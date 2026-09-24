@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { getNode, graph } from "../graph/model";
 import { OrbGlyph } from "../paths/OrbGlyph";
 import { InfoSheet } from "../sheet/InfoSheet";
+import { useBookmarks } from "./bookmarks";
 import { ConceptCard, CourseCard, LayerDots, ModuleCard } from "./Cards";
 import { LAYERS, childrenOf, coursesFor, depthById, getCourse, getDepartment, getModule, whereIs, type LayerKey } from "./data";
 import { hrefFor, type Route } from "./route";
@@ -98,6 +99,7 @@ export function ConceptPage({ id, go }: { id: string; go: (route: Route) => void
   const node = graph.byId.get(id);
   const [layer, setLayer] = useState<LayerKey>("picture");
   const [sources, setSources] = useState(false);
+  const { isBookmarked, toggle } = useBookmarks();
 
   useEffect(() => {
     setLayer("picture");
@@ -145,6 +147,14 @@ export function ConceptPage({ id, go }: { id: string; go: (route: Route) => void
           <h1 className="page__title">{node.title}</h1>
         </div>
         <div className="page__actions">
+          <button
+            type="button"
+            className={`pill pill--ghost${isBookmarked(node.id) ? " is-on" : ""}`}
+            aria-pressed={isBookmarked(node.id)}
+            onClick={() => toggle(node.id)}
+          >
+            {isBookmarked(node.id) ? "★ Bookmarked" : "☆ Bookmark"}
+          </button>
           <a className="pill" href={hrefFor({ kind: "map", id: node.id })}>Map</a>
           <button type="button" className="pill" onClick={() => setSources(true)}>Sources</button>
         </div>

@@ -37,6 +37,9 @@
 }
 @media (hover: hover) { .pill:hover { background: var(--orb-mid-hover); } }
 .pill:active { background: var(--orb-deep); }
+.pill--ghost { background: var(--canvas-alt); color: var(--ink); }
+@media (hover: hover) { .pill--ghost:not(.is-on):hover { background: rgba(0, 0, 0, 0.08); } }
+.pill--ghost.is-on { background: #f5a623; color: #fff; }
 .pill:focus-visible, .card:focus-visible, .chip-filter:focus-visible, .dial__tab:focus-visible, .crumbs a:focus-visible, .example button:focus-visible {
   outline: 2px solid var(--orb-mid); outline-offset: 2px;
 }
@@ -127,6 +130,17 @@
 .dots { display: inline-flex; gap: 4px; }
 .dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(0, 0, 0, 0.14); }
 .dots i.is-on { background: var(--orb-mid); }
+
+.bookmark-toggle {
+  position: absolute; z-index: 1; top: 10px; right: 10px;
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0;
+  border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.86); color: var(--muted-ink);
+  cursor: pointer; transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+@media (hover: hover) { .bookmark-toggle:hover { color: var(--orb-mid); transform: scale(1.08); } }
+.bookmark-toggle.is-on { color: #f5a623; }
+.bookmark-toggle:focus-visible { outline: 2px solid var(--orb-mid); outline-offset: 1px; }
 
 /* ─── A page for one idea ────────────────────────────────────────────── */
 

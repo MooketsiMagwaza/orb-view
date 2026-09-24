@@ -1,5 +1,6 @@
 import type { ConceptNode } from "../concepts/types";
 import { OrbGlyph } from "../paths/OrbGlyph";
+import { useBookmarks } from "./bookmarks";
 import {
   courseSize, courseWritten, depthById, departmentSize, departmentWritten, moduleSize, moduleWritten, subtree, whereIs, LAYERS,
   type Course, type Department, type Faculty, type Module,
@@ -12,6 +13,31 @@ function firstSentence(text: string, limit = 96): string {
   const cut = text.split(/(?<=[.!?])\s/)[0];
   if (cut.length <= limit) return cut;
   return `${cut.slice(0, limit - 1).replace(/\s+\S*$/, "")}…`;
+}
+
+function StarIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 3.5 2.6 5.4 5.9.7-4.3 4.1 1.1 5.9L12 16.7l-5.3 2.9 1.1-5.9-4.3-4.1 5.9-.7Z" />
+    </svg>
+  );
+}
+
+/** A star toggle for bookmarking a concept. Its own click target, so it works inside a card that's itself a link. */
+export function BookmarkButton({ id }: { id: string }) {
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarked = isBookmarked(id);
+  return (
+    <button
+      type="button"
+      className={`bookmark-toggle${bookmarked ? " is-on" : ""}`}
+      aria-pressed={bookmarked}
+      aria-label={bookmarked ? "Remove bookmark" : "Bookmark this idea"}
+      onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggle(id); }}
+    >
+      <StarIcon filled={bookmarked} />
+    </button>
+  );
 }
 
 /** Four small dots: one per layer of the concept that has been written. */
@@ -30,6 +56,7 @@ export function ConceptCard({ node, showPlace = false }: { node: ConceptNode; sh
   const place = showPlace ? whereIs(node.id) : null;
   return (
     <a className={`card${below ? " card--deck" : ""}`} href={hrefFor({ kind: "concept", id: node.id })}>
+      <BookmarkButton id={node.id} />
       <OrbGlyph state={node.orb} voice={node.tone.voice} seed={node.id} size={52} />
       <h3 className="card__title">{node.title}</h3>
       <p className="card__blurb">{firstSentence(node.summary)}</p>

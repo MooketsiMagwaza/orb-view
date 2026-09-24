@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { getNode, graph } from "../graph/model";
 import { OrbGlyph } from "../paths/OrbGlyph";
+import { useBookmarks } from "./bookmarks";
 import { ConceptCard, DepartmentCard, GuideCard } from "./Cards";
 import { depthById, faculties, searchConcepts, whereIs } from "./data";
 import { guides } from "./guides";
@@ -14,15 +15,18 @@ export function LibraryHome() {
   const [query, setQuery] = useState("");
   const [facultyId, setFacultyId] = useState<string | null>(null);
   const [writtenOnly, setWrittenOnly] = useState(false);
+  const [bookmarkedOnly, setBookmarkedOnly] = useState(false);
+  const { ids: bookmarkIds } = useBookmarks();
 
-  const flat = query.trim().length > 0 || writtenOnly;
+  const flat = query.trim().length > 0 || writtenOnly || bookmarkedOnly;
   const results = useMemo(() => {
     if (!flat) return [];
-    const base = query.trim() ? searchConcepts(query, 60) : [...depthById.keys()].map(getNode);
+    const base = query.trim() ? searchConcepts(query, 60) : bookmarkedOnly ? bookmarkIds.filter((id) => graph.byId.has(id)).map(getNode) : [...depthById.keys()].map(getNode);
     return base
       .filter((node) => !writtenOnly || depthById.has(node.id))
+      .filter((node) => !bookmarkedOnly || bookmarkIds.includes(node.id))
       .filter((node) => !facultyId || whereIs(node.id)?.faculty.id === facultyId);
-  }, [flat, query, writtenOnly, facultyId]);
+  }, [flat, query, writtenOnly, bookmarkedOnly, bookmarkIds, facultyId]);
 
   const shown = faculties.filter((f) => !facultyId || f.id === facultyId);
 
@@ -68,12 +72,19 @@ export function LibraryHome() {
           <button type="button" className={`chip-filter chip-filter--written${writtenOnly ? " is-on" : ""}`} aria-pressed={writtenOnly} onClick={() => setWrittenOnly(!writtenOnly)}>
             Written in depth
           </button>
+          <button type="button" className={`chip-filter chip-filter--written${bookmarkedOnly ? " is-on" : ""}`} aria-pressed={bookmarkedOnly} onClick={() => setBookmarkedOnly(!bookmarkedOnly)}>
+            Bookmarked
+          </button>
         </div>
       </div>
 
       {flat ? (
         <section aria-live="polite">
-          <p className="library__result-count">{results.length ? `${results.length} ${results.length === 1 ? "idea" : "ideas"}` : "Nothing matches. Try a shorter word."}</p>
+          <p className="library__result-count">
+            {results.length
+              ? `${results.length} ${results.length === 1 ? "idea" : "ideas"}`
+              : bookmarkedOnly && !query.trim() ? "No bookmarks yet. Star an idea to save it here." : "Nothing matches. Try a shorter word."}
+          </p>
           <div className="cards">
             {results.map((node) => <ConceptCard key={node.id} node={node} showPlace />)}
           </div>

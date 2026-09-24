@@ -115,7 +115,7 @@ Shipped for `dsa` (3 courses, 13 modules) and `calculus` (4 courses, 7 modules) 
   - **Calculus & Analysis** (`calculus`, 110 concepts) — confirm its children the same way before drafting; last known shape (from `content/library/faculties.json`'s single `calculus` entry) covers functions/limits, derivatives, integrals, series, differential equations, multivariable/vector calculus, and history. A natural split: Course "Single-Variable Calculus" (Functions & Limits, Derivatives, Integrals, Series), Course "Differential Equations", Course "Multivariable & Vector Calculus", Course "History".
 - Update `content/library.schema.json` (add a sibling `courses.schema.json` or extend the existing one) and `tools/validate-content.mjs` if it walks `faculties.json` structurally — check whether it needs to learn about the new file/shape so `npm run check:content` doesn't silently ignore or choke on it.
 
-### 2. Bookmark functionality
+### 2. Bookmark functionality — done 2026-09-24
 
 - New `src/library/bookmarks.ts`: a small hook, e.g. `useBookmarks()`, backed by `localStorage` (key like `orb-view:bookmarks`, JSON array of concept ids). Wrap every read/write in try/catch (private-mode / blocked storage shouldn't crash the app). Expose `isBookmarked(id)`, `toggle(id)`.
 - UI: a star/bookmark toggle button in `ConceptPage`'s `.page__actions` header row, next to Map/Sources. Also worth a small toggle affordance on `ConceptCard` itself (the whole card is an `<a>`, so the star button needs its own `onClick` with `preventDefault`/`stopPropagation`).
