@@ -132,4 +132,14 @@ Targets, once picked back up:
 - `.sheet` itself stays solid white (readability over material purism — this matches Apple's own use of Liquid Glass for chrome/navigation, not for body content); only `.sheet__close` and `.sheet-scrim` get the heavier glass/blur treatment.
 - Verify `-webkit-backdrop-filter` prefix stays paired with every new `backdrop-filter`, and re-run the mobile-width + reduced-motion checks done for the previous redesign pass.
 
+### 4. Fumadocs integration — a proper documentation site over the whole library
+
+Requested 2026-09-24. Fumadocs (`fumadocs-ui`/`fumadocs-core`/`fumadocs-mdx`) is built around the Next.js App Router; Orb View itself is Vite + React 19 + Tauri, so this is **not** a drop-in addition to the existing app — it's a separate Next.js project that publishes the content as real documentation, not a Tauri-bundled feature.
+
+- New top-level Next.js app (e.g. `docs/`) scaffolded with Fumadocs, sharing nothing at build time with the Vite app except the `content/` data.
+- Generate one MDX page per concept from `content/concepts/*.json` + `content/depth/*.json` (all four layers — Picture/Mechanism/Detail/Principles — where written; an honest stub where not, matching the main app's "no depth written yet" pattern rather than hiding the gap).
+- Mirror the Faculty → Department → (Course → Module, once work order #1 lands) → concept hierarchy as Fumadocs' page tree, so the sidebar navigation matches the app's own breadcrumb structure in `content/library/faculties.json`.
+- Wiki-style cross-linking ("Wikipedia plugin view"): a concept's prose and its `requires` list should render as clickable in-page links to the other concept pages it mentions or depends on, the way Wikipedia links between articles — most likely a remark/rehype plugin (in the spirit of `remark-wiki-link`) that resolves concept ids/titles to the generated Fumadocs routes, rather than plain unlinked text.
+- Needs a decision, once picked up, on whether this becomes the canonical way to read the library (eventually superseding `ConceptPage`) or a separate public documentation mirror that lives alongside the desktop app — flagged here rather than guessed at, since it changes how much of this is throwaway vs. long-lived.
+
 Files already read and understood for this queued work (don't re-read from scratch): `src/library/data.ts`, `src/library/route.ts`, `src/library/Cards.tsx`, `src/library/ConceptPage.tsx`, `src/library/LibraryHome.tsx`, `src/app/Root.tsx`, `content/library.schema.json`, `content/library/faculties.json`, `src/styles/app.css`, `src/styles/library.css`, `src/styles/sheets.css`.
