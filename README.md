@@ -4,8 +4,9 @@ Orb View is a visual learning app for exploring how ideas connect. Browse a libr
 
 ## What you can do
 
-- Browse and search a concept library organized into subject areas.
+- Browse and search a concept library organized into subject areas, some of it broken down further into a Course → Module tier (Data Structures & Algorithms, Calculus & Analysis) for a university-like structure.
 - Open a concept to explore its layers, prerequisites, related ideas, and examples.
+- Bookmark ideas you want to come back to, and filter the library down to just those.
 - Explore the concept graph by expanding nodes, panning, and zooming.
 - Focus on an idea to read a short explanation and open its sources.
 - Follow curated learning paths, including a debate guide and a Japan study guide.
@@ -43,6 +44,18 @@ npm run tauri dev
 ## Content
 
 Concepts, categories, learning paths, and cross-links live in [`content/`](content/README.md) as JSON. The content guide explains the data formats and how to contribute or validate changes. The app fetches source material on demand from Wikipedia, NASA, and The Met; see [SOURCES.md](SOURCES.md) for details and attribution behavior.
+
+## Documentation site
+
+[`docs/`](docs/README.md) is a separate Next.js + [Fumadocs](https://fumadocs.dev) app that publishes the whole concept library as browsable documentation — same content, same hierarchy, with Wikipedia-style links between concept mentions. It shares nothing at build time with the app above except the `content/` data, and isn't part of the Tauri bundle.
+
+```sh
+cd docs
+npm install
+npm run dev
+```
+
+Open http://localhost:3000/docs. `npm run generate` (run automatically before `dev`/`build`) turns `content/**` into `docs/content/docs/**`, which isn't committed.
 
 ## Project docs
 
