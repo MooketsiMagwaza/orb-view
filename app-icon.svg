@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#f7f9fc"/>
+  <circle cx="256" cy="256" r="142" fill="none" stroke="#dbe3f0" stroke-width="3"/>
+  <g fill="#1769ff">
+    <circle cx="256" cy="114" r="13"/>
+    <circle cx="379" cy="185" r="13"/>
+    <circle cx="379" cy="327" r="13"/>
+    <circle cx="256" cy="398" r="13"/>
+    <circle cx="133" cy="327" r="13"/>
+    <circle cx="133" cy="185" r="13"/>
+  </g>
+  <circle cx="256" cy="256" r="24" fill="#1769ff"/>
+</svg>

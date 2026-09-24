@@ -1,0 +1,354 @@
+:root {
+  /* Apple's own palette: near-black ink, restrained gray, blue reserved for actions and links. */
+  --canvas: #ffffff;
+  --canvas-alt: #f5f5f7;
+  --ink: #1d1d1f;
+  --muted-ink: #6e6e73;
+  --hairline: rgba(0, 0, 0, 0.08);
+  --hairline-soft: rgba(0, 0, 0, 0.05);
+  --line: rgba(0, 0, 0, 0.1);
+  --orb-light: #8ed8ff;
+  --orb-mid: #0071e3;
+  --orb-mid-hover: #0077ed;
+  --orb-deep: #0058b0;
+  --focus-shadow: rgba(0, 113, 227, 0.32);
+  --radius-pill: 980px;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 20px -12px rgba(0, 0, 0, 0.16);
+  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.05), 0 20px 34px -16px rgba(0, 0, 0, 0.22);
+  --shadow-float: inset 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 4px 18px -6px rgba(0, 0, 0, 0.18);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Canvas ─────────────────────────────────────────────────────────── */
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  overflow: clip;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+  outline: none;
+}
+.stage:active { cursor: grabbing; }
+.stage.is-focus { cursor: default; }
+
+.world {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ─── Nodes ──────────────────────────────────────────────────────────── */
+
+.node {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 0;
+  transform-origin: 0 0;
+  visibility: hidden;
+}
+
+/* A generous invisible target: 96px, comfortably above the 48px minimum even at the smallest zoom. */
+.node__hit {
+  position: absolute;
+  left: -48px; top: -48px;
+  width: 96px; height: 96px;
+  margin: 0; padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  outline: none;
+}
+.node__hit:focus-visible { outline: none; }
+.node__hit:focus-visible .node__orb {
+  border-radius: 50%;
+  outline: 2px solid var(--orb-mid);
+  outline-offset: 0;
+}
+
+.node__glow {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 116px; height: 116px;
+  margin: -58px 0 0 -58px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--tone) 34%, transparent), transparent);
+  pointer-events: none;
+}
+
+.node__orb {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 64px; height: 64px;
+  margin: -32px 0 0 -32px;
+  pointer-events: none;
+}
+.node__orb canvas { display: block; width: 64px; height: 64px; }
+
+.node__label {
+  position: absolute;
+  left: 50%; top: calc(50% + 36px);
+  width: 120px;
+  margin-left: -60px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 560;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: balance;
+  pointer-events: none;
+}
+.node[data-role="center"] .node__label { font-size: 14px; font-weight: 700; }
+.node[data-focused] .node__label { opacity: 0; }
+
+/* Press-and-hold halo: a ring traces around the orb over the hold delay. */
+.node__halo {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 92px; height: 92px;
+  margin: -46px 0 0 -46px;
+  opacity: 0;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+.node__halo circle {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 289;
+  stroke-dashoffset: 289;
+}
+.node.is-pressing .node__halo {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--focus-shadow));
+  animation: halo-swell var(--hold-ms, 450ms) cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.node.is-pressing .node__halo circle {
+  animation: halo-trace var(--hold-ms, 450ms) linear forwards;
+}
+@keyframes halo-swell {
+  from { transform: rotate(-90deg) scale(0.86); }
+  to   { transform: rotate(-90deg) scale(1.12); }
+}
+@keyframes halo-trace { to { stroke-dashoffset: 0; } }
+
+/* ─── Controls ───────────────────────────────────────────────────────── */
+
+.control {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 48px; height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), background 0.2s ease;
+}
+.control:focus-visible { outline: 2px solid var(--orb-mid); outline-offset: 3px; }
+@media (hover: hover) { .control:hover { background: rgba(255, 255, 255, 0.92); } }
+
+/* Within thumb reach, bottom-left, and only present when there is somewhere to go back to. */
+.control--back {
+  left: max(14px, env(safe-area-inset-left));
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 8px));
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+}
+.control--back[data-visible] { opacity: 1; transform: none; pointer-events: auto; }
+
+.control--sound {
+  right: max(14px, env(safe-area-inset-right));
+  top: max(14px, env(safe-area-inset-top));
+  width: 44px; height: 44px;
+  color: var(--muted-ink);
+}
+
+.hint {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: max(32px, calc(env(safe-area-inset-bottom) + 20px));
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted-ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.hint[data-visible] { opacity: 1; transition-delay: 1.4s; }
+
+/* ─── Focus: the centered thought ────────────────────────────────────── */
+
+.focus {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  animation: focus-in 0.6s ease both;
+  transition: opacity 0.3s ease;
+}
+.focus.is-leaving { opacity: 0; }
+
+.focus__stack {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(50% + var(--orb-r) + 22px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 0 max(32px, env(safe-area-inset-left)) 40px max(32px, env(safe-area-inset-right));
+  text-align: center;
+}
+
+.focus__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--orb-deep);
+}
+
+.focus__text {
+  max-width: 30rem;
+  margin: 0;
+  font-size: clamp(18px, 1.1vw + 14px, 22px);
+  font-weight: 420;
+  line-height: 1.55;
+  letter-spacing: -0.008em;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.focus__word { opacity: 0; animation: word-in 0.7s ease forwards; }
+
+@keyframes focus-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes word-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (max-height: 640px) {
+  .focus__text { font-size: 17px; line-height: 1.45; }
+  .focus__stack { gap: 10px; }
+}
+
+/* ─── Voice-like glow ────────────────────────────────────────────────── */
+
+.glow {
+  position: absolute;
+  left: -10%; right: -10%; bottom: 0;
+  height: 46%;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to top, #000 28%, transparent);
+  mask-image: linear-gradient(to top, #000 28%, transparent);
+  opacity: 1;
+  transition: opacity 1.8s ease;
+  animation: glow-rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.glow[data-phase="spoken"] { opacity: 0.22; }
+.glow.is-leaving { opacity: 0; transition-duration: 0.3s; }
+
+.glow__blob {
+  position: absolute;
+  bottom: -34%;
+  width: 62%; height: 100%;
+  border-radius: 50%;
+}
+.glow__blob--blue   { left: -4%;  background: radial-gradient(closest-side, rgba(0, 113, 227, 0.7), transparent); }
+.glow__blob--violet { left: 20%;  background: radial-gradient(closest-side, rgba(139, 92, 246, 0.55), transparent); }
+.glow__blob--pink   { left: 40%;  background: radial-gradient(closest-side, rgba(255, 111, 174, 0.5), transparent); }
+.glow__blob--teal   { left: 58%;  background: radial-gradient(closest-side, rgba(34, 211, 197, 0.55), transparent); }
+
+.glow[data-phase="thinking"] .glow__blob { animation: glow-sweep 2.1s ease-in-out infinite alternate; }
+.glow[data-phase="thinking"] .glow__blob--violet { animation-delay: -0.6s; animation-direction: alternate-reverse; }
+.glow[data-phase="thinking"] .glow__blob--pink   { animation-delay: -1.2s; }
+.glow[data-phase="thinking"] .glow__blob--teal   { animation-delay: -0.3s; animation-direction: alternate-reverse; }
+.glow[data-phase="spoken"] .glow__blob { animation: glow-sweep 2.1s ease-in-out infinite alternate; animation-play-state: paused; }
+
+@keyframes glow-rise {
+  from { transform: translateY(70%); opacity: 0; }
+  to   { transform: translateY(0); }
+}
+@keyframes glow-sweep {
+  from { transform: translateX(-24%); }
+  to   { transform: translateX(24%); }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .node.is-pressing .node__halo { animation: none; transform: rotate(-90deg); }
+  .node.is-pressing .node__halo circle { animation: none; stroke-dashoffset: 0; }
+  .focus { animation: none; }
+  .focus__word { animation: none; opacity: 1; }
+  .glow, .glow[data-phase] .glow__blob { animation: none; }
+  .glow[data-phase="thinking"] { opacity: 0.7; }
+  .control, .hint { transition-duration: 0.01ms; }
+}
