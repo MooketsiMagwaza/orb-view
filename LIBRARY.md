@@ -134,7 +134,9 @@ Targets, once picked back up:
 - `.sheet` itself stays solid white (readability over material purism — this matches Apple's own use of Liquid Glass for chrome/navigation, not for body content); only `.sheet__close` and `.sheet-scrim` get the heavier glass/blur treatment.
 - Verify `-webkit-backdrop-filter` prefix stays paired with every new `backdrop-filter`, and re-run the mobile-width + reduced-motion checks done for the previous redesign pass.
 
-### 4. Fumadocs integration — a proper documentation site over the whole library
+### 4. Fumadocs integration — a proper documentation site over the whole library — done 2026-09-24
+
+Shipped as `docs/`, a separate Next.js 16 + Fumadocs 16 app (scaffolded via `create-fumadocs-app`, not hand-rolled — its plugin/macro API moves too fast to guess at). `npm run generate` (auto-run before `dev`/`build`) reads `../content/**` and writes `content/docs/**` (not committed — fully derived): 912 concept pages across 6 faculties, mirroring Faculty → Department → (Course → Module)? → concept tree exactly, including the department/course/module overview pages. Wiki-style cross-linking is done at generation time (plain Markdown links from title mentions), not a live remark plugin — same visible result, none of the plugin-API risk. See `docs/README.md` and `docs/scripts/generate-content.mjs` (the ownership/ordering rules, incl. the "Also in this department" fallback for entries a course absorbed away from). Decision on canonical-vs-mirror status, below, was resolved as: separate mirror for now, the in-app viewer is untouched.
 
 Requested 2026-09-24. Fumadocs (`fumadocs-ui`/`fumadocs-core`/`fumadocs-mdx`) is built around the Next.js App Router; Orb View itself is Vite + React 19 + Tauri, so this is **not** a drop-in addition to the existing app — it's a separate Next.js project that publishes the content as real documentation, not a Tauri-bundled feature.
 
