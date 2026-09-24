@@ -1,0 +1,31 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-algorithms",
+  "group": "Tech",
+  "order": 11,
+  "title": "Algorithms",
+  "blurb": "Recipes that solve problems, and how to tell how costly they are: sorting, searching, recursion, and graphs.",
+  "orb": "solving",
+  "entry": "algorithms",
+  "path": [
+    "algorithms",
+    "big-o",
+    "time-complexity",
+    "sorting",
+    "merge-sort",
+    "quicksort",
+    "searching",
+    "binary-search",
+    "recursion",
+    "divide-and-conquer",
+    "dynamic-programming",
+    "memoization",
+    "greedy-algorithms",
+    "graph-algorithms",
+    "bfs",
+    "dfs",
+    "dijkstra",
+    "backtracking",
+    "randomized-algorithms"
+  ]
+}

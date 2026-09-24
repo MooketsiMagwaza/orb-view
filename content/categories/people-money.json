@@ -1,0 +1,18 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "people-money",
+  "group": "People",
+  "order": 4,
+  "title": "Money & Markets",
+  "blurb": "Trade, money, prices, and living with scarcity.",
+  "orb": "composing",
+  "entry": "trade",
+  "path": [
+    "trade",
+    "money",
+    "markets",
+    "scarcity",
+    "economics",
+    "capitalism"
+  ]
+}

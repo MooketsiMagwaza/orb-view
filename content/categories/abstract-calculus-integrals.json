@@ -1,0 +1,26 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-calculus-integrals",
+  "group": "Abstract",
+  "order": 6,
+  "title": "Calculus: Accumulation & Series",
+  "blurb": "Integrals, the fundamental theorem, and infinite sums that become functions.",
+  "orb": "breathing",
+  "entry": "integrals",
+  "path": [
+    "integrals",
+    "riemann-sum",
+    "antiderivative",
+    "fundamental-theorem",
+    "u-substitution",
+    "integration-by-parts",
+    "improper-integrals",
+    "series",
+    "geometric-series",
+    "convergence-tests",
+    "power-series",
+    "taylor-series",
+    "eulers-identity",
+    "fourier-series"
+  ]
+}

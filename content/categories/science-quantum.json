@@ -1,0 +1,21 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "science-quantum",
+  "group": "Science",
+  "order": 2,
+  "title": "Light & the Quantum",
+  "blurb": "Photons, waves and particles, uncertainty, and what measurement means.",
+  "orb": "shaping",
+  "entry": "light",
+  "path": [
+    "light",
+    "photons",
+    "quantum-mechanics",
+    "wave-particle",
+    "uncertainty",
+    "superposition",
+    "entanglement",
+    "wave-function",
+    "measurement"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-data-structures",
+  "group": "Tech",
+  "order": 10,
+  "title": "Data Structures",
+  "blurb": "Arrays to graphs: the shapes data takes in memory, and what each is good for.",
+  "orb": "shaping",
+  "entry": "data-structures",
+  "path": [
+    "data-structures",
+    "arrays",
+    "dynamic-array",
+    "locality-of-reference",
+    "linked-lists",
+    "pointers",
+    "stacks",
+    "call-stack",
+    "queues",
+    "hash-tables",
+    "hash-functions",
+    "collisions",
+    "trees",
+    "binary-search-trees",
+    "balanced-trees",
+    "heaps",
+    "tries",
+    "graphs",
+    "dag",
+    "union-find"
+  ]
+}

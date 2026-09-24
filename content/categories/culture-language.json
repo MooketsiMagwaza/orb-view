@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "culture-language",
+  "group": "Culture",
+  "order": 2,
+  "title": "Language & Writing",
+  "blurb": "Speech, grammar, meaning, metaphor, and the invention of writing.",
+  "orb": "listening",
+  "entry": "language",
+  "path": [
+    "language",
+    "speech",
+    "grammar",
+    "semantics",
+    "metaphor",
+    "poetry",
+    "writing",
+    "cuneiform",
+    "alphabet",
+    "translation"
+  ]
+}

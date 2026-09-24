@@ -1,0 +1,263 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part seven: calculus in several variables, from partial derivatives and the gradient to multiple integrals, vector fields, and the great theorems of Green, Stokes, and Gauss, each in four layers.",
+  "depth": [
+    {
+      "id": "multivariable",
+      "picture": "Calculus for functions with more than one input: surfaces, fields, and flows.",
+      "mechanism": "A function f(x, y) assigns a number to each point in the plane, so its graph is a surface; a function of three variables describes a field in space. Derivatives become partial derivatives, one per direction, collected in the gradient; integrals become double and triple integrals over regions; and vector fields appear, with line and surface integrals.",
+      "detail": "It generalizes every idea of single-variable calculus: tangent lines become tangent planes, critical points include saddles, the chain rule becomes a product of matrices, and the fundamental theorem grows into the theorems of Green, Stokes, and Gauss.\n\nIt is the mathematics of temperature over a map, the height of terrain, electric and gravitational fields, fluid flow, and optimization with many parameters, such as the loss surface of a neural network with billions of inputs. Coordinates matter: polar, cylindrical, and spherical systems simplify problems with the right symmetry. The subject connects to linear algebra (the Jacobian and Hessian), geometry (surfaces and curvature), and physics (fields), and is usually the third semester of a calculus sequence.",
+      "principles": "The world has more than one dimension, and so does its calculus. Everything you know about slopes and areas survives, but each idea splits into directions, and new questions appear: which way is steepest, and how does a field flow?",
+      "example": {
+        "label": "Slopes in two directions",
+        "code": "f = lambda x, y: x ** 2 + 3 * x * y + y ** 2       # a surface over the plane\nh = 1e-6\nx0, y0 = 1.0, 2.0\nfx = (f(x0 + h, y0) - f(x0 - h, y0)) / (2 * h)      # slope in the x direction\nfy = (f(x0, y0 + h) - f(x0, y0 - h)) / (2 * h)      # slope in the y direction\nprint(round(fx, 4), 2 * x0 + 3 * y0)                 # 8.0\nprint(round(fy, 4), 3 * x0 + 2 * y0)                 # 7.0"
+      },
+      "requires": [
+        "derivatives",
+        "integrals"
+      ]
+    },
+    {
+      "id": "partial-derivatives",
+      "picture": "The slope in one direction, holding everything else fixed.",
+      "mechanism": "For f(x, y), the partial derivative ∂f/∂x treats y as a constant and differentiates in x: the slope of the surface along the x-direction. ∂f/∂y does the same for y. Compute them with ordinary rules, treating the other variables as constants.",
+      "detail": "Example: f = x²y + sin y has f_x = 2xy and f_y = x² + cos y. Mixed partials f_xy and f_yx are equal when they are continuous (Clairaut's theorem). Thermodynamics writes (∂U/∂T)_V to say with volume held fixed, since which variables are held matters. The total differential df = f_x dx + f_y dy estimates the change when all inputs move, and the multivariable chain rule says that if x and y depend on t, then df/dt = f_x x′ + f_y y′.\n\nPartial derivatives define the gradient and Jacobian and the PDEs of physics: the heat and wave equations are relations among partials. In machine learning, training computes the partial derivative of the loss with respect to every weight. Note that all the partials existing does not guarantee differentiability, or even continuity.",
+      "principles": "Change one thing at a time. Holding everything else fixed is how you isolate the influence of a single variable, which is the basis of experiments, of marginal analysis, and of teaching a network which weight to adjust.",
+      "example": {
+        "label": "Partials by finite differences",
+        "code": "import math\n\nf = lambda x, y: x ** 2 * y + math.sin(y)\ndef partial(f, i, point, h=1e-6):\n    p, m = list(point), list(point)\n    p[i] += h; m[i] -= h\n    return (f(*p) - f(*m)) / (2 * h)\n\npt = (2.0, 0.5)\nprint(round(partial(f, 0, pt), 5), 2 * pt[0] * pt[1])                        # f_x = 2xy = 2.0\nprint(round(partial(f, 1, pt), 5), round(pt[0] ** 2 + math.cos(pt[1]), 5))   # f_y = x^2 + cos y"
+      },
+      "requires": [
+        "multivariable"
+      ]
+    },
+    {
+      "id": "hessian",
+      "picture": "All the second derivatives in one grid: how the surface curves in every direction.",
+      "mechanism": "For f(x, y), the Hessian matrix is [[f_xx, f_xy], [f_yx, f_yy]]. At a critical point, where the gradient is zero, its eigenvalues classify the point: all positive means a local minimum (a bowl), all negative a local maximum (a dome), mixed signs a saddle, a pass between peaks.",
+      "detail": "In two variables, at a critical point compute D = f_xx f_yy − f_xy². If D > 0 and f_xx > 0, it is a minimum; D > 0 and f_xx < 0, a maximum; D < 0, a saddle; D = 0, inconclusive. The Hessian appears in the second-order Taylor expansion f(x + h) ≈ f(x) + ∇f·h + ½ hᵀHh.\n\nNewton's method for optimization uses it: h = −H⁻¹∇f, converging quadratically near a minimum but costing O(n²) memory and O(n³) time for n variables, so large-scale machine learning uses first-order methods or approximations. Ludwig Otto Hesse introduced it in 1842. A huge ratio of its largest to smallest eigenvalue means narrow valleys where gradient descent zigzags, and in high-dimensional loss landscapes most critical points are saddles. In statistics, the Hessian of the log-likelihood gives the observed Fisher information, whose inverse estimates parameter variances.",
+      "principles": "The gradient says which way is downhill; the Hessian says how the ground curves. Together they tell a bowl from a saddle, and tell an optimizer whether to trust a step.",
+      "example": {
+        "label": "Bowl, dome, saddle",
+        "code": "def hessian(f, x, y, h=1e-4):\n    fxx = (f(x + h, y) - 2 * f(x, y) + f(x - h, y)) / h ** 2\n    fyy = (f(x, y + h) - 2 * f(x, y) + f(x, y - h)) / h ** 2\n    fxy = (f(x + h, y + h) - f(x + h, y - h) - f(x - h, y + h) + f(x - h, y - h)) / (4 * h ** 2)\n    return fxx, fxy, fyy\n\nfor name, f in ((\"bowl x^2+y^2\", lambda x, y: x * x + y * y),\n                (\"dome -x^2-y^2\", lambda x, y: -x * x - y * y),\n                (\"saddle x^2-y^2\", lambda x, y: x * x - y * y)):\n    fxx, fxy, fyy = hessian(f, 0.0, 0.0)\n    D = fxx * fyy - fxy ** 2\n    kind = \"saddle\" if D < 0 else \"minimum\" if fxx > 0 else \"maximum\"\n    print(f\"{name:15s} D = {D:6.2f} -> {kind}\")"
+      },
+      "requires": [
+        "partial-derivatives",
+        "second-derivative"
+      ]
+    },
+    {
+      "id": "gradient",
+      "picture": "An arrow pointing straight uphill, as long as the slope is steep.",
+      "mechanism": "The gradient ∇f = (∂f/∂x, ∂f/∂y, …) collects all partial derivatives into a vector. It points in the direction of steepest increase, its length is the steepness, and it is perpendicular to the level curves, the contour lines, of f.",
+      "detail": "Example: for f = x² + y², ∇f = (2x, 2y), pointing away from the origin and steeper the farther out. Walking along −∇f goes downhill fastest. It gives the tangent plane: z ≈ f(a) + ∇f(a)·(x − a). The directional derivative along a unit vector u is ∇f·u = |∇f| cos θ, so it is largest when u points along ∇f and zero along a contour line.\n\nIn physics, force is the negative gradient of potential energy (F = −∇U): a ball rolls downhill. Heat flows down the temperature gradient, the electric field is minus the gradient of the potential, and fluids flow from high to low pressure. In vector calculus it is the first of three operators, gradient, divergence, and curl, all written with ∇. In machine learning, the gradient of the loss with respect to the parameters is what backpropagation computes and gradient descent follows.",
+      "principles": "The gradient turns a landscape into an arrow at every point: the direction in which the value grows fastest. It is the compass of optimization and, in physics, the reason things roll downhill.",
+      "example": {
+        "label": "Gradients around a hilltop",
+        "code": "import math\n\nf = lambda x, y: math.exp(-(x - 1) ** 2 - (y + 2) ** 2)      # a hill centered at (1, -2)\ndef grad(f, x, y, h=1e-6):\n    return ((f(x + h, y) - f(x - h, y)) / (2 * h), (f(x, y + h) - f(x, y - h)) / (2 * h))\n\nfor point in [(0.0, 0.0), (2.0, -3.0), (1.0, -2.0)]:\n    gx, gy = grad(f, *point)\n    print(point, \"gradient\", (round(gx, 4), round(gy, 4)))    # points toward the hilltop; zero at the top"
+      },
+      "requires": [
+        "partial-derivatives"
+      ]
+    },
+    {
+      "id": "directional-derivative",
+      "picture": "The slope of a surface in any direction you choose to walk.",
+      "mechanism": "The rate of change of f at a point in the direction of a unit vector u is D_u f = ∇f · u. It is the ordinary derivative of f along the line through the point in direction u.",
+      "detail": "Because ∇f·u = |∇f| cos θ, where θ is the angle between the direction and the gradient, the slope is greatest along the gradient (θ = 0), zero along the level curve (θ = 90°), and most negative against it (θ = 180°). So the gradient's direction is the steepest ascent, and its magnitude is that maximum slope.\n\nExample: on a hillside where the gradient is (3, 4), the steepest slope is 5, and walking in the direction (1, 0) gives a slope of 3. The two coordinate partials are the special cases u = (1, 0) and u = (0, 1). The formula requires the function to be differentiable, not merely to have partial derivatives; a function can have directional derivatives in every direction yet be badly behaved. In machine learning, directional derivatives probe a loss surface, such as its sharpness along particular directions.",
+      "principles": "Steepness depends on which way you face. The gradient packages the answer for every direction at once: the slope you feel is the part of the gradient that lies along your path.",
+      "example": {
+        "label": "Slope as you turn",
+        "code": "import math\n\ngx, gy = 2 * 1.0 * 2.0, 1.0 ** 2 + 1                        # gradient of x^2 y + y at (1, 2): (4, 2)\nfor angle in (0, 45, 90, 135, 180, 270):\n    u = (math.cos(math.radians(angle)), math.sin(math.radians(angle)))\n    print(f\"{angle:3d} deg: slope {gx * u[0] + gy * u[1]:6.3f}\")\nprint(\"steepest slope is |grad| =\", round(math.hypot(gx, gy), 3))"
+      },
+      "requires": [
+        "gradient"
+      ]
+    },
+    {
+      "id": "gradient-descent",
+      "picture": "Find the bottom of a valley by always stepping downhill.",
+      "mechanism": "To minimize f, start somewhere, compute the gradient, and step against it: x ← x − η ∇f(x), where the learning rate η sets the step size. Repeat until the gradient is near zero. The descent follows the direction of steepest decrease.",
+      "detail": "Augustin-Louis Cauchy described the method in 1847. Too large a learning rate overshoots and diverges; too small crawls. In a narrow valley it zigzags, so variants add memory: momentum (keep moving in the recent direction), Nesterov acceleration, and adaptive methods such as AdaGrad, RMSProp, and Adam that scale steps per parameter.\n\nStochastic gradient descent estimates the gradient from a small batch of data, cheaper and noisier, and the noise can even help escape shallow traps. It is the workhorse of machine learning: training a neural network means running it on the loss over millions or billions of parameters, with gradients from backpropagation. For convex functions it reaches the global minimum; for non-convex ones it finds a local minimum or saddle, but in practice deep networks train well, an active area of research. Outside machine learning it fits curves by least squares, drives logistic regression, and minimizes physical energies.",
+      "principles": "Optimization without a formula: just feel the slope and step downhill. That crude idea, run billions of times, is how modern machine learning models learn.",
+      "example": {
+        "label": "Descending an elongated bowl",
+        "code": "# Minimize f(x, y) = (x - 3)^2 + 10 (y + 1)^2, minimum at (3, -1)\nx, y, eta = 0.0, 0.0, 0.05\nfor step in range(1, 201):\n    gx, gy = 2 * (x - 3), 20 * (y + 1)\n    x, y = x - eta * gx, y - eta * gy\n    if step in (1, 5, 20, 50, 200):\n        print(step, round(x, 4), round(y, 4))"
+      },
+      "requires": [
+        "gradient"
+      ]
+    },
+    {
+      "id": "multiple-integrals",
+      "picture": "Adding up a quantity over a region of the plane, or a volume of space.",
+      "mechanism": "A double integral of f(x, y) over a region sums f over it, computed as an iterated integral: integrate in y for each fixed x, then integrate the result in x. Triple integrals do the same over solids. Fubini's theorem says the order does not matter for reasonable functions, so choose the easier one.",
+      "detail": "With f = 1 it gives area, or volume in three dimensions. With f a density it gives total mass, charge, or population; with f a height, the volume under a surface. Averages, centers of mass, and moments of inertia are integrals. In probability, the chance that a pair of variables lands in a region is the integral of their joint density.\n\nThe bounds of the region determine the limits; sketching the region is key, and sometimes reversing the order of integration makes a hopeless integral easy. Polar, cylindrical, and spherical coordinates simplify regions with circular symmetry, with Jacobian factors r, r, and ρ² sin φ. The Gaussian integral of e^(−x²), which is √π, is computed by squaring it and going to polar coordinates. In many dimensions numerical integration uses Monte Carlo methods.",
+      "principles": "A volume is a stack of areas, and an area is a stack of lengths. Iterating one-dimensional integrals extends accumulation to any number of dimensions, which is why probability, physics, and geometry can all be handled with the same tools.",
+      "example": {
+        "label": "Volume under z = xy, and the area of a disk",
+        "code": "import math\n\nn = 400                                                       # exact volume: (4/2) * (9/2) = 9\ndx, dy = 2 / n, 3 / n\ntotal = sum((i + 0.5) * dx * (j + 0.5) * dy * dx * dy for i in range(n) for j in range(n))\nprint(round(total, 4))\n\nm = 800                                                       # the area of the unit disk, on a grid\nstep = 2 / m\ninside = sum(1 for i in range(m) for j in range(m) if (-1 + (i + .5) * step) ** 2 + (-1 + (j + .5) * step) ** 2 <= 1)\nprint(round(inside * step * step, 3), round(math.pi, 3))"
+      },
+      "requires": [
+        "integrals",
+        "partial-derivatives"
+      ]
+    },
+    {
+      "id": "jacobian",
+      "picture": "How much a change of variables stretches or squashes space, point by point.",
+      "mechanism": "For a map (u, v) → (x(u, v), y(u, v)), the Jacobian matrix has the partial derivatives [[x_u, x_v], [y_u, y_v]]. It is the best linear approximation to the map at each point. Its determinant tells how much areas are scaled: dx dy = |det J| du dv.",
+      "detail": "Carl Gustav Jacob Jacobi studied the determinant in 1841. For polar coordinates x = r cos θ, y = r sin θ, the determinant is r, which is where the r in dA = r dr dθ comes from; for spherical coordinates the factor is ρ² sin φ. A zero determinant means the map collapses space there, so it cannot be inverted locally; the inverse function theorem says a nonzero determinant gives a local inverse. The multivariable chain rule is multiplication of Jacobians.\n\nIn machine learning, the Jacobian of a layer relates changes in inputs to outputs, backpropagation multiplies Jacobians, and normalizing flows use log-determinants of Jacobians to transform probability densities. In robotics, the manipulator Jacobian relates joint speeds to the hand's velocity, and where it degenerates are singularities, arm poses that lose a degree of freedom. In statistics, changing variables for densities needs |det J|.",
+      "principles": "Changing coordinates changes how much room things take up, and the Jacobian is the exchange rate. It is the factor that keeps integrals, probabilities, and physical laws consistent when you describe the same thing in different variables.",
+      "example": {
+        "label": "The Jacobian of polar coordinates is r",
+        "code": "import math\n\ndef jacobian_det(r, theta, h=1e-6):\n    x = lambda r, t: r * math.cos(t)\n    y = lambda r, t: r * math.sin(t)\n    xr = (x(r + h, theta) - x(r - h, theta)) / (2 * h)\n    xt = (x(r, theta + h) - x(r, theta - h)) / (2 * h)\n    yr = (y(r + h, theta) - y(r - h, theta)) / (2 * h)\n    yt = (y(r, theta + h) - y(r, theta - h)) / (2 * h)\n    return xr * yt - xt * yr\n\nfor r in (0.5, 1.0, 3.0):\n    print(r, round(jacobian_det(r, 0.8), 5))                   # equals r: the area scale factor"
+      },
+      "requires": [
+        "partial-derivatives"
+      ]
+    },
+    {
+      "id": "coordinate-systems",
+      "picture": "Different ways to say where something is.",
+      "mechanism": "Cartesian coordinates give a point by distances along perpendicular axes (x, y, z). Polar coordinates use distance r from the origin and an angle θ. Cylindrical adds height z to polar. Spherical uses distance ρ, a polar angle φ from the vertical, and an azimuth θ around it. Conversion formulas relate them: x = r cos θ, y = r sin θ.",
+      "detail": "Choose the system to fit the symmetry. A circle is r = 1 in polar but x² + y² = 1 in Cartesian; a sphere is ρ = R; a cone is φ = constant. Integrals over discs, cylinders, and balls become easy: the polar area element is r dr dθ, the cylindrical volume element r dr dθ dz, and the spherical one ρ² sin φ dρ dφ dθ. René Descartes and Pierre de Fermat introduced coordinate geometry in the 1630s.\n\nOther systems: curvilinear coordinates in general (elliptic, parabolic, toroidal), in which the Laplace equation separates; geographic latitude and longitude, which are spherical; celestial coordinates; barycentric coordinates for triangles in graphics; and homogeneous coordinates for perspective projection. The choice of coordinates is not physical: the underlying quantities are the same, which is a starting point of tensor calculus and of general relativity.",
+      "principles": "The same point has many addresses, and a problem can be easy in one and impossible in another. Choosing coordinates to match the symmetry is one of the most powerful moves in all of mathematical physics.",
+      "example": {
+        "label": "Converting, and integrating over a ball",
+        "code": "import math\n\ndef to_polar(x, y):\n    return math.hypot(x, y), math.degrees(math.atan2(y, x))\n\ndef to_cartesian(r, deg):\n    return r * math.cos(math.radians(deg)), r * math.sin(math.radians(deg))\n\nprint(to_polar(3, 4))                                       # (5.0, 53.13...)\nprint([round(v, 4) for v in to_cartesian(5, 53.130102)])    # back to (3, 4)\n\nR, n = 2.0, 200                                              # volume of a ball: integral of rho^2 sin(phi)\nvol = sum((R / n) * ((i + .5) * R / n) ** 2 * math.sin((j + .5) * math.pi / n) * (math.pi / n) * 2 * math.pi\n          for i in range(n) for j in range(n))\nprint(round(vol, 3), round(4 / 3 * math.pi * R ** 3, 3))"
+      },
+      "requires": [
+        "trigonometric-functions"
+      ]
+    },
+    {
+      "id": "vector-fields",
+      "picture": "An arrow attached to every point of space: wind, gravity, flow, force.",
+      "mechanism": "A vector field F(x, y, z) assigns a vector to each point, written with components (P, Q, R). It can represent the velocity of a fluid (a flow field), a force (gravity, electric, magnetic), or a gradient, since the gradient of a scalar function is a vector field. Flow lines follow the arrows.",
+      "detail": "Fields are visualized by arrow diagrams or streamlines: weather maps of wind, field lines around magnets, currents in the ocean. A field is conservative if it is the gradient of a potential (F = ∇φ): then work between two points does not depend on the path, and there is no swirl. Gravity and static electric fields are conservative; friction is not.\n\nKey derived quantities: divergence (net outflow: sources and sinks), curl (rotation), line integrals (work along a path), and surface integrals (flux through a surface). Physics is written in fields: Maxwell's equations for E and B, gravity's g, the fluid velocity in Navier–Stokes. An ODE system x′ = F(x) is a vector field whose trajectories are its solutions. The idea of a field, due to Faraday in the 1830s, replaced action at a distance.",
+      "principles": "A field describes what would happen to something placed at each point. Replacing action at a distance with a quantity defined everywhere was the conceptual move that turned modern physics into the study of fields.",
+      "example": {
+        "label": "A whirlpool and a radial field",
+        "code": "import math\n\nswirl = lambda x, y: (-y, x)\nradial = lambda x, y: (2 * x, 2 * y)                 # the gradient of x^2 + y^2\nfor p in [(1, 0), (0, 1), (-1, 0), (1, 1)]:\n    print(p, \"swirl\", swirl(*p), \"radial\", radial(*p))\n\ndef loop_work(F, n=100_000):                         # work around the unit circle\n    w = 0.0\n    for k in range(n):\n        t = 2 * math.pi * k / n\n        x, y = math.cos(t), math.sin(t)\n        dx, dy = -math.sin(t) * 2 * math.pi / n, math.cos(t) * 2 * math.pi / n\n        Fx, Fy = F(x, y)\n        w += Fx * dx + Fy * dy\n    return w\n\nprint(round(loop_work(radial), 4), round(loop_work(swirl), 4))     # 0 for the conservative field, 2 pi for the swirl"
+      },
+      "requires": [
+        "multivariable"
+      ]
+    },
+    {
+      "id": "divergence",
+      "picture": "How much a flow spreads out from a point: sources are positive, sinks are negative.",
+      "mechanism": "For F = (P, Q, R), the divergence is ∇·F = ∂P/∂x + ∂Q/∂y + ∂R/∂z. It measures the net outflow per unit volume at a point. Positive means more leaves than enters, a source; negative, a sink; zero, what comes in goes out, as in an incompressible fluid.",
+      "detail": "For a radial field F = (x, y, z), ∇·F = 3 everywhere. Physically, a heated air parcel expands, giving positive divergence of velocity, while water in a pipe of constant width has zero divergence. Maxwell's equations use it: ∇·E = ρ/ε₀ (charges are sources of electric field) and ∇·B = 0 (no magnetic monopoles). The continuity equation ∂ρ/∂t + ∇·(ρv) = 0 expresses conservation of mass.\n\nThe divergence theorem turns a volume integral of ∇·F into the flux through the boundary. The Laplacian is the divergence of the gradient, ∇²f = ∇·∇f, which measures how a value differs from the average of its neighbors and drives diffusion. In fluid solvers, enforcing ∇·v = 0 is the pressure-projection step. On networks, divergence is net flow out of a node, as in Kirchhoff's current law.",
+      "principles": "Divergence counts how much is being created or destroyed at a point. It is the local statement of conservation, and it is why the flux out of a closed surface tells you exactly what is inside.",
+      "example": {
+        "label": "Three fields, three divergences",
+        "code": "def divergence(F, x, y, z, h=1e-5):\n    d = 0.0\n    for i in range(3):\n        p, m = [x, y, z], [x, y, z]\n        p[i] += h; m[i] -= h\n        d += (F(*p)[i] - F(*m)[i]) / (2 * h)\n    return d\n\nprint(round(divergence(lambda x, y, z: (x, y, z), 1, 2, 3), 4))                 # 3: a source everywhere\nprint(round(divergence(lambda x, y, z: (-y, x, 0), 1, 2, 3), 4))                # 0: pure rotation has no spreading\nprint(round(divergence(lambda x, y, z: (x * x, 0, 0), 2, 0, 0), 4))             # 4: flow speeding up as it goes"
+      },
+      "requires": [
+        "vector-fields",
+        "partial-derivatives"
+      ]
+    },
+    {
+      "id": "vector-curl",
+      "picture": "How much a flow swirls around a point.",
+      "mechanism": "For F = (P, Q, R), the curl is ∇ × F = (∂R/∂y − ∂Q/∂z, ∂P/∂z − ∂R/∂x, ∂Q/∂x − ∂P/∂y). Its direction is the axis about which a tiny paddle wheel in the flow would spin fastest (right-hand rule), and its size is twice the angular speed.",
+      "detail": "In the plane, the curl is the single number ∂Q/∂x − ∂P/∂y. For a rigid rotation F = (−y, x) it equals 2, a constant swirl. A gradient field has zero curl, ∇ × ∇f = 0, so curl-free fields on simply connected domains come from a potential. Conversely, the divergence of a curl is always zero.\n\nIn fluid dynamics the curl of velocity is vorticity, which measures spin in tornadoes and eddies. In electromagnetism, Faraday's law ∇ × E = −∂B/∂t says a changing magnetic field creates a circulating electric field, the principle of generators and transformers, and the Ampère–Maxwell law says currents and changing electric fields create magnetic fields. Stokes' theorem relates the surface integral of the curl to the circulation around the boundary. In computer graphics, curl noise makes divergence-free flows for smoke effects. Maxwell coined the name curl.",
+      "principles": "Curl detects rotation hidden in a flow. Fields that come from a potential have none, so curl is the local test for whether a force does path-independent work.",
+      "example": {
+        "label": "Which fields make a paddle wheel turn?",
+        "code": "def curl_z(F, x, y, h=1e-5):\n    Q_x = (F(x + h, y)[1] - F(x - h, y)[1]) / (2 * h)\n    P_y = (F(x, y + h)[0] - F(x, y - h)[0]) / (2 * h)\n    return Q_x - P_y\n\nprint(round(curl_z(lambda x, y: (-y, x), 1.0, 2.0), 4))          # 2: a spinning wheel\nprint(round(curl_z(lambda x, y: (2 * x, 2 * y), 1.0, 2.0), 4))   # 0: a gradient field never swirls\nprint(round(curl_z(lambda x, y: (y, 0), 1.0, 2.0), 4))           # -1: shear flow also rotates a paddle"
+      },
+      "requires": [
+        "vector-fields",
+        "partial-derivatives"
+      ]
+    },
+    {
+      "id": "line-integrals",
+      "picture": "Add up a quantity along a path: the work a force does along a route.",
+      "mechanism": "For a curve C parametrized as r(t), t from a to b: a line integral of a scalar f is the integral of f(r(t)) |r′(t)| dt, such as the mass of a wire with variable density. For a vector field F, the work integral is the integral of F(r(t))·r′(t) dt: add up the component of the force along the direction of travel.",
+      "detail": "The work done by gravity on a climber depends only on the height change, but the work done by friction depends on the path taken: the first is a conservative field. The fundamental theorem for line integrals: if F = ∇φ, then the integral of F·dr equals φ(end) − φ(start): no path dependence, and the integral around any closed loop is zero. In a simply connected domain, a field is conservative exactly when its curl is zero. Circulation is the line integral around a closed loop.\n\nUses: work, energy, circulation and lift in aerodynamics, voltage (the line integral of the electric field), and Ampère's law (the integral of B around a loop equals the enclosed current). Green's and Stokes' theorems convert closed-loop line integrals into area or surface integrals of the curl. Complex analysis is line integrals along paths in the plane: Cauchy's theorem and residues.",
+      "principles": "Adding up effects along a route is the basis of work and energy. When the answer does not depend on the route, something deeper is going on: a potential exists, and energy is a property of position, not path.",
+      "example": {
+        "label": "Path independence, and its failure",
+        "code": "def work(F, path, a, b, n=50_000):\n    total, dt = 0.0, (b - a) / n\n    for k in range(n):\n        t = a + (k + 0.5) * dt\n        (x, y), (dx, dy) = path(t)\n        Fx, Fy = F(x, y)\n        total += (Fx * dx + Fy * dy) * dt\n    return total\n\nF = lambda x, y: (y, x)                                    # conservative: F = grad(x*y)\nstraight = lambda t: ((t, t), (1, 1))                      # path 1: straight line from (0,0) to (1,1)\ncurved = lambda t: ((t, t * t), (1, 2 * t))                # path 2: parabola from (0,0) to (1,1)\nprint(round(work(F, straight, 0, 1), 5), round(work(F, curved, 0, 1), 5))   # both 1.0\nG = lambda x, y: (-y, x)                                   # not conservative\nprint(round(work(G, straight, 0, 1), 5), round(work(G, curved, 0, 1), 5))   # 0.0 versus 0.33333"
+      },
+      "requires": [
+        "vector-fields",
+        "integrals"
+      ]
+    },
+    {
+      "id": "surface-integrals",
+      "picture": "Add up a quantity over a curved surface, or measure how much flow passes through it.",
+      "mechanism": "A surface integral of a scalar f over a surface S sums f dS, with dS the area element of the surface (for z = g(x, y), dS = √(1 + g_x² + g_y²) dx dy). The flux of a vector field through S is the integral of F·n dS, where n is the unit normal: the amount flowing through the surface per unit time.",
+      "detail": "Scalar version: the mass of a curved shell with varying density, or, with f = 1, the surface area. Flux version: how much water flows through a net, how much sunlight hits a solar panel (which depends on the angle, through F·n), or how much electric field passes through a closed surface (Gauss's law: total flux is the enclosed charge divided by ε₀). Orientation matters for flux: choose the normal, outward for closed surfaces. Parametrized surfaces r(u, v) have dS = |r_u × r_v| du dv.\n\nExamples: the surface area of a sphere, 4πR²; the flux of a radial field through a sphere; the lateral area of a cone. Stokes' theorem equates the flux of the curl through a surface with the circulation around its edge; the divergence theorem equates the flux through a closed surface with the integral of the divergence inside. Applications include heat loss through walls, drag from pressure integrated over a body, and radiosity in graphics.",
+      "principles": "Flux is the count of how much passes through a surface. It is what a net catches, a panel absorbs, or a membrane lets through, and the theorems of vector calculus connect it to what is created inside.",
+      "example": {
+        "label": "Flux of a radial field through a sphere",
+        "code": "import math\n\nR, n = 2.0, 400                     # exact flux of F = (x, y, z) through a sphere of radius R is 4 pi R^3\nflux = 0.0\nfor i in range(n):\n    phi = (i + 0.5) * math.pi / n\n    for j in range(n):\n        flux += R * R ** 2 * math.sin(phi) * (math.pi / n) * (2 * math.pi / n)   # F.n = R and dS = R^2 sin(phi) dphi dtheta\nprint(round(flux, 3), round(4 * math.pi * R ** 3, 3))"
+      },
+      "requires": [
+        "multiple-integrals",
+        "vector-fields"
+      ]
+    },
+    {
+      "id": "greens-theorem",
+      "picture": "Adding up the tiny swirls inside a region gives the circulation around its edge.",
+      "mechanism": "For a region D in the plane with boundary curve C traversed counterclockwise, the line integral of P dx + Q dy around C equals the double integral over D of (∂Q/∂x − ∂P/∂y) dA. The line integral around the boundary equals the double integral of the curl inside.",
+      "detail": "Interior swirls cancel between neighboring cells, leaving only the boundary contribution, which is the idea of the proof. Special cases give area formulas: choosing P = −y/2 and Q = x/2 gives area = ½ ∮ (x dy − y dx), the principle behind the planimeter, a mechanical instrument that measures area by tracing the perimeter, and behind the surveyor's shoelace formula for polygons. The flux form, ∮ F·n ds = ∬ div F dA, is the two-dimensional divergence theorem.\n\nGeorge Green published it in 1828 in a privately printed essay on electricity and magnetism, which went nearly unnoticed until Lord Kelvin rediscovered it. It is the two-dimensional special case of Stokes' theorem and of the generalized Stokes theorem: an integral over a region equals an integral over its boundary.",
+      "principles": "What happens inside a region is recorded on its boundary. Green's theorem is the first and simplest expression of an idea that runs through mathematics and physics: totals over a region can be read from its edge.",
+      "example": {
+        "label": "The shoelace formula",
+        "code": "import math\n\ndef polygon_area(pts):\n    s = 0.0\n    for (x1, y1), (x2, y2) in zip(pts, pts[1:] + pts[:1]):\n        s += x1 * y2 - x2 * y1\n    return s / 2\n\nprint(polygon_area([(0, 0), (4, 0), (4, 3), (0, 3)]))            # 12.0\nprint(polygon_area([(0, 0), (4, 0), (2, 3)]))                     # 6.0\ncircle = [(math.cos(2 * math.pi * k / 10_000), math.sin(2 * math.pi * k / 10_000)) for k in range(10_000)]\nprint(round(polygon_area(circle), 5), round(math.pi, 5))          # a fine polygon approaches pi"
+      },
+      "requires": [
+        "line-integrals",
+        "multiple-integrals",
+        "vector-curl"
+      ]
+    },
+    {
+      "id": "stokes-theorem",
+      "picture": "The total swirl across a surface equals the circulation around its rim.",
+      "mechanism": "For a surface S with boundary curve C, oriented consistently by the right-hand rule, the line integral of F·dr around C equals the surface integral of (∇ × F)·n dS over S. Adding up the curl over the surface gives the same as going around the edge.",
+      "detail": "It says the answer for a surface depends only on its boundary: any two surfaces with the same rim give the same flux of curl, so a soap film across a wire loop can be replaced by a bulging or flattened one. Because ∇ × ∇f = 0, a gradient field has zero circulation around any loop, consistent with path independence.\n\nIt is named after George Gabriel Stokes, who set it as an exam question at Cambridge in 1854, after a letter from William Thomson (Kelvin) in 1850. It turns Maxwell's equations into integral form: Faraday's law says the electromotive force around a loop equals minus the rate of change of magnetic flux through any surface it bounds, the principle of generators, and Ampère's law says the circulation of B equals the current through the loop. Green's theorem is the special case for a flat surface. The generalized Stokes theorem, in differential forms, unifies the fundamental theorem of calculus, Green's, Stokes', and the divergence theorem.",
+      "principles": "Circulation around an edge is the sum of the tiny rotations across whatever it encloses. Stokes' theorem lets you trade a hard surface for an easy one, or a surface for its edge, and it is the geometry behind electric generators.",
+      "requires": [
+        "greens-theorem",
+        "vector-curl",
+        "surface-integrals"
+      ]
+    },
+    {
+      "id": "divergence-theorem",
+      "picture": "What flows out through a closed surface equals what is created inside.",
+      "mechanism": "For a solid region V with closed boundary surface S and outward normal n, the flux of F through S equals the integral of the divergence ∇·F throughout V. The total flux out through the surface equals the sum of the sources inside.",
+      "detail": "Also called Gauss's theorem or Ostrogradsky's. Interior sources add up; flow that passes from one small cell to the next cancels between neighbors, leaving only what escapes through the outer skin. It is the mathematical form of conservation laws: integrate the continuity equation over a volume and you get the rate of change of the amount inside equals minus the net flux out. Gauss's law of electrostatics follows from ∇·E = ρ/ε₀.\n\nIt gives quick flux computations (the flux of F = (x, y, z) through a sphere of radius R is 3 times the volume, 4πR³), Archimedes' principle (the net pressure force on a submerged body equals the weight of displaced fluid), and derivations of the heat and diffusion equations. Gauss found a special case in 1813 and Ostrogradsky proved it in general in 1826. Finite-volume methods for fluid flow are built on it, ensuring conservation exactly, cell by cell.",
+      "principles": "Conservation is a statement about boundaries: whatever is not created or destroyed inside must cross the surface. The divergence theorem says exactly that, and it is behind every balance law in physics.",
+      "requires": [
+        "surface-integrals",
+        "divergence"
+      ]
+    },
+    {
+      "id": "lagrange-multipliers",
+      "picture": "Find the highest point that also lies on a given curve: where the level lines just touch it.",
+      "mechanism": "To optimize f(x, y) subject to g(x, y) = c, solve ∇f = λ∇g together with g = c. At the best point on the constraint, the gradients are parallel: the level curve of f is tangent to the constraint curve, so moving along the constraint cannot improve f. The number λ is the multiplier.",
+      "detail": "Example: maximize xy subject to x + y = 10. Then ∇f = (y, x) = λ(1, 1), so x = y = 5 and the maximum product is 25. Joseph-Louis Lagrange introduced the method in 1788 in his Mécanique analytique.\n\nThe multiplier has a meaning: λ = ∂f*/∂c, the rate at which the optimal value changes as the constraint is relaxed, a shadow price in economics: how much extra profit an extra unit of resource brings. Several constraints use several multipliers. In physics, Lagrangian mechanics treats constraints, such as a bead on a wire, with multipliers giving the constraint forces. In economics it maximizes utility subject to a budget. In statistics it gives maximum-entropy distributions, and principal component analysis. The Karush–Kuhn–Tucker conditions extend it to inequality constraints, the foundation of convex optimization, support vector machines, and linear programming duality.",
+      "principles": "A constrained optimum is a place where the goal and the constraint want the same direction. The multiplier measures how much the goal would gain if the constraint loosened, which is why it is called a shadow price.",
+      "example": {
+        "label": "The largest product on a circle",
+        "code": "import math\n\nbest = max(((2 * math.sqrt(2) * math.cos(t)) * (2 * math.sqrt(2) * math.sin(t)), t)\n           for t in [i * math.pi / 100000 for i in range(1, 50000)])\nprint(round(best[0], 4), round(math.degrees(best[1]), 2), \"degrees\")      # maximize xy on x^2 + y^2 = 8: 4.0 at 45 degrees\n\nprint(\"lambda =\", 2 / 4)        # at (2, 2): grad f = (2, 2), grad g = (4, 4), so lambda = 0.5"
+      },
+      "requires": [
+        "gradient",
+        "optimization"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "description": "Extra cross-links across cosmos, physics, life, and machines.",
+  "links": [
+    ["cmb", "time"], ["cmb", "entropy"], ["cmb", "waves"], ["inflation", "quantum-mechanics"], ["inflation", "cosmic-web"], ["inflation", "cosmic-expansion"],
+    ["dark-matter", "gravity"], ["dark-matter", "curiosity"], ["dark-energy", "entropy"], ["dark-energy", "time"], ["magnetars", "electricity"], ["magnetars", "supernovae"],
+    ["magnetars", "energy"], ["degenerate-matter", "stars"], ["degenerate-matter", "gravity"], ["milky-way", "sun"], ["milky-way", "solar-system"], ["milky-way", "cosmic-web"],
+    ["milky-way", "stars"], ["photons", "energy"], ["photons", "spectrum"], ["photons", "information"], ["photons", "perception"], ["superposition", "cryptography"],
+    ["superposition", "measurement"], ["superposition", "reality"], ["wave-function", "reality"], ["wave-function", "uncertainty"], ["wave-particle", "light"], ["wave-particle", "reality"],
+    ["event-horizon", "time-dilation"], ["event-horizon", "gravity"], ["event-horizon", "information-paradox"], ["quasars", "light"], ["quasars", "energy"], ["quasars", "redshift"],
+    ["gravitational-waves", "general-relativity"], ["gravitational-waves", "spacetime"], ["gravitational-waves", "time"], ["proton-decay", "entropy"], ["proton-decay", "symmetry"], ["proton-decay", "probability"],
+    ["solar-system", "orbits"], ["solar-system", "sun"], ["solar-system", "gravity"], ["comets", "orbits"], ["comets", "time"], ["comets", "myth"],
+    ["genes", "information"], ["genes", "probability"], ["genes", "learning"], ["rna", "evolution"], ["rna", "cells"], ["natural-selection", "machine-learning"],
+    ["natural-selection", "probability"], ["natural-selection", "learning"], ["adaptation", "culture"], ["adaptation", "ecosystems"], ["adaptation", "technology-behavior"], ["internal-combustion", "climate"],
+    ["internal-combustion", "waste-heat"], ["internal-combustion", "efficiency"], ["escapement", "time"], ["escapement", "oscillation"], ["escapement", "mechanisms"], ["wheels", "leverage"],
+    ["wheels", "engines"], ["wheels", "history"], ["gears", "leverage"], ["gears", "engines"], ["gears", "time"], ["lightning", "energy"],
+    ["lightning", "myth"], ["lightning", "light"], ["group-theory", "crystal-ingot"], ["group-theory", "music"], ["group-theory", "quantum-mechanics"], ["topology", "cosmic-web"],
+    ["topology", "patterns"], ["syntax", "symbols"], ["syntax", "meaning"], ["modes", "jazz"], ["modes", "patterns"], ["tuning", "mathematics"],
+    ["tuning", "resonance"], ["thermodynamics", "black-holes"], ["temperature", "entropy"], ["heat", "entropy"], ["energy", "cosmos"]
+  ]
+}

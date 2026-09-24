@@ -1,0 +1,20 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "culture-art",
+  "group": "Culture",
+  "order": 5,
+  "title": "Art",
+  "blurb": "Painting, color, beauty, architecture, dance, story, and film.",
+  "orb": "composing",
+  "entry": "art",
+  "path": [
+    "art",
+    "painting",
+    "color",
+    "beauty",
+    "architecture",
+    "dance",
+    "story",
+    "film"
+  ]
+}

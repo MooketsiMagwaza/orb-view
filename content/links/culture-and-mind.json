@@ -1,0 +1,21 @@
+{
+  "description": "Extra cross-links across culture, society, and mind, with extra weight on love, the thread that runs through most of them.",
+  "links": [
+    ["middle-ages", "renaissance"], ["middle-ages", "science"], ["middle-ages", "clocks"], ["feudalism", "money"], ["feudalism", "agriculture"], ["feudalism", "conflict"],
+    ["feudalism", "trust"], ["urbanization", "energy"], ["urbanization", "globalization"], ["urbanization", "emergence"], ["love", "oxytocin"], ["love", "dance"],
+    ["love", "film"], ["love", "language"], ["love", "sacred"], ["love", "wonder"], ["love", "body"], ["love", "sound"],
+    ["friendship", "kindness"], ["friendship", "play"], ["friendship", "empathy"], ["family", "kindness"], ["family", "grief"], ["forgiveness", "kindness"],
+    ["forgiveness", "time"], ["forgiveness", "memory"], ["grief", "empathy"], ["grief", "kindness"], ["taoism", "love"], ["taoism", "kindness"],
+    ["taoism", "silence"], ["regret", "kindness"], ["regret", "nostalgia"], ["boundaries", "love"], ["boundaries", "empathy"], ["boundaries", "conflict"],
+    ["curiosity", "love"], ["curiosity", "friendship"], ["wonder", "music"], ["wonder", "silence"], ["play", "love"], ["play", "music"],
+    ["empathy", "music"], ["empathy", "learning"], ["empathy", "trust"], ["kindness", "trust"], ["care", "loneliness"], ["care", "grief"],
+    ["care", "forgiveness"], ["care", "attachment"], ["care", "body"], ["care", "sleep"], ["memory", "family"], ["dreams", "love"],
+    ["dreams", "fear"], ["dreams", "grief"], ["identity", "grief"], ["identity", "music"], ["identity", "culture"], ["meditation", "kindness"],
+    ["meditation", "compassion"], ["meditation", "grief"], ["death", "peace"], ["death", "hope"], ["death", "wonder"], ["death", "friendship"],
+    ["death", "art"], ["death", "music"], ["death", "meditation"], ["hope", "friendship"], ["hope", "family"], ["hope", "art"],
+    ["joy", "friendship"], ["joy", "family"], ["joy", "nature"], ["joy", "food"], ["gratitude", "family"], ["gratitude", "friendship"],
+    ["gratitude", "nature"], ["gratitude", "wonder"], ["gratitude", "death"], ["anger", "love"], ["anger", "family"], ["loneliness", "music"],
+    ["loneliness", "story"], ["loneliness", "grief"], ["loneliness", "cities"], ["loneliness", "nature"], ["loneliness", "language"], ["loneliness", "kindness"],
+    ["loneliness", "family"]
+  ]
+}

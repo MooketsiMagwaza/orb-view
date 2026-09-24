@@ -1,0 +1,23 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-servers",
+  "group": "Tech",
+  "order": 7,
+  "title": "Linux, Servers & nginx",
+  "blurb": "The machines under the app: Linux, web servers, proxies, and load balancing.",
+  "orb": "shaping",
+  "entry": "infrastructure",
+  "path": [
+    "infrastructure",
+    "linux",
+    "shell",
+    "processes",
+    "permissions",
+    "servers",
+    "web-servers",
+    "nginx",
+    "reverse-proxy",
+    "load-balancing",
+    "ssh"
+  ]
+}

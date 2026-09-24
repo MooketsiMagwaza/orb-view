@@ -1,0 +1,308 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Data structures, part one: the idea, arrays, linked chains, memory, stacks, and queues, each in four layers.",
+  "depth": [
+    {
+      "id": "data-structures",
+      "picture": "The shapes data takes in memory, chosen so the operations you care about are fast.",
+      "mechanism": "Every structure is a bargain. Arrays read by position instantly but insert slowly; linked lists do the opposite; hash tables find things fast but lose order; trees keep order and stay fairly quick at everything. You choose by asking which operations happen most.",
+      "detail": "The core toolkit is small: arrays, linked lists, stacks, queues, hash tables, trees, and graphs. Each has a cost table: how long it takes to read, search, insert, and delete as the data grows, written in Big O. A structure is also tied to hardware: contiguous memory plays well with processor caches, while pointer-heavy shapes scatter data around.\n\nIn practice most programs get by with an array and a hash map, and reach for a tree or graph when order or relationships matter. A useful habit is to separate the interface from the implementation: decide that you need \"a set\" or \"a queue\", then choose what backs it.",
+      "principles": "Algorithms and data structures are two halves of one thing. A good algorithm is often just the right structure with a simple loop around it, which is why Fred Brooks said that if you show him your tables he rarely needs your flowcharts.",
+      "requires": [
+        "data",
+        "ram"
+      ]
+    },
+    {
+      "id": "arrays",
+      "picture": "A row of numbered boxes, side by side. Ask for box seven and you get it at once.",
+      "mechanism": "The items sit in one unbroken stretch of memory, all the same size. The address of item n is the start address plus n times the item size: one multiplication and one addition, so any element costs the same to reach whether it is first or millionth.",
+      "detail": "Reading or writing by position is O(1). Searching an unsorted array is O(n), since you may have to look at everything. Inserting or deleting in the middle is O(n), because everything after must shift. The size is fixed when the array is made, which is why growable variants exist.\n\nArrays are the densest structure: no per-item overhead, and contiguous memory means the processor's cache loads neighbors for free. Most languages count from 0 because the index is an offset from the start: item 0 is zero steps away. Two-dimensional arrays are stored as one long array with arithmetic on the indexes, either row by row or column by column.",
+      "principles": "Arithmetic on addresses is why arrays are fast, and contiguity is why they are cache-friendly. Nearly every other structure is either built from arrays or exists to fix something arrays are bad at.",
+      "example": {
+        "label": "Reading, writing, and inserting",
+        "code": "nums = [10, 20, 30, 40]\nprint(nums[2])        # 30, reached by position\nnums[1] = 25          # overwrite in place\nnums.insert(1, 15)    # shifts everything after it\nprint(nums)           # [10, 15, 25, 30, 40]"
+      },
+      "requires": [
+        "data-structures",
+        "ram"
+      ]
+    },
+    {
+      "id": "dynamic-array",
+      "picture": "An array that grows itself when it runs out of room.",
+      "mechanism": "It keeps spare capacity. When full, it allocates a new block, often twice the size, copies everything over, and frees the old one. Appending is usually one write; every so often it is one big copy.",
+      "detail": "Doubling the capacity each time means that over n appends the total copying is at most about 2n, so the average cost per append is constant: amortized O(1). Growing by a fixed amount instead would make appends O(n) on average, which is why growth is geometric.\n\nThe trade-offs are some wasted space (up to half) and the fact that references into the array can become invalid after a resize. Python's list, Java's ArrayList, JavaScript's Array, and C++'s vector all follow this pattern, with growth factors between 1.5 and 2. Removing from the end is also cheap, and some implementations shrink when mostly empty.",
+      "principles": "Occasional expensive steps can hide inside a cheap average. Amortization is what lets simple growth rules deliver constant cost per operation, and it is why append is safe to use in a loop.",
+      "example": {
+        "label": "Watching the capacity jump",
+        "code": "import sys\n\nitems = []\nlast = 0\nfor i in range(40):\n    items.append(i)\n    size = sys.getsizeof(items)\n    if size != last:\n        print(f\"len={len(items):2d}  bytes={size}\")   # each jump is a reallocation\n        last = size"
+      },
+      "requires": [
+        "arrays",
+        "amortized-analysis"
+      ]
+    },
+    {
+      "id": "strings",
+      "picture": "Text as a row of characters.",
+      "mechanism": "A string is an array whose items are characters, plus a length or an end marker. The details depend on the encoding: in ASCII one byte is one character, but in UTF-8 a character takes one to four bytes, so byte number n is not character number n.",
+      "detail": "Many languages make strings immutable: to change one you build a new one. That makes strings safe to share and to use as dictionary keys, but building a long string by repeated joining copies each time and becomes quadratic. The fix is to collect the pieces in a list and join once.\n\nComparing strings costs time proportional to their length. Unicode adds complications: a visible character may be several code points (a letter plus an accent, an emoji with a skin tone), and the same text can be encoded in more than one way, so normalization matters. Null-terminated strings in C store the text followed by a zero byte; forgetting the zero, or writing past the end, is a classic source of security bugs.",
+      "principles": "Text feels simple because people read it, but to a machine it is bytes plus an agreement about meaning. Most string bugs come from mixing up characters, bytes, and what a reader would call a letter.",
+      "example": {
+        "label": "Characters versus bytes",
+        "code": "s = \"naïve\"\nprint(len(s), len(s.encode(\"utf-8\")))   # 5 characters, 6 bytes\n\nparts = []\nfor word in [\"build\", \"once\", \"join\", \"once\"]:\n    parts.append(word)\nprint(\" \".join(parts))                   # avoids re-copying at every step"
+      },
+      "requires": [
+        "arrays",
+        "encoding"
+      ]
+    },
+    {
+      "id": "locality-of-reference",
+      "picture": "What you used just now, and what sits next to it, is what you will probably want next.",
+      "mechanism": "Processors are far faster than main memory, so they keep recently used data in small, quick caches and fetch memory in lines of about 64 bytes. Code that reads neighboring items uses the whole line it paid for; code that hops around wastes most of it.",
+      "detail": "There are two kinds. Temporal locality means reusing the same data soon; spatial locality means using data near what you just used. Summing an array walks memory in order and runs close to the machine's limit. Walking a linked list touches nodes wherever the allocator put them, and can be many times slower even though both are O(n).\n\nA classic experiment sums a large two-dimensional array by rows versus by columns: identical work, very different speed. This is why arrays often beat theoretically better structures for small and medium sizes, and why databases and file systems organize data in blocks. Cache-aware design means compact records, keeping hot data together, and processing in batches.",
+      "principles": "Big O counts operations, but the machine also counts trips to memory. Two algorithms with the same complexity can differ tenfold because one respects the memory hierarchy: what is nearby matters as much as what is fewer.",
+      "requires": [
+        "arrays",
+        "cache"
+      ]
+    },
+    {
+      "id": "linked-lists",
+      "picture": "A chain of boxes, each pointing to the next. To reach the fifth, follow four pointers.",
+      "mechanism": "Each node holds a value and the address of the next node; the list itself is just the address of the first. To insert after a node, point the new node at its successor and the node at the new one. No shifting: two pointer changes.",
+      "detail": "Insert or delete at a known node is O(1); finding that node by position or value is O(n). There is no random access. Nodes can live anywhere in memory and each carries pointer overhead, so scattered nodes are cache-unfriendly, which makes linked lists slower in practice than their reputation suggests.\n\nThey shine when you already hold a reference to the node, when memory must not be moved, or in functional languages where immutable lists share their tails. Variants are singly linked (one direction), doubly linked (two), and circular (the last points back to the first). A classic exercise is reversing a list by flipping each pointer as you walk.",
+      "principles": "A linked list trades access by position for cheap rearrangement. It is the simplest structure built from pointers, and understanding it is the doorway to trees and graphs, which are lists with more than one way onward.",
+      "example": {
+        "label": "A three-node chain, then an insert",
+        "code": "class Node:\n    def __init__(self, value, next=None):\n        self.value, self.next = value, next\n\nhead = Node(1, Node(2, Node(4)))\nsecond = head.next\nsecond.next = Node(3, second.next)   # insert 3 after 2: two pointer changes\n\nnode = head\nwhile node:\n    print(node.value, end=\" \")       # 1 2 3 4\n    node = node.next"
+      },
+      "requires": [
+        "data-structures",
+        "pointers"
+      ]
+    },
+    {
+      "id": "doubly-linked-list",
+      "picture": "A chain you can walk both ways, because each link remembers the one before.",
+      "mechanism": "Each node stores next and previous pointers. To remove a node you only need the node itself: link its previous to its next. Adding at either end is instant if you keep pointers to both the head and the tail.",
+      "detail": "Costs: O(1) to insert or delete at a known node or at either end; O(n) to find by position or value; one extra pointer of memory per node. Uses include browser back and forward history, undo stacks with redo, text-editor buffers, and, paired with a hash map, LRU caches: move a node to the front on use, evict from the back.\n\nSentinel nodes at both ends remove special cases for empty lists and edge insertions. The main hazard is bookkeeping: four pointer updates for each splice, and forgetting one corrupts the list.",
+      "principles": "A back pointer costs one word per node and buys O(1) removal, a good trade whenever you hold a node and need to take it out. It is the structure behind anything that must move items around by reference.",
+      "example": {
+        "label": "Unlink a node by joining its neighbors",
+        "code": "class Node:\n    def __init__(self, v):\n        self.v, self.prev, self.next = v, None, None\n\ndef link(a, b):            # a <-> b\n    a.next, b.prev = b, a\n\na, b, c = Node(\"a\"), Node(\"b\"), Node(\"c\")\nlink(a, b); link(b, c)\nlink(a, c)                 # b is now bypassed\nn = a\nwhile n:\n    print(n.v, end=\" \")    # a c\n    n = n.next"
+      },
+      "requires": [
+        "linked-lists"
+      ]
+    },
+    {
+      "id": "skip-list",
+      "picture": "A linked list with express lanes stacked above it, so you can skip ahead.",
+      "mechanism": "The bottom layer is a sorted linked list. Each item is promoted to the layer above by a coin flip, so about half appear in layer two, a quarter in layer three, and so on. To search, ride the top lane as far as you can without overshooting, drop down a lane, and repeat.",
+      "detail": "Expected search, insert, and delete are O(log n), like a balanced tree, but with no rotations or rebalancing: randomness keeps it balanced with high probability. William Pugh introduced it in 1990. Implementations are far shorter than red-black trees and are easy to make concurrent, since an insert touches only a few local pointers.\n\nRedis uses skip lists for sorted sets, and LevelDB and RocksDB use them for their in-memory tables. The drawbacks are extra pointers per node (about two on average), worse cache behavior than arrays, and only probabilistic guarantees.",
+      "principles": "Randomness can substitute for careful bookkeeping. A structure that stays balanced by luck at each insert is simpler than one that enforces balance, and its expected performance is just as good.",
+      "requires": [
+        "linked-lists",
+        "randomness"
+      ]
+    },
+    {
+      "id": "pointers",
+      "picture": "A note saying where something lives, instead of the thing itself.",
+      "mechanism": "Memory is a numbered row of bytes. A pointer holds one of those numbers. Follow it (dereference it) to reach the data at that address. Copying a pointer copies the address, not the data, so two pointers can refer to the same thing.",
+      "detail": "Pointers let you build linked structures, pass large data to a function without copying it, and share state. They also bring a family of bugs. A null pointer points nowhere and crashes when followed; a dangling pointer refers to memory that has been freed; a wild pointer was never set; a buffer overflow uses pointer arithmetic to write past the end of an array. Tony Hoare called inventing the null reference his billion-dollar mistake.\n\nLanguages respond differently: C and C++ give raw pointers; Java and Python hide them behind references and use garbage collection; Rust keeps pointers but checks ownership at compile time. Pointer arithmetic is what makes array indexing work underneath: a[i] is the value at address a plus i.",
+      "principles": "An address is a value like any other, and once values can name other values you can build any shape of data. The power and the danger of pointers are the same thing: reaching into memory by name.",
+      "example": {
+        "label": "Two names, one list",
+        "code": "a = [1, 2, 3]\nb = a                # b holds the same reference, not a copy\nb.append(4)\nprint(a)             # [1, 2, 3, 4]\nprint(a is b)        # True\nc = list(a)          # a real copy\nprint(c is a)        # False"
+      },
+      "requires": [
+        "ram",
+        "binary"
+      ]
+    },
+    {
+      "id": "memory-management",
+      "picture": "Who owns which piece of memory, and who gives it back.",
+      "mechanism": "A program asks for blocks of memory as it runs and must release them when done. Local variables live on the stack and vanish when the function returns. Data whose lifetime is not tied to a call goes on the heap, where something has to decide when it can be freed.",
+      "detail": "There are four main strategies. Manual (C's malloc and free) is fast and precise, and easy to get wrong: leaks, double frees, use-after-free. Garbage collection lets the runtime find unreachable data (Java, Go, JavaScript). Reference counting has each object track its owners, and needs extra care for cycles (Python, Swift). Ownership and borrowing lets the compiler prove that each value has one owner (Rust).\n\nUnderneath, the operating system hands out pages of virtual memory and allocators such as malloc carve them into blocks, fighting fragmentation, where free space exists but in pieces too small to use. Memory bugs are a leading cause of security vulnerabilities, a main reason for newer languages' designs.",
+      "principles": "Memory is finite and lifetimes are real, so every language answers who frees this? somewhere. The choices sit on a spectrum between programmer effort, runtime cost, and safety, and no option gets all three.",
+      "requires": [
+        "pointers",
+        "operating-systems"
+      ]
+    },
+    {
+      "id": "garbage-collection",
+      "picture": "A janitor that finds what nobody is using and takes it away.",
+      "mechanism": "The runtime starts from what the program can still reach (variables, the stack, globals) and follows every reference. Anything not reached is garbage and its memory is reclaimed. This is the mark-and-sweep idea.",
+      "detail": "Variants include copying collectors, which move live objects to a fresh area and discard the old one whole, and generational collectors, which exploit the observation that most objects die young: collect a small young area often and the old area rarely. Costs are pauses while the collector runs (modern ones work concurrently to keep pauses to milliseconds), extra memory headroom, and less predictable timing, which matters in real-time systems.\n\nReference counting is a different strategy: free an object when its count reaches zero, though cycles of objects referring to each other leak unless separately handled. John McCarthy invented garbage collection for Lisp around 1959. Even with it you can leak by holding references you no longer need, such as an ever-growing cache.",
+      "principles": "Automatic reclamation removes a whole class of bugs in exchange for some overhead. The idea rests on reachability: if nothing can reach an object, nothing can ever use it, so it is safe to reclaim.",
+      "requires": [
+        "memory-management"
+      ]
+    },
+    {
+      "id": "memory-leaks",
+      "picture": "Memory taken and never given back, until the program chokes.",
+      "mechanism": "A leak happens when a program holds memory it will never use again. In manual languages it forgot to free; in garbage-collected ones it kept a reference the collector must respect. Usage creeps upward run after run.",
+      "detail": "Signs are memory that grows steadily under a steady workload, slowdown, out-of-memory kills, and restarts that make the problem vanish for a while. Common causes: caches with no eviction; listeners, timers, or callbacks registered and never removed; global collections that only grow; cycles in reference-counted systems; unclosed files, sockets, or database connections.\n\nTools include heap profilers (compare two snapshots and see what grew), leak detectors such as Valgrind and AddressSanitizer, and memory metrics over time. Fixes are bounded caches, weak references, explicit lifetimes, and always releasing resources in a finally block or a context manager. Long-running servers suffer most: a small leak per request becomes gigabytes in days.",
+      "principles": "A leak is a quiet failure of ownership: something is still holding on when it should have let go. It is found by watching growth over time, not by reading any one line.",
+      "example": {
+        "label": "A cache that only grows",
+        "code": "_cache = {}\n\ndef lookup(key):\n    if key not in _cache:\n        _cache[key] = \"x\" * 1000     # never evicted: a leak by design\n    return _cache[key]\n\nfor i in range(1000):\n    lookup(i)\nprint(len(_cache))                   # 1000 entries and counting\n# fix: bound the size, e.g. functools.lru_cache(maxsize=256)"
+      },
+      "requires": [
+        "memory-management",
+        "debugging"
+      ]
+    },
+    {
+      "id": "stacks",
+      "picture": "A pile of plates: you can only add to, or take from, the top.",
+      "mechanism": "Two operations matter. Push adds an item on top; pop removes and returns the top. Both take constant time, and the last thing in is the first thing out. Usually there is also peek, to look at the top without removing it.",
+      "detail": "Implementation is trivial: a dynamic array where push appends and pop removes the end, or a linked list where the head is the top. Uses are everywhere. The call stack tracks function calls; undo history stacks edits; depth-first search keeps a stack of nodes to visit; parsers use stacks to match brackets and evaluate expressions; browsers keep a back-button stack.\n\nA stack is the natural tool whenever the most recent unfinished thing must be handled first, which is what nesting means: a bracket inside a bracket, a function inside a function. Recursion is stack use in disguise, and any recursive function can be rewritten with an explicit stack.",
+      "principles": "Nesting has a natural shape: whatever opened last must close first. A stack is that rule as a data structure, which is why so much of computing, from function calls to parsers to undo, quietly relies on one.",
+      "example": {
+        "label": "Matching brackets",
+        "code": "def balanced(text):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in text:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n\nprint(balanced(\"{[()]}\"), balanced(\"{[(])}\"))   # True False"
+      },
+      "requires": [
+        "data-structures",
+        "arrays"
+      ]
+    },
+    {
+      "id": "call-stack",
+      "picture": "The pile of unfinished function calls a program is in the middle of.",
+      "mechanism": "When a function is called, the machine pushes a frame holding its arguments, its local variables, and the address to return to. When it returns, the frame is popped and execution resumes there. The frames on the stack at any moment are the chain of calls that led to the current line.",
+      "detail": "This is what a stack trace shows when a program fails: the frames from the top, most recent call first. Each frame is small but the stack has a fixed size, often a megabyte or a few, so very deep recursion exhausts it. Local variables are cheap because allocating them just moves the stack pointer. Debuggers walk the stack to show where you are, and each thread has its own.\n\nSecurity note: return addresses live on the stack, so overwriting them with a buffer overflow lets an attacker redirect execution, which is why compilers add stack canaries and operating systems randomize memory layout. Tail-call optimization reuses a frame when the last thing a function does is call another.",
+      "principles": "The call stack is the program's memory of where it was. Function calls nest, so the way to remember how to get back is to pile up the unfinished ones, last on top.",
+      "example": {
+        "label": "Printing the chain of frames",
+        "code": "import traceback\n\ndef a(): b()\ndef b(): c()\ndef c(): traceback.print_stack(limit=4)\n\na()      # shows the chain: a -> b -> c"
+      },
+      "requires": [
+        "stacks",
+        "processes"
+      ]
+    },
+    {
+      "id": "stack-overflow",
+      "picture": "The pile of calls grows past the space set aside for it, and the program crashes.",
+      "mechanism": "The stack has a fixed size and every call takes a little. A function that calls itself with no end, or recursion far deeper than expected, keeps pushing until it runs off the end, and the system stops the program.",
+      "detail": "Typical causes are a missing or wrong base case, mutual recursion that never ends, or a recursive algorithm on very large input, such as a naive recursive walk of a long list. Fixes are correcting the base case, converting to a loop with an explicit stack in heap memory, or using tail-call optimization where the language supports it.\n\nSome runtimes catch it as an exception (Python raises RecursionError at about 1000 frames by default; Java throws StackOverflowError), while in C it is usually a segmentation fault. The programming Q&A site is named after this error. A related but different bug is the stack buffer overflow, where writing past a local array smashes neighboring data, including return addresses: the basis of classic exploits.",
+      "principles": "Recursion is bounded by memory as well as by logic. A function that is correct on paper can still fail on deep input, so the depth of the call chain is part of the design.",
+      "example": {
+        "label": "Recursion with no base case",
+        "code": "import sys\nprint(sys.getrecursionlimit())   # usually 1000\n\ndef down(n):\n    return down(n + 1)           # no base case\n\ntry:\n    down(0)\nexcept RecursionError as e:\n    print(\"stopped:\", type(e).__name__)"
+      },
+      "requires": [
+        "call-stack",
+        "recursion"
+      ]
+    },
+    {
+      "id": "reverse-polish",
+      "picture": "Write 3 4 + instead of 3 + 4, and brackets are never needed.",
+      "mechanism": "Operators come after their operands. Read left to right: push each number on a stack; when you meet an operator, pop what it needs, apply it, and push the result. At the end the answer is the single item left.",
+      "detail": "The expression (3 + 4) × 5 becomes 3 4 + 5 ×. There is no ambiguity and no precedence rules: the order of evaluation is fixed by the order of the tokens. Jan Łukasiewicz invented prefix, or Polish, notation in the 1920s for logic; the postfix version suited early calculators and computers because evaluating it needs only a stack.\n\nHewlett-Packard calculators used it for decades; Forth and PostScript are built on it; virtual machines such as the JVM and WebAssembly execute stack-based bytecode. Dijkstra's shunting-yard algorithm converts ordinary infix expressions into postfix, which is how many compilers and calculators parse arithmetic.",
+      "principles": "Bracket-free notation moves complexity from the reader to the machine: once operators follow their operands, a stack alone is enough to evaluate anything. A change of notation can change what has to be remembered.",
+      "example": {
+        "label": "Evaluating postfix with a stack",
+        "code": "def rpn(tokens):\n    ops = {\"+\": lambda a, b: a + b, \"-\": lambda a, b: a - b,\n           \"*\": lambda a, b: a * b, \"/\": lambda a, b: a / b}\n    stack = []\n    for t in tokens.split():\n        if t in ops:\n            b, a = stack.pop(), stack.pop()\n            stack.append(ops[t](a, b))\n        else:\n            stack.append(float(t))\n    return stack.pop()\n\nprint(rpn(\"3 4 + 5 *\"))   # 35.0"
+      },
+      "requires": [
+        "stacks"
+      ]
+    },
+    {
+      "id": "queues",
+      "picture": "A line at a shop: first to arrive is first to be served.",
+      "mechanism": "Enqueue adds an item at the back; dequeue removes the one at the front. Both are constant time when implemented well. The order of arrival is the order of service.",
+      "detail": "Implementation choices are a linked list with head and tail pointers, or a circular buffer in an array, which avoids shifting on every dequeue: removing from the front of a plain array is O(n). Uses include breadth-first search, print spools, task schedulers, buffers between a fast producer and a slow consumer, request queues at a web server, and the event loop at the heart of JavaScript.\n\nBounded queues make overload visible: when full, a system must block, drop, or reject, which is the origin of backpressure. Queueing theory studies how waits behave: as utilization approaches 100 percent, waiting time grows without bound, which is why systems are run well below capacity.",
+      "principles": "A queue turns a mismatch in speeds into a wait. It gives fairness by construction and makes load visible: how long the line has grown says how far behind you are.",
+      "example": {
+        "label": "First in, first out",
+        "code": "from collections import deque\n\nline = deque()\nline.append(\"first\")\nline.append(\"second\")\nline.append(\"third\")\nprint(line.popleft())    # first\nprint(line.popleft())    # second"
+      },
+      "requires": [
+        "data-structures"
+      ]
+    },
+    {
+      "id": "priority-queue",
+      "picture": "A waiting room where the sickest patient goes first, not the one who arrived first.",
+      "mechanism": "Each item has a priority. Extract returns the item with the highest (or lowest) priority; insert adds a new one. Built on a binary heap, both take O(log n), and looking at the best takes O(1).",
+      "detail": "A sorted list gives O(1) extraction but O(n) insertion; an unsorted list gives the reverse; a heap balances both. Uses include Dijkstra's shortest-path algorithm (always expand the closest unvisited node), A* search, Huffman coding (merge the two least frequent), event-driven simulation (next event first), operating-system schedulers, and finding the top k items in a stream.\n\nDijkstra also needs decrease-key, lowering an item's priority. Fibonacci heaps make that O(1) amortized in theory, though simple binary heaps usually win in practice. Ties need a rule, often insertion order, so behavior is predictable.",
+      "principles": "Give me the best one next is a question asked all through computing, and a heap answers it without ever fully sorting. Doing only as much ordering as needed is the source of the speed.",
+      "example": {
+        "label": "Most urgent first",
+        "code": "import heapq\n\ntasks = []\nheapq.heappush(tasks, (2, \"write report\"))\nheapq.heappush(tasks, (1, \"fix outage\"))\nheapq.heappush(tasks, (3, \"reply to email\"))\nwhile tasks:\n    priority, name = heapq.heappop(tasks)\n    print(priority, name)     # 1 fix outage, then 2, then 3"
+      },
+      "requires": [
+        "queues",
+        "heaps"
+      ]
+    },
+    {
+      "id": "deque",
+      "picture": "A line you can join or leave from either end.",
+      "mechanism": "Push and pop work at both the front and the back, in constant time. It generalizes both stack and queue: use one end only and it is a stack; add at one end and remove at the other and it is a queue.",
+      "detail": "Built as a doubly linked list or, more commonly, a circular buffer or a list of fixed-size blocks (Python's collections.deque, C++'s std::deque). Uses include sliding-window algorithms, where you keep candidates in order and drop stale ones from the front (finding the maximum of every window of size k in O(n)); work stealing, where each worker takes tasks from its own end of a deque and thieves take from the other; palindrome checks; and undo with redo.\n\nRandom access in the middle is slower than in an array, so use it when you work at the ends.",
+      "principles": "Allowing both ends costs almost nothing extra and opens up patterns neither a stack nor a queue can express. Many clever linear-time algorithms are a deque used as a monotonic filter.",
+      "example": {
+        "label": "Sliding window maximum in O(n)",
+        "code": "from collections import deque\n\ndef window_max(nums, k):\n    out, q = [], deque()          # q holds indexes, values decreasing\n    for i, x in enumerate(nums):\n        while q and nums[q[-1]] <= x:\n            q.pop()\n        q.append(i)\n        if q[0] <= i - k:\n            q.popleft()\n        if i >= k - 1:\n            out.append(nums[q[0]])\n    return out\n\nprint(window_max([1, 3, -1, -3, 5, 3, 6, 7], 3))   # [3, 3, 5, 5, 6, 7]"
+      },
+      "requires": [
+        "stacks",
+        "queues"
+      ]
+    },
+    {
+      "id": "circular-buffer",
+      "picture": "A fixed-size loop that overwrites its oldest entry when full.",
+      "mechanism": "An array of fixed length plus two indexes, read and write. Each write goes at the write index, which then advances and wraps to zero past the end (index = (index + 1) mod size). If the write index catches the read index, the buffer is full: refuse the write, or overwrite the oldest.",
+      "detail": "It gives a queue with no allocation, no shifting, and no growth: operations are O(1) and memory is constant, which is why it appears in audio and video streaming, network card drivers, keyboard input, embedded systems, and logging (\"keep the last 1000 lines\").\n\nTelling full from empty needs care: when read equals write, is it empty or full? Common solutions keep a count or leave one slot unused. A single-producer, single-consumer ring buffer can be made lock-free, since each side changes only its own index, which is how high-performance systems pass data between threads.",
+      "principles": "Modular arithmetic turns a line into a loop. When you only care about the most recent stretch of a stream, a fixed-size ring gives constant memory and never has to move anything.",
+      "example": {
+        "label": "Keeping the latest three",
+        "code": "class Ring:\n    def __init__(self, size):\n        self.buf, self.size, self.head, self.count = [None] * size, size, 0, 0\n\n    def push(self, x):\n        self.buf[(self.head + self.count) % self.size] = x\n        if self.count < self.size:\n            self.count += 1\n        else:\n            self.head = (self.head + 1) % self.size    # overwrite the oldest\n\n    def items(self):\n        return [self.buf[(self.head + i) % self.size] for i in range(self.count)]\n\nr = Ring(3)\nfor x in range(1, 6):\n    r.push(x)\nprint(r.items())     # [3, 4, 5]"
+      },
+      "requires": [
+        "queues",
+        "arrays"
+      ]
+    },
+    {
+      "id": "message-queues",
+      "picture": "A mailbox between programs: drop a message in, and someone collects it later.",
+      "mechanism": "A producer sends a message to the queue and carries on. A consumer takes it when ready. The queue, run by a broker such as RabbitMQ, Kafka, or Amazon SQS, stores messages durably in between, so sender and receiver need not run at the same time or speed.",
+      "detail": "Benefits are decoupling (services need not know each other), buffering (bursts are absorbed and drained later), reliability (messages survive a restart, and failed jobs can be retried), and scaling (add consumers to share the load).\n\nDelivery guarantees are a design choice: at most once (may lose), at least once (may duplicate, so consumers must be idempotent), and exactly once (hard, usually approximated). Variants: work queues (each message goes to one worker), publish-subscribe (each message goes to every subscriber), and logs like Kafka's that keep history so consumers can replay. Trade-offs are extra infrastructure, harder debugging, ordering across partitions, and dead-letter queues for messages that keep failing.",
+      "principles": "Putting a queue between two systems trades immediacy for resilience. One side's slowness or failure no longer becomes the other's, and the price is that results arrive later and must be tracked.",
+      "requires": [
+        "queues",
+        "servers"
+      ]
+    },
+    {
+      "id": "producer-consumer",
+      "picture": "Some workers make things, some use them, and a shared shelf sits in between.",
+      "mechanism": "Producers put items in a bounded buffer; consumers take them out. A producer must wait when the buffer is full and a consumer must wait when it is empty. Synchronization (locks, semaphores, or condition variables) makes sure they never disturb the buffer at the same moment.",
+      "detail": "Edsger Dijkstra formulated it in the 1960s as a test for concurrency primitives. The simplest correct solution uses two counting semaphores (empty slots and full slots) and a mutex protecting the buffer. In practice, languages provide blocking queues that do all of this internally: Java's BlockingQueue, Python's queue.Queue, Go's channels.\n\nPitfalls are deadlock (both sides waiting on each other), lost wake-ups, busy-waiting that burns CPU, and unbounded buffers that eat memory when producers outrun consumers. The pattern appears in thread pools, pipelines, logging, and streaming systems, and it is the shape of every work-queue architecture.",
+      "principles": "Coordination is the hard part of concurrent programs, and this problem isolates it: two parties, one buffer, and rules for waiting. Bounded buffers turn overload into waiting rather than failure.",
+      "example": {
+        "label": "A bounded buffer between two threads",
+        "code": "import queue, threading\n\nq = queue.Queue(maxsize=3)         # bounded buffer\n\ndef producer():\n    for i in range(5):\n        q.put(i)                   # blocks when full\n    q.put(None)                    # signal: done\n\ndef consumer():\n    while (item := q.get()) is not None:\n        print(\"got\", item)\n\nt1, t2 = threading.Thread(target=producer), threading.Thread(target=consumer)\nt1.start(); t2.start(); t1.join(); t2.join()"
+      },
+      "requires": [
+        "queues",
+        "processes"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "language",
+  "description": "Language from sound to grammar to writing, plus how meaning is carried and how it drifts.",
+  "concepts": [
+    {"id":"language","title":"Language","voice":"layered","orb":"listening","parents":["culture"],"wiki":"Language","met":"manuscript calligraphy","summary":"A shared agreement about what a sound can point to, followed by a thousand small betrayals of that agreement. We call them poetry, slang, and change."},
+    {"id":"speech","title":"Speech","voice":"layered","orb":"listening","parents":["language"],"wiki":"Speech","summary":"Language made of breath, tongue, and lips. Every child learns it without being taught, which is one of the strongest hints that we are built for it."},
+    {"id":"phonetics","title":"Phonetics","voice":"layered","orb":"composing","parents":["speech"],"wiki":"Phonetics","summary":"The study of the sounds we make and hear. Each language uses only a small slice of what a mouth can produce, and learning it means hearing the boundaries that slice draws."},
+    {"id":"origin-of-language","title":"Origin of Language","voice":"layered","orb":"searching","parents":["speech"],"wiki":"Origin of language","summary":"No one knows when or how it began; spoken words leave no fossils. Guesses range from gesture to song to grooming, and the honest answer is that it happened long ago, and gradually."},
+    {"id":"grammar","title":"Grammar","voice":"layered","orb":"solving","parents":["language"],"wiki":"Grammar","summary":"The unwritten rules that let a handful of words become endless sentences. People follow them fluently without being able to state them, and children infer them from scraps."},
+    {"id":"syntax","title":"Syntax","voice":"layered","orb":"connecting","parents":["grammar"],"wiki":"Syntax","summary":"How words combine into phrases and phrases into sentences. Order and structure change meaning: the dog bit the man is not the man bit the dog."},
+    {"id":"semantics","title":"Semantics","voice":"layered","orb":"searching","parents":["language"],"wiki":"Semantics","summary":"How words and sentences come to mean something. Meaning turns out to depend on context, on shared background, and on what a speaker intends, far more than on definitions."},
+    {"id":"metaphor","title":"Metaphor","voice":"layered","orb":"weaving","parents":["poetry","semantics"],"wiki":"Metaphor","summary":"Understanding one thing in terms of another: time is money, an argument is a battle. It isn't decoration; a great deal of abstract thinking is built out of physical comparisons."},
+    {"id":"poetry","title":"Poetry","voice":"layered","orb":"composing","parents":["language"],"wiki":"Poetry","summary":"Language with the pressure turned up: sound, rhythm, and image doing as much work as the sense. It's how people say what plain statement can't quite hold."},
+    {"id":"translation","title":"Translation","voice":"layered","orb":"breathing","parents":["language"],"wiki":"Translation","summary":"Carrying meaning between languages that carve up the world differently. Something is always lost and something is always added, which is why a good translation is an act of interpretation, not substitution."},
+    {"id":"writing","title":"Writing","voice":"layered","orb":"weaving","parents":["language"],"wiki":"Writing","summary":"Language turned into marks, so it can outlast the speaker and cross distances. It began as accounting, and it made history, law, and science possible."},
+    {"id":"cuneiform","title":"Cuneiform","voice":"layered","orb":"shaping","parents":["writing"],"wiki":"Cuneiform","summary":"Wedge-shaped marks pressed into wet clay in Mesopotamia more than five thousand years ago. The first writing was mostly receipts, and only later did it start to hold stories and prayers."},
+    {"id":"alphabet","title":"The Alphabet","voice":"layered","orb":"listening","parents":["writing"],"wiki":"Alphabet","summary":"A few dozen signs, each standing for a sound, that can spell any word. It's a startlingly economical idea, and nearly every alphabet in use descends from a single ancestor."},
+    {"id":"symbols","title":"Symbols","voice":"layered","orb":"shaping","parents":["language"],"wiki":"Symbol","met":"seal","summary":"A mark that stands in for something that isn't there. Letters, flags, coins, emoji. Symbols let meaning travel much further than the person who first made it."},
+    {"id":"technology-behavior","title":"Tech & Behavior","voice":"layered","orb":"connecting","parents":["language"],"wiki":"Technology and society","summary":"The tools we communicate with quietly reshape how we speak, gather, and pay attention. A new medium changes the language and the habits before anyone notices anything happened."},
+    {"id":"social-media","title":"Social Media","voice":"layered","orb":"working","parents":["technology-behavior"],"wiki":"Social media","summary":"Networks where everyone can publish and be seen. They rewired how people find each other and argue, and their design, tuned for attention, shaped what spreads far more than anyone intended."}
+  ],
+  "links": [
+    ["language", "music"], ["language", "logic"], ["language", "dna"], ["language", "numbers"], ["language", "tao"],
+    ["language", "paradox"], ["language", "trade"], ["language", "history"], ["speech", "sound"], ["speech", "voice"],
+    ["speech", "body"], ["phonetics", "sound"], ["phonetics", "timbre"], ["phonetics", "voice"], ["origin-of-language", "evolution"],
+    ["origin-of-language", "cooperation"], ["origin-of-language", "tools"], ["origin-of-language", "prehistory"], ["grammar", "logic"], ["grammar", "programming-languages"],
+    ["grammar", "learning"], ["syntax", "programming-languages"], ["syntax", "logic"], ["semantics", "truth"], ["semantics", "language-models"],
+    ["semantics", "symbols"], ["metaphor", "story"], ["metaphor", "imagination"], ["metaphor", "science"], ["metaphor", "religion"],
+    ["poetry", "music"], ["poetry", "seasons"], ["poetry", "water"], ["poetry", "rhythm"], ["poetry", "myth"],
+    ["poetry", "translation"], ["translation", "trade"], ["translation", "silk-road"], ["translation", "meaning"], ["writing", "memory"],
+    ["writing", "symbols"], ["writing", "trade"], ["writing", "law"], ["writing", "numbers"], ["cuneiform", "trade"],
+    ["cuneiform", "cities"], ["cuneiform", "ancient-world"], ["cuneiform", "numbers"], ["alphabet", "encoding"], ["alphabet", "symbols"],
+    ["symbols", "money"], ["symbols", "binary"], ["symbols", "mathematics"], ["symbols", "religion"], ["technology-behavior", "silicon"],
+    ["technology-behavior", "internet"], ["technology-behavior", "mass-media"], ["technology-behavior", "privacy"], ["social-media", "attention"], ["social-media", "identity"],
+    ["social-media", "internet"], ["social-media", "trust"], ["social-media", "mass-media"], ["social-media", "shame"], ["social-media", "machine-learning"],
+    ["social-media", "conflict"]
+  ]
+}

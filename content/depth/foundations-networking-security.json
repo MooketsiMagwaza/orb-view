@@ -1,0 +1,136 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Networking and security foundations: URLs, ports, UDP, domain names, symmetric and public-key cryptography, key exchange, digital signatures, certificates, and the telephone network, each in four layers.",
+  "depth": [
+    {
+      "id": "urls",
+      "picture": "The address of anything on the web.",
+      "mechanism": "A URL has parts: scheme://userinfo@host:port/path?query#fragment. The address https://example.com:443/docs/page?lang=en#intro means: use HTTPS, connect to example.com on port 443, ask for /docs/page with the parameter lang=en, and, in the browser, scroll to the element intro. The fragment never leaves the browser.",
+      "detail": "Tim Berners-Lee defined URLs in 1994 as part of the web. They are also called URIs; a URL is a URI that says where to find something. Reserved characters (: / ? # & =) have special meanings, so other characters are percent-encoded: a space becomes %20, and non-ASCII text is encoded as UTF-8 bytes first. Relative URLs resolve against the current page. Paths identify resources, and good practice is to keep them stable and readable; query strings pass parameters and are visible in logs and history, so secrets do not belong there.\n\nSecurity: open redirects, differences in how components parse URLs (a source of server-side request forgery and phishing bugs), look-alike hostnames, and userinfo tricks: https://google.com@evil.com goes to evil.com. REST APIs use URLs for resources, deep links open apps, and canonical URLs tell search engines which copy counts. The scheme can be http, https, mailto, file, data, or a custom app scheme. Punycode encodes internationalized domain names as ASCII.",
+      "principles": "Being able to name any resource by a string, and put that string in a link, is what let the web assemble itself. The format is simple enough to write by hand and subtle enough that parsers still disagree about edge cases.",
+      "example": {
+        "label": "Taking a URL apart",
+        "code": "from urllib.parse import urlparse, parse_qs, quote, urljoin\n\nu = urlparse(\"https://alice@example.com:8443/docs/page?lang=en&tag=a&tag=b#intro\")\nprint(u.scheme, u.hostname, u.port, u.path, u.fragment)\nprint(parse_qs(u.query))\nprint(quote(\"a b&c/é\"), urljoin(\"https://example.com/docs/page\", \"../images/logo.png\"))\nprint(urlparse(\"https://google.com@evil.example/login\").hostname)         # the real host is after the @"
+      }
+    },
+    {
+      "id": "ports",
+      "picture": "Numbered doors on a machine, one for each service.",
+      "mechanism": "An IP address delivers a packet to a machine; a 16-bit port number, 0 to 65535, delivers it to a particular program on that machine. A connection is identified by the four values of source address, source port, destination address, and destination port, so one server port can serve many clients.",
+      "detail": "Well-known ports, 0 to 1023, need privileges to listen on and are assigned by IANA: 80 for HTTP, 443 for HTTPS, 22 for SSH, 25 for SMTP, 53 for DNS. Registered ports, 1024 to 49151, are for applications such as PostgreSQL (5432) and MySQL (3306), and ephemeral ports, from about 32768 or 49152 up, are picked by clients for outgoing connections. Only one program can listen on a given address, port, and protocol at a time (address already in use); TCP and UDP port spaces are separate.\n\nFirewalls filter by port, so opening or closing a port controls exposure; port scanning with tools such as nmap probes which are open, an early step in attacks and audits. NAT devices rewrite ports so many private hosts can share one public address, and port forwarding maps an external port to an internal machine. Only about 64,000 ephemeral ports exist per client address and destination, a practical limit in load balancers. Moving a service to a non-standard port offers obscurity, not security.",
+      "principles": "An address says which machine; a port says which program. The pairing is what lets one computer run a web server, a database, and a chat client at the same time without their traffic mixing.",
+      "example": {
+        "label": "One server port, two clients, two source ports",
+        "code": "import socket, threading\n\nsrv = socket.socket(); srv.bind((\"127.0.0.1\", 0)); srv.listen()\nport = srv.getsockname()[1]\nprint(\"listening on port\", port)\n\ndef serve():\n    for _ in range(2):\n        conn, addr = srv.accept()\n        conn.sendall(f\"you connected from port {addr[1]}\\n\".encode()); conn.close()\nthreading.Thread(target=serve, daemon=True).start()\n\nfor _ in range(2):                                           # two clients, two different ephemeral source ports\n    with socket.create_connection((\"127.0.0.1\", port)) as c:\n        print(c.recv(100).decode().strip())\n\ntry:\n    other = socket.socket(); other.bind((\"127.0.0.1\", port))       # only one listener per port\nexcept OSError as e:\n    print(\"second bind fails:\", e.strerror)"
+      },
+      "requires": [
+        "ip"
+      ]
+    },
+    {
+      "id": "udp",
+      "picture": "Send it and hope: no connection, no retries, no order.",
+      "mechanism": "UDP, the User Datagram Protocol, sends independent datagrams: an 8-byte header of source port, destination port, length, and checksum, then the payload. There is no handshake, no acknowledgement, no retransmission, no ordering, and no congestion control. What arrives arrives; what is lost is gone.",
+      "detail": "David Reed designed it in 1980. Compared with TCP it has less overhead and latency, and leaves the decision about loss to the application. It is used for DNS queries (one request, one reply, where a handshake would double the cost), real-time voice and video (a retransmitted packet arrives too late to matter), online games (the latest position matters, not the old one), VPNs such as WireGuard, time sync, DHCP, and QUIC and HTTP/3, which build reliable, encrypted, multiplexed transport on top of UDP to avoid TCP's head-of-line blocking. It supports broadcast and multicast, one sender to many receivers, which TCP does not.\n\nDatagram sizes near the network's MTU, about 1,472 bytes on Ethernet, avoid fragmentation. Risks: no built-in congestion control, so a careless UDP application can flood a network, and amplification attacks, where small spoofed requests to DNS or NTP servers yield large replies aimed at a victim, make it a favorite of denial-of-service attackers. Choose UDP when timeliness beats completeness.",
+      "principles": "Sometimes late is worse than lost. UDP hands the application the choice, and gives up every guarantee to be as fast and light as the network allows, which is why real-time systems are built on it.",
+      "example": {
+        "label": "Three datagrams, no connection",
+        "code": "import socket\n\nrx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\nrx.bind((\"127.0.0.1\", 0)); rx.settimeout(1)\nport = rx.getsockname()[1]\n\ntx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\nfor i in range(3):\n    tx.sendto(f\"packet {i}\".encode(), (\"127.0.0.1\", port))          # no connection, no handshake\n\nfor _ in range(3):\n    data, addr = rx.recvfrom(1024)\n    print(data.decode(), \"from\", addr[1])\nprint(\"UDP guarantees nothing; on localhost they nearly always arrive\")"
+      },
+      "requires": [
+        "ip"
+      ]
+    },
+    {
+      "id": "domain-names",
+      "picture": "Human-readable addresses read from right to left, organized as a tree.",
+      "mechanism": "A domain name such as www.example.co.uk is a path in a hierarchy read right to left: the root, then the top-level domain (uk), a second-level domain (co), the registered name (example), and any subdomains (www). Each label is managed by whoever owns the level above it.",
+      "detail": "The Domain Name System, from 1983 and Paul Mockapetris, replaced a single shared hosts file. ICANN coordinates the root; registries run each top-level domain; registrars sell names to registrants for a yearly fee, and the registrant then controls everything beneath. Top-level domains are generic (.com, .org, and hundreds of newer ones), country codes (.de, .jp), and sponsored (.edu, .gov). Labels are at most 63 characters and the whole name at most 253; internationalized names use Punycode.\n\nRecords in the zone say what the name points to: A and AAAA for addresses, CNAME for aliases, MX for mail, TXT for verification. Ownership is a lease, not permanent, and lapsed or dangling names can be taken over by others, a real attack path. Other risks: typosquatting, look-alike characters, hijacking through a compromised registrar account, and DNS spoofing, mitigated by DNSSEC. A domain also anchors trust: TLS certificates are issued to names, cookies scope to domains, and the same-origin policy compares hostnames.",
+      "principles": "A domain name is a place in a shared naming tree, leased from whoever runs the level above. Owning one gives you a name, the right to hang anything beneath it, and the responsibility of keeping it.",
+      "example": {
+        "label": "Reading a name, and resolving one",
+        "code": "import socket\n\nlabels = \"www.example.co.uk\".split(\".\")\nprint(list(reversed(labels)))                                  # ['uk', 'co', 'example', 'www']: read from the right\n\nfor name in (\"localhost\", \"example.com\"):\n    try:\n        print(name, \"->\", socket.gethostbyname(name))          # resolved through DNS (needs the network)\n    except OSError as e:\n        print(name, \"-> could not resolve:\", e)\n\nprint(\"münchen.de\".encode(\"idna\"))                              # internationalized names become ASCII (Punycode)"
+      }
+    },
+    {
+      "id": "symmetric-encryption",
+      "picture": "One secret key both locks and unlocks.",
+      "mechanism": "A symmetric cipher takes a key and plaintext and produces ciphertext; the same key reverses it. Block ciphers such as AES process fixed blocks of 128 bits, and a mode of operation (GCM, CTR, CBC) extends them to long messages. Stream ciphers such as ChaCha20 generate a keystream that is XORed with the data.",
+      "detail": "AES, chosen by NIST in 2001 after a public competition, with 128, 192, or 256-bit keys, is the standard, and hardware instructions make it very fast. Security rests on the key: a 128-bit key has 3.4 × 10³⁸ possibilities, out of reach of brute force. Modes matter more than beginners expect: ECB encrypts equal blocks identically, leaking patterns, as in the famous encrypted penguin image; CBC needs unpredictable IVs and is prone to padding-oracle attacks. Authenticated encryption, AES-GCM or ChaCha20-Poly1305, also detects tampering and is what to use, with a unique nonce for each message: reusing a nonce with the same key is catastrophic.\n\nWhat symmetric ciphers cannot solve is key distribution: both sides need the same key, and sending it in the clear defeats the purpose. Public-key methods address that; in practice TLS uses a public-key exchange to agree on a symmetric key, then AES or ChaCha20 for the bulk of the data. Historical ciphers, Caesar, Vigenère, and Enigma, were symmetric too. The one-time pad is perfectly secure but impractical. Never invent your own cipher.",
+      "principles": "One key, shared in advance, and the strongest, fastest cipher we have. All the difficulty of symmetric cryptography moved from the cipher to the key: how to agree on it, keep it, and never use it twice the wrong way.",
+      "example": {
+        "label": "A toy stream cipher (not for real use)",
+        "code": "import hashlib, itertools\n\ndef keystream(key: bytes):\n    for counter in itertools.count():\n        yield from hashlib.sha256(key + counter.to_bytes(8, \"big\")).digest()\n\ndef xor_cipher(key, data):\n    return bytes(b ^ k for b, k in zip(data, keystream(key)))\n\nsecret = b\"meet at the library at noon\"\nciphertext = xor_cipher(b\"shared key\", secret)\nprint(ciphertext.hex())\nprint(xor_cipher(b\"shared key\", ciphertext))            # the same key decrypts\nprint(xor_cipher(b\"wrong key!!\", ciphertext))           # a wrong key gives noise"
+      }
+    },
+    {
+      "id": "public-key",
+      "picture": "A lock anyone can close, and only you can open.",
+      "mechanism": "You generate a linked pair: a public key, which you publish, and a private key, which you keep. What one key does, only the other can undo. To send you a secret, someone encrypts with your public key and only your private key decrypts. To sign, you use your private key and anyone can verify with the public one.",
+      "detail": "Diffie and Hellman published the idea in 1976, and Rivest, Shamir, and Adleman gave RSA in 1977; James Ellis, Clifford Cocks, and Malcolm Williamson at GCHQ had found it a few years earlier, in secret. Security rests on problems believed hard: factoring large numbers (RSA), discrete logarithms (Diffie–Hellman), and elliptic-curve discrete logarithms (ECDSA, Ed25519, X25519), which give the same strength with far shorter keys.\n\nPublic-key operations are slow and limited in message size, so they are used to exchange keys or sign, while symmetric ciphers do the bulk encryption. Uses: TLS, SSH keys, PGP email, code signing, cryptocurrency wallets, and Signal's protocol. Challenges: knowing that a public key really belongs to who you think, through certificates or fingerprints checked out of band; protecting private keys; and good randomness at key generation, since weak random numbers have produced guessable keys. A quantum computer running Shor's algorithm would break RSA and elliptic curves, and post-quantum algorithms standardized by NIST in 2024 are being deployed. The public key is not secret; the private key must never leave its owner.",
+      "principles": "Public-key cryptography broke the old assumption that secrecy needs a secret shared in advance. Strangers can now set up secure channels and prove who they are, which is what makes commerce and private communication over open networks possible.",
+      "example": {
+        "label": "Textbook RSA with tiny primes",
+        "code": "p, q = 61, 53\nn, phi = p * q, (p - 1) * (q - 1)\ne = 17                                     # public exponent\nd = pow(e, -1, phi)                        # private exponent: the modular inverse of e\nprint(\"public key (n, e):\", (n, e), \" private d:\", d)\n\nmessage = 65\ncipher = pow(message, e, n)                # anyone can encrypt with the public key\nprint(\"ciphertext:\", cipher, \" decrypted:\", pow(cipher, d, n))\n\nsignature = pow(message, d, n)             # only the key owner can sign ...\nprint(\"signature checks out:\", pow(signature, e, n) == message)      # ... and anyone can verify"
+      },
+      "requires": [
+        "symmetric-encryption"
+      ]
+    },
+    {
+      "id": "key-exchange",
+      "picture": "Two parties talk in public and end up sharing a secret.",
+      "mechanism": "In Diffie–Hellman, Alice and Bob agree on public numbers, a prime p and a generator g. Alice picks a secret a and sends A = gᵃ mod p; Bob picks b and sends B = gᵇ mod p. Each computes the shared secret: Alice computes Bᵃ and Bob computes Aᵇ, both equal to g^(ab). An eavesdropper sees p, g, A, and B, and cannot get g^(ab) without solving a discrete logarithm.",
+      "detail": "Whitfield Diffie and Martin Hellman published it in 1976, building on ideas of Ralph Merkle; it was the first public solution to the key distribution problem. Mixing paints is easy and unmixing is hard. Modern variants use elliptic curves (X25519) for small keys, and ephemeral keys, generated fresh for each session, which give forward secrecy: even if a server's long-term key is stolen later, past recorded sessions cannot be decrypted. TLS 1.3 requires an ephemeral exchange.\n\nPlain Diffie–Hellman is unauthenticated: a man in the middle can set up separate exchanges with each party, so it must be combined with signatures or certificates to prove who you are talking to. Bad parameters are dangerous: the Logjam attack of 2015 showed 512-bit and common 1024-bit groups could be attacked by well-resourced adversaries with precomputation. Quantum computers threaten it, and hybrid post-quantum exchange is being deployed in browsers and Signal. The derived secret is passed through a key derivation function to make encryption keys. Uses: TLS, SSH, VPNs, Signal and WhatsApp, and Bluetooth pairing.",
+      "principles": "Some things easy to do and hard to undo let two strangers agree on a secret in front of everyone. It sounds impossible, and its existence changed cryptography from a matter of trust to a matter of mathematics.",
+      "example": {
+        "label": "Diffie–Hellman with a demo-sized prime",
+        "code": "import secrets\n\np = 2 ** 127 - 1                  # a Mersenne prime (a demo size; real groups are 2048+ bits, or elliptic curves)\ng = 3\n\na = secrets.randbelow(p - 2) + 1          # Alice's secret\nb = secrets.randbelow(p - 2) + 1          # Bob's secret\nA, B = pow(g, a, p), pow(g, b, p)          # the only values sent over the open channel\n\nalice_secret = pow(B, a, p)\nbob_secret = pow(A, b, p)\nprint(alice_secret == bob_secret)                  # True: the same shared secret, never transmitted\nprint(hex(alice_secret)[:20], \"...\")"
+      },
+      "requires": [
+        "symmetric-encryption"
+      ]
+    },
+    {
+      "id": "digital-signatures",
+      "picture": "Sign with a private key; anyone can check with the public one.",
+      "mechanism": "To sign a message, hash it and transform the hash with your private key: the result is the signature. To verify, anyone applies the public key to the signature and compares the result with a fresh hash of the message. A match shows both that the holder of the private key signed it and that the message has not changed.",
+      "detail": "A signature gives authenticity (who), integrity (unchanged), and non-repudiation: the signer cannot plausibly deny it, provided their key was secure. Unlike a handwritten signature it depends on the content, so it cannot be copied to another document. Algorithms: RSA, DSA, ECDSA, and EdDSA (Ed25519, deterministic and fast), plus post-quantum schemes.\n\nApplications: TLS certificates (a certificate authority signs a site's key), software updates and code signing, package signatures, Git commit signing, email (S/MIME, DKIM), legal e-signatures, blockchain transactions, and passkeys, where a device signs a login challenge. Pitfalls: a compromised private key lets attackers sign malware, as in attacks that used stolen certificates; weak randomness in ECDSA, since reusing a nonce leaks the private key, as with the PlayStation 3 in 2010; hash collisions, which let researchers forge MD5-signed certificates in 2008; and signing what you cannot see. Verifying a signature only proves the key made it; you still need to know the key belongs to the person.",
+      "principles": "A signature ties a message to a key, and a key to its owner. It is the electronic counterpart of a seal that cannot be forged and breaks if the contents change, which is why software, contracts, and money can be trusted across the internet.",
+      "example": {
+        "label": "Toy RSA signing and verifying",
+        "code": "import hashlib\n\np, q, e = 1000003, 1000033, 65537\nn = p * q\nd = pow(e, -1, (p - 1) * (q - 1))\n\ndef digest(message):\n    return int.from_bytes(hashlib.sha256(message).digest(), \"big\") % n      # a hash squeezed into the toy modulus\n\ndef sign(message):    return pow(digest(message), d, n)                     # needs the private key d\ndef verify(message, sig): return pow(sig, e, n) == digest(message)          # needs only the public key (n, e)\n\nsig = sign(b\"pay Alice 10 dollars\")\nprint(verify(b\"pay Alice 10 dollars\", sig), verify(b\"pay Alice 1000 dollars\", sig))     # True False"
+      },
+      "requires": [
+        "hashing",
+        "public-key"
+      ]
+    },
+    {
+      "id": "certificates",
+      "picture": "A signed statement that this public key belongs to this website.",
+      "mechanism": "An X.509 certificate contains a subject (the domain), the subject's public key, a validity period, and a signature by an issuer, a certificate authority. Your browser trusts a set of root authorities; a site presents a chain from its certificate through intermediates to one of those roots, and the browser checks each signature, the dates, the name, and revocation status.",
+      "detail": "Without certificates, TLS would give encryption but no idea who is on the other end: anyone could claim to be your bank. Types by validation: domain validated, which proves control of the domain and is often automated by the ACME protocol; organization validated; and extended validation, whose special browser display has been dropped. Let's Encrypt, from 2014, issues free certificates and helped secure most of the web.\n\nThe trust model is centralized: any of the hundreds of root authorities in your device's store can issue a certificate for any domain, so one compromised authority can undermine everyone; DigiNotar was hacked in 2011, used to spy on Iranian users, and was distrusted. Defenses: Certificate Transparency logs, public records of every issued certificate that domain owners can monitor, and CAA DNS records limiting which authorities may issue. Revocation is weak, so lifetimes are shrinking toward months. Common failures: expired certificates causing outages, hostname mismatch, incomplete chains, and self-signed certificates. Certificates are public; only the private key must stay secret.",
+      "principles": "Encryption alone only hides a conversation; it does not say who you are talking to. Certificates answer that by chaining trust back to a small set of authorities, which is why the whole web's security rests on who the browsers agree to believe.",
+      "example": {
+        "label": "Inspecting a live certificate",
+        "code": "import ssl, socket\n\nctx = ssl.create_default_context()\nprint(\"trusted root CAs on this machine:\", len(ctx.get_ca_certs()))\n\ntry:\n    with socket.create_connection((\"example.com\", 443), timeout=5) as s:\n        with ctx.wrap_socket(s, server_hostname=\"example.com\") as tls:\n            cert = tls.getpeercert()\n            print(\"subject:\", dict(x[0] for x in cert[\"subject\"]).get(\"commonName\"))\n            print(\"issuer: \", dict(x[0] for x in cert[\"issuer\"]).get(\"organizationName\"))\n            print(\"valid until:\", cert[\"notAfter\"])\n            print(\"TLS version:\", tls.version())\nexcept OSError as e:\n    print(\"no network here, so no certificate to inspect:\", e)"
+      },
+      "requires": [
+        "public-key",
+        "digital-signatures"
+      ]
+    },
+    {
+      "id": "telephone-network",
+      "picture": "The first worldwide network: wires from every home to a switch, and switches wired to each other.",
+      "mechanism": "Each telephone connects by a local loop of copper pair to a central-office switch. Switches connect to each other over trunk lines. To call, the dialed number sets up a dedicated circuit end to end for the duration of the call: circuit switching. Voice travels as an analog signal on the local loop and, once digitized, as 64 kbit/s streams between exchanges: 8,000 samples a second of 8 bits each.",
+      "detail": "Bell's 1876 patent led to exchanges staffed by operators at switchboards; Almon Strowger invented the automatic switch in 1891, followed by step-by-step, crossbar, and computer-controlled electronic switching. Coaxial cable, microwave, optical fiber, and satellites raised capacity: the first transatlantic telephone cable, TAT-1 in 1956, carried 36 channels, 35 for voice and one for telegraph traffic. Multiplexing let many calls share one wire: a T1 line carries 24 voice channels at 1.544 Mbit/s.\n\nStandards include E.164 numbering and SS7 signaling, which separated control from voice. AT&T's Bell System was broken up in 1984, and the five-nines reliability target of 99.999 percent came from this era. The network carried early data: modems, dial-up internet, DSL over the same copper, and fax. Packet switching, invented for the ARPANET, deliberately differed: data chopped into independent packets, with no reserved circuit. Today voice increasingly runs as VoIP over IP networks, cellular networks carry most calls, and the old copper network is being retired. Its legacy includes phone numbers, universal service, and phone phreaking.",
+      "principles": "The telephone network showed that a planet could be wired so any two people can talk, and it taught the world how to run infrastructure at five-nines reliability. The internet grew inside it, then out-competed its central idea by replacing reserved circuits with shared packets.",
+      "example": {
+        "label": "Numbers behind a phone call",
+        "code": "import math\n\nsample_rate, bits = 8000, 8\nprint(sample_rate * bits, \"bit/s per call;\", 24 * sample_rate * bits + 8000, \"bit/s on a T1\")\n\ndef dtmf(digit, rate=8000, ms=40):                 # a touch-tone: two sine waves added together\n    rows, cols = [697, 770, 852, 941], [1209, 1336, 1477]\n    keys = \"123456789*0#\"\n    i = keys.index(digit)\n    f1, f2 = rows[i // 3], cols[i % 3]\n    return [math.sin(2 * math.pi * f1 * t / rate) + math.sin(2 * math.pi * f2 * t / rate) for t in range(rate * ms // 1000)]\n\nprint(len(dtmf(\"5\")), \"samples for the tone of key 5 (770 Hz + 1336 Hz)\")\nprint(round(math.log2(1 + 1000) * 3100 / 1000, 1), \"kbit/s: Shannon's limit for a 3.1 kHz line at 30 dB signal-to-noise\")"
+      }
+    }
+  ]
+}

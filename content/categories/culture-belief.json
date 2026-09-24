@@ -1,0 +1,21 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "culture-belief",
+  "group": "Culture",
+  "order": 6,
+  "title": "Belief & Ritual",
+  "blurb": "Religion, myth, the sacred, meditation, and the Way.",
+  "orb": "searching",
+  "entry": "religion",
+  "path": [
+    "religion",
+    "myth",
+    "sacred",
+    "ritual",
+    "meditation",
+    "buddhism",
+    "taoism",
+    "tao",
+    "yin-yang"
+  ]
+}

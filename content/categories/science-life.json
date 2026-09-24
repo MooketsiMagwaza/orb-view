@@ -1,0 +1,23 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "science-life",
+  "group": "Science",
+  "order": 3,
+  "title": "Life",
+  "blurb": "Cells, DNA, evolution, and the energy that keeps living things organized.",
+  "orb": "weaving",
+  "entry": "life",
+  "path": [
+    "life",
+    "abiogenesis",
+    "cells",
+    "dna",
+    "genes",
+    "mutation",
+    "evolution",
+    "natural-selection",
+    "metabolism",
+    "photosynthesis",
+    "death"
+  ]
+}

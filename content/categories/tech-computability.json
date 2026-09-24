@@ -1,0 +1,21 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-computability",
+  "group": "Tech",
+  "order": 12,
+  "title": "Limits of Computation",
+  "blurb": "What no algorithm can do, and what none can do quickly.",
+  "orb": "weaving",
+  "entry": "computability",
+  "path": [
+    "computability",
+    "state-machines",
+    "turing-machine",
+    "lambda-calculus",
+    "church-turing",
+    "halting-problem",
+    "p-vs-np",
+    "np-completeness",
+    "travelling-salesman"
+  ]
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part six: differential equations, the rules of change behind physics, biology, and engineering, from separable equations and numerical methods to the heat, wave, fluid, quantum, and electromagnetic equations, each in four layers.",
+  "depth": [
+    {
+      "id": "differential-equations",
+      "picture": "Equations that describe how something changes, and ask what it must therefore be.",
+      "mechanism": "A differential equation relates a function to its own derivatives: y′ = 2y, or m x″ = −kx. A solution is a function that satisfies it. Instead of a single number the answer is a whole function, often a family of them, one for each choice of starting condition.",
+      "detail": "Order is the highest derivative present; linear equations are those in which the unknown and its derivatives appear only to the first power, and they obey superposition: solutions can be added. Some are solved by formulas (separable, first-order linear with an integrating factor, constant-coefficient linear via characteristic equations); most real ones are not, and are solved numerically. Qualitative methods, slope fields, phase portraits, and stability of equilibria, reveal behavior without solutions.\n\nAlmost every law of physics is one: Newton's second law, the heat and wave equations, Maxwell's, Schrödinger's, the Navier–Stokes equations, and Einstein's field equations. In biology and economics they model populations, epidemics, predator–prey cycles, and growth. The existence-and-uniqueness theorem of Picard and Lindelöf says that under mild conditions a starting condition determines exactly one solution.",
+      "principles": "The laws of nature tell us how things change, not where they are. A differential equation is that law written down, and solving it is how you get from a rule of change to a prediction of the future.",
+      "example": {
+        "label": "Following the slope, step by step",
+        "code": "import math\n\n# y' = -0.5 y with y(0) = 10: exponential decay, exact solution 10 e^(-0.5 t)\nk, y, dt = -0.5, 10.0, 0.001\nfor step in range(1, 4001):\n    y += k * y * dt                        # follow the slope a tiny step at a time\n    if step % 1000 == 0:\n        t = step * dt\n        print(f\"t={t:.0f}: simulated {y:.4f}, exact {10 * math.exp(k * t):.4f}\")"
+      },
+      "requires": [
+        "derivatives",
+        "integrals"
+      ]
+    },
+    {
+      "id": "ode",
+      "picture": "A rule for how one quantity changes with time, or with another single variable.",
+      "mechanism": "An ordinary differential equation has one independent variable. First order: y′ = f(t, y). Second order: y″ = f(t, y, y′). Linear ODEs with constant coefficients are solved by trying y = e^(rt), which turns the equation into a polynomial for r; the roots give exponentials, oscillations, or both.",
+      "detail": "Examples: radioactive decay y′ = −ky; Newton's cooling T′ = −k(T − T_room); a falling body with drag; a spring–mass system m x″ + b x′ + kx = 0; an RLC circuit; population growth; and chemical kinetics. Solutions have a general part with free constants, one per order, fixed by initial or boundary conditions.\n\nDamped oscillators fall into three types: over-damped (slow return), critically damped (fastest return without oscillation, used in door closers), and under-damped (decaying oscillation). Systems of ODEs describe orbits, ecosystems, and epidemics, and can be viewed geometrically in phase space. Nonlinear ODEs can be chaotic, as in the Lorenz system of 1963. Numerical solvers such as Euler, Runge–Kutta, and adaptive methods handle those without formulas.",
+      "principles": "Most of the time-dependent world, from cooling coffee to swinging bridges, is governed by ODEs. Their solutions are a small zoo: exponentials, oscillations, and their combinations, and knowing the zoo is enough for a great deal.",
+      "example": {
+        "label": "Cooling coffee",
+        "code": "import math\n\n# T' = -k (T - 20), starting at 90 C. Exact: T(t) = 20 + 70 e^(-k t)\nk, T, dt = 0.1, 90.0, 0.01\nfor step in range(1, 3001):\n    T += -k * (T - 20) * dt\n    if step % 1000 == 0:\n        t = step * dt\n        print(f\"after {t:.0f} min: {T:.2f} C  (exact {20 + 70 * math.exp(-k * t):.2f} C)\")"
+      },
+      "requires": [
+        "differential-equations"
+      ]
+    },
+    {
+      "id": "pde",
+      "picture": "Equations for things that change across space and time at once.",
+      "mechanism": "A partial differential equation involves partial derivatives with respect to several variables, such as position and time. The unknown is a function of all of them, such as temperature u(x, t), and the equation ties its rates of change in different directions together.",
+      "detail": "Three archetypes: the heat equation u_t = α u_xx (parabolic, smoothing), the wave equation u_tt = c² u_xx (hyperbolic, propagating), and Laplace's equation u_xx + u_yy = 0 (elliptic, describing equilibrium: steady heat, electrostatic potential, soap films). Others: Navier–Stokes for fluids, Maxwell for electromagnetism, Schrödinger for quantum systems, Einstein's for gravity, Black–Scholes for option prices, and reaction–diffusion equations that generate animal patterns, as Turing proposed.\n\nSolutions need boundary conditions as well as initial ones. Techniques include separation of variables, Fourier and Laplace transforms, and Green's functions, but for most real problems numerical methods dominate: finite differences, finite elements, and spectral methods run weather forecasts, aircraft design, and structural analysis. Questions of existence, uniqueness, and smoothness are subtle; the Navier–Stokes case is a Millennium Prize Problem.",
+      "principles": "When quantities vary from place to place as well as from moment to moment, the laws take the form of PDEs. They are the mathematics of fields, and the reason weather, sound, light, and heat all obey equations of the same handful of types.",
+      "requires": [
+        "differential-equations",
+        "partial-derivatives"
+      ]
+    },
+    {
+      "id": "separable-equations",
+      "picture": "Sort the y's to one side and the x's to the other, then integrate both.",
+      "mechanism": "If y′ = g(x) h(y), rewrite it as dy/h(y) = g(x) dx and integrate each side. Then solve for y if possible. The constant of integration is fixed by an initial condition.",
+      "detail": "Example: y′ = ky gives dy/y = k dx, so ln|y| = kx + C, that is y = Ce^(kx). Another: y′ = xy² separates to dy/y² = x dx, giving −1/y = x²/2 + C. Uses: exponential growth and decay, Newton's cooling, the logistic equation, mixing problems (salt in a tank), and a falling body with drag.\n\nCaution: dividing by h(y) can lose constant solutions where h(y) = 0, the equilibrium solutions, which must be checked separately; and solutions can blow up in finite time (y′ = y² gives y = 1/(1 − t), which blows up at t = 1). The trick is the heart of separation of variables for PDEs, where a solution is assumed to be a product X(x)T(t). Equations that are not separable can sometimes be made so by substitution.",
+      "principles": "When the variables can be pulled apart, an equation about rates turns into two ordinary integrals. It is the simplest, most reliable way to solve a differential equation, and it covers growth, decay, and cooling.",
+      "example": {
+        "label": "Logistic growth from a separated equation",
+        "code": "import math\n\nr, K, y0 = 0.5, 100.0, 5.0\nexact = lambda t: K / (1 + (K / y0 - 1) * math.exp(-r * t))\nfor t in (0, 5, 10, 15, 20):\n    print(t, round(exact(t), 3))                  # an S-curve levelling off at K = 100\n\nt, h = 6.0, 1e-6                                   # check that the formula satisfies y' = r y (1 - y/K)\nslope = (exact(t + h) - exact(t - h)) / (2 * h)\nprint(round(slope, 6), round(r * exact(t) * (1 - exact(t) / K), 6))"
+      },
+      "requires": [
+        "antiderivative",
+        "differential-equations"
+      ]
+    },
+    {
+      "id": "laplace-transform",
+      "picture": "Turn a differential equation into algebra by trading time for a complex frequency variable.",
+      "mechanism": "L{f}(s) is the integral of f(t) e^(−st) from 0 to ∞. It converts derivatives into multiplication: L{f′} = sF(s) − f(0). So a linear ODE becomes an algebraic equation in s; solve that, then invert the transform, often by partial fractions and a table, to get back to time.",
+      "detail": "Table entries: L{1} = 1/s; L{e^(at)} = 1/(s − a); L{sin ωt} = ω/(s² + ω²); L{tⁿ} = n!/sⁿ⁺¹. It handles discontinuous and impulsive inputs, step and delta functions, elegantly, which suits circuits with switches.\n\nIn engineering, the transfer function H(s), the ratio of transformed output to input, characterizes a linear system: its poles, the roots of the denominator, determine stability (all in the left half-plane means stable), and it is the basis of control theory, filter design, and circuit analysis. It is named after Pierre-Simon Laplace, who used similar integrals in probability in the 1780s; Oliver Heaviside developed operational methods for telegraph equations in the 1890s. The Fourier transform is the special case s = iω, and convolution in time becomes multiplication in s.",
+      "principles": "A change of viewpoint can make the calculus disappear. By looking at a system's response to exponentials instead of to time, differentiation turns into multiplication, and a whole branch of engineering becomes algebra.",
+      "requires": [
+        "integrals",
+        "improper-integrals",
+        "differential-equations"
+      ]
+    },
+    {
+      "id": "euler-method",
+      "picture": "Follow the slope a short way, recompute the slope, and repeat.",
+      "mechanism": "For y′ = f(t, y) with y(t₀) = y₀, choose a step size h and update: y_{n+1} = y_n + h f(t_n, y_n), t_{n+1} = t_n + h. Each step walks along the tangent line; the path is a chain of short straight segments approximating the solution curve.",
+      "detail": "Leonhard Euler introduced it in 1768. It is first-order: halving the step size roughly halves the error, which makes it too inefficient for serious work, though it is useful for understanding. It can be unstable: for stiff equations, with very different time scales, a step that is too large produces wild oscillations or blow-up; backward Euler fixes stability at the cost of solving an equation at each step.\n\nBetter methods sample the slope several times per step: the midpoint method, Heun's method, and the classic fourth-order Runge–Kutta, whose error shrinks like h⁴, plus adaptive methods that adjust the step size automatically. Symplectic integrators such as leapfrog and Verlet preserve energy for orbital and molecular dynamics, where ordinary methods drift. Games and physics engines use Euler-type steps to move objects each frame; weather models use far more sophisticated relatives.",
+      "principles": "If you know the slope everywhere, you can trace a solution by taking small steps. Nearly every simulation is a refinement of this idea, and the art is choosing steps that stay accurate and stable.",
+      "example": {
+        "label": "Error shrinks in proportion to the step",
+        "code": "import math\n\nf = lambda t, y: y                          # y' = y, y(0) = 1, so y = e^t\nfor h in (0.5, 0.1, 0.01, 0.001):\n    t, y = 0.0, 1.0\n    for _ in range(round(1 / h)):\n        y += h * f(t, y)\n        t += h\n    print(f\"h={h}: y(1) ~ {y:.5f}, error {abs(y - math.e):.5f}\")"
+      },
+      "requires": [
+        "differential-equations",
+        "tangent-line"
+      ]
+    },
+    {
+      "id": "initial-value-problems",
+      "picture": "A rule for how things change, plus where they start: together they fix the story.",
+      "mechanism": "An initial value problem is a differential equation with the state at one moment given: y′ = f(t, y), y(t₀) = y₀. The equation alone has a family of solutions, one constant per order; the initial condition selects exactly one.",
+      "detail": "The Picard–Lindelöf theorem says that if f is continuous and does not change too abruptly in y (Lipschitz), a unique solution exists locally. Failures show why the conditions matter: y′ = 3y^(2/3) with y(0) = 0 has more than one solution (y = 0 and y = t³); y′ = y² with y(0) = 1 has a solution only until t = 1, where it blows up.\n\nPhysics reads this as determinism: given the present state and the law, the future is fixed, Laplace's demon. Chaos complicates this: sensitive dependence on initial conditions means tiny uncertainty grows exponentially, so prediction beyond a horizon is impossible in practice, as with weather. Boundary value problems instead specify conditions at two different points, such as a beam fixed at both ends, and need different methods. Hadamard's notion of a well-posed problem asks for existence, uniqueness, and continuous dependence on the data.",
+      "principles": "A law of change says how, and an initial condition says from where. Together they determine a future, which is the mathematical heart of determinism, and the limit of predicting it is where chaos begins.",
+      "example": {
+        "label": "Different starts, and chaos",
+        "code": "import math\n\nfor y0 in (1.0, 5.0, -3.0):\n    print(y0, [round(y0 * math.exp(-t), 3) for t in (0, 1, 2, 3)])      # y' = -y from three starts\n\na, b = 0.400000, 0.400001                    # chaos: tiny differences at the start grow (logistic map)\nfor step in range(40):\n    a, b = 3.9 * a * (1 - a), 3.9 * b * (1 - b)\nprint(\"after 40 steps:\", round(a, 4), round(b, 4))"
+      },
+      "requires": [
+        "differential-equations"
+      ]
+    },
+    {
+      "id": "harmonic-oscillator",
+      "picture": "Anything pulled back toward its resting place in proportion to how far it has been displaced.",
+      "mechanism": "m x″ = −k x: force proportional to displacement and opposite in direction (Hooke's law). The solution is x(t) = A cos(ωt + φ) with ω = √(k/m): a sinusoid whose frequency depends only on the stiffness and mass, not on the amplitude.",
+      "detail": "Springs, small pendulum swings (ω = √(g/L)), sound in a column of air, atoms in a crystal, LC circuits, and molecular vibrations all behave this way, because near any stable equilibrium the restoring force is approximately linear, a Taylor series argument. That is why so many systems have natural frequencies.\n\nAdd damping and oscillations decay; add a periodic driving force and you get resonance, when the drive matches the natural frequency and the amplitude grows large: a child on a swing, a wine glass shattered by a voice. In quantum mechanics, the harmonic oscillator has equally spaced energy levels (n + ½)ħω, with a zero-point energy of ½ħω, and models photons and molecular vibration. The pendulum is only nearly harmonic: its period grows slightly with amplitude, a fact Huygens tried to correct with cycloidal cheeks.",
+      "principles": "Every stable equilibrium looks like a spring up close. That is why sine waves are everywhere, and why so many systems have a natural frequency they prefer to ring at.",
+      "example": {
+        "label": "A spring, simulated against cos(2t)",
+        "code": "import math\n\nm, k = 1.0, 4.0                       # omega = sqrt(k/m) = 2 rad/s\nx, v, dt = 1.0, 0.0, 0.0005\nt = 0.0\nfor step in range(1, 12569):\n    v += -k / m * x * dt              # semi-implicit Euler\n    x += v * dt\n    t += dt\n    if step % 3142 == 0:\n        print(f\"t={t:.2f}: x={x:+.3f}   exact {math.cos(2 * t):+.3f}\")"
+      },
+      "requires": [
+        "ode",
+        "trigonometric-functions"
+      ]
+    },
+    {
+      "id": "predator-prey",
+      "picture": "Rabbits multiply, foxes eat rabbits, foxes starve, rabbits recover: an endless cycle.",
+      "mechanism": "The Lotka–Volterra equations: x′ = αx − βxy (prey grow, and are eaten in proportion to encounters) and y′ = δxy − γy (predators grow by eating, and die off). Populations oscillate: prey peak, then predators, then prey crash, then predators, in a repeating loop around a center point.",
+      "detail": "Alfred Lotka (1925) and Vito Volterra (1926) derived them independently; Volterra was prompted by his son-in-law, the biologist Umberto D'Ancona, who noticed that the fishing pause in the First World War raised the share of predatory fish in the Adriatic. The model conserves a quantity, so orbits are closed curves in the prey–predator plane; in reality noise and other factors damp or disrupt them.\n\nHudson's Bay Company fur records for lynx and snowshoe hare show roughly ten-year cycles, a famous though contested illustration. Extensions such as logistic prey growth, predators that saturate, and more species give stable equilibria, limit cycles, or chaos. The same mathematics models chemical oscillations, competing firms, and epidemics. Volterra's principle: indiscriminate culling of both species helps the prey, not the predators, on average.",
+      "principles": "Two populations locked into each other's fortunes cycle instead of settling. The model was the first mathematical picture of an ecosystem, and its lesson, that interaction creates rhythm, reaches from ecology to economics.",
+      "example": {
+        "label": "Cycles of prey and predators",
+        "code": "alpha, beta, delta, gamma = 1.0, 0.1, 0.075, 1.5\nx, y, dt = 10.0, 5.0, 0.001          # prey, predators\nfor step in range(1, 40001):\n    dx = (alpha * x - beta * x * y) * dt\n    dy = (delta * x * y - gamma * y) * dt\n    x, y = x + dx, y + dy\n    if step % 4000 == 0:\n        print(f\"t={step * dt:5.1f}  prey={x:6.2f}  predators={y:6.2f}\")"
+      },
+      "requires": [
+        "ode"
+      ]
+    },
+    {
+      "id": "logistic-growth",
+      "picture": "Growth that starts exponentially and levels off at a limit: an S-curve.",
+      "mechanism": "y′ = r y (1 − y/K): growth rate r when small, shrinking to zero as the population y approaches the carrying capacity K. The solution is y = K / (1 + ((K − y₀)/y₀) e^(−rt)). The curve is steepest at y = K/2, its inflection point.",
+      "detail": "Pierre-François Verhulst proposed it in 1838 to model human populations, after reading Malthus on unchecked exponential growth. It fits bacterial cultures in a dish, the spread of a rumor or technology (the S-curve of diffusion of innovations), tumor growth in modified forms, and epidemics in a fixed population.\n\nThe discrete version, x_{n+1} = r x_n (1 − x_n), is the logistic map: for r below 3 it settles, then splits into cycles of 2, 4, 8, and beyond r ≈ 3.57 becomes chaotic, a route to chaos studied by Robert May in 1976 and by Feigenbaum, who found the universal ratio 4.669 in period-doubling. The logistic function is also the sigmoid used in logistic regression and neural networks. Caution: an S-curve is not always logistic, and extrapolating from early data is unreliable, since early exponential growth looks the same across very different ceilings.",
+      "principles": "Nothing grows exponentially forever. Logistic growth captures the transition from unlimited to limited, and its discrete sibling shows how the same simple feedback can produce order, cycles, or chaos.",
+      "example": {
+        "label": "Smooth growth, and the chaotic map",
+        "code": "import math\n\nr = 3.9                      # try 2.8 (settles), 3.2 (2-cycle), 3.5 (4-cycle), 3.9 (chaos)\nx = 0.2\nhistory = []\nfor n in range(60):\n    x = r * x * (1 - x)\n    history.append(x)\nprint([round(v, 3) for v in history[-6:]])       # never settles when r = 3.9\n\nK, y0, rate = 100, 2, 0.4                        # continuous logistic growth toward K\nprint([round(K / (1 + (K / y0 - 1) * math.exp(-rate * t)), 1) for t in (0, 5, 10, 15, 20, 30)])"
+      },
+      "requires": [
+        "ode",
+        "exponential-growth"
+      ]
+    },
+    {
+      "id": "heat-equation",
+      "picture": "Heat flows from hot to cold, smoothing everything out.",
+      "mechanism": "u_t = α u_xx: the temperature at a point rises at a rate proportional to how sharply the temperature profile curves there. If a point is colder than the average of its neighbors it warms; if hotter, it cools. Sharp features smooth out quickly, and everything tends toward uniform temperature.",
+      "detail": "Joseph Fourier derived it in the early 1800s and invented Fourier series to solve it: an initial temperature profile is a sum of sine waves, each decaying exponentially at a rate proportional to the square of its frequency, so fine detail vanishes first. The same equation governs diffusion of dye, molecules, and probability (Brownian motion: variance grows linearly with time), and, with a twist, the Black–Scholes equation for options.\n\nIt is irreversible: run backwards it is ill-posed, mirroring the arrow of time and entropy increase. A point source spreads as a Gaussian bell curve of width √(2αt). Numerically, explicit finite-difference schemes need a small time step for stability. Applications: cooling of buildings and computer chips, cooking times (which scale with thickness squared), and ground temperature with depth, where seasonal waves decay and lag. Blurring an image with a Gaussian filter is running the heat equation on the picture.",
+      "principles": "Diffusion is the tendency of everything to even out, and the heat equation is its precise form. That smoothing only runs one way is the mathematical shadow of the second law of thermodynamics.",
+      "example": {
+        "label": "A hot spike spreading along a rod",
+        "code": "import math\n\nn, alpha, dx, dt = 50, 1.0, 1.0, 0.25          # alpha*dt/dx^2 = 0.25, below the stability limit of 0.5\nu = [0.0] * n\nu[n // 2] = 100.0                              # a hot spike in the middle of a cold rod\nfor step in range(200):\n    u = [u[i] + alpha * dt / dx ** 2 * (u[max(i - 1, 0)] - 2 * u[i] + u[min(i + 1, n - 1)]) for i in range(n)]\n\nprint(round(max(u), 2), round(sum(u), 2))       # the peak drops; the total heat stays 100\nsigma = math.sqrt(2 * alpha * 200 * dt)\nprint(round(100 / (sigma * math.sqrt(2 * math.pi)), 2), \"peak of the ideal spreading Gaussian\")"
+      },
+      "requires": [
+        "pde"
+      ]
+    },
+    {
+      "id": "wave-equation",
+      "picture": "How disturbances travel: plucked strings, sound, water, light.",
+      "mechanism": "u_tt = c² u_xx: the acceleration of each point is proportional to how the profile curves there. The solutions are shapes that move at speed c without changing form: u = f(x − ct) + g(x + ct), a wave going right and one going left.",
+      "detail": "D'Alembert found the general solution for a string in 1746, launching a famous dispute with Euler and Daniel Bernoulli over what functions are allowed. A string fixed at both ends supports standing waves with frequencies n × c/2L: the fundamental and its harmonics, which is why strings and pipes produce musical notes, and their mix gives timbre. In two dimensions a drum's modes are Bessel-function patterns, the Chladni figures seen in sand.\n\nSound spreads spherically in three dimensions and dims as 1/r. Light follows the same equation with c = 3 × 10⁸ m/s, derived from Maxwell's equations. The speed depends on the medium: √(tension/density) for a string. Waves superpose, producing interference, beats, and diffraction. Unlike heat, the wave equation is reversible in time and does not smooth out sharp features, so signals can travel far intact. Numerically, a leapfrog scheme is stable if cΔt/Δx ≤ 1, the CFL condition.",
+      "principles": "A wave is a pattern that travels while the medium stays put. The wave equation says that one local rule, acceleration follows curvature, is enough to produce sound, ripples, and light, and to tell you exactly how fast each one moves.",
+      "example": {
+        "label": "A pulse splitting into two travelling waves",
+        "code": "import math\n\nn, c, dx = 200, 1.0, 0.01\ndt = 0.5 * dx / c                                  # CFL: c dt / dx = 0.5, below 1\nu = [math.exp(-((i * dx - 1.0) / 0.05) ** 2) for i in range(n)]   # a bump in the middle of a string of length 2\nprev = u[:]\nfor step in range(1, 151):\n    new = [0.0] * n\n    for i in range(1, n - 1):\n        new[i] = 2 * u[i] - prev[i] + (c * dt / dx) ** 2 * (u[i + 1] - 2 * u[i] + u[i - 1])\n    prev, u = u, new\n    if step % 50 == 0:\n        left = max(range(n // 2), key=lambda i: u[i]) * dx\n        right = max(range(n // 2, n), key=lambda i: u[i]) * dx\n        print(f\"t={step * dt:.2f}: pulses at x={left:.2f} and x={right:.2f}\")    # moving apart at speed c"
+      },
+      "requires": [
+        "pde",
+        "sine-wave"
+      ]
+    },
+    {
+      "id": "navier-stokes",
+      "picture": "The equations of moving fluids: water in pipes, air over wings, weather.",
+      "mechanism": "ρ(∂v/∂t + v·∇v) = −∇p + μ∇²v + f: mass times acceleration of a fluid parcel equals pressure forces, viscous (friction) forces, and external forces such as gravity. Together with the condition that the flow conserves mass (∇·v = 0 for incompressible fluids), they determine velocity and pressure.",
+      "detail": "Claude-Louis Navier (1822) and George Gabriel Stokes (1845) derived them. The nonlinear term v·∇v, the fluid carrying its own momentum, makes them hard: solutions can be smooth and orderly (laminar) or chaotic and swirling (turbulent), and the Reynolds number, inertia over viscosity, decides which. Turbulence, often called the most important unsolved problem of classical physics, is still not fully understood.\n\nWhether smooth solutions in three dimensions always exist, or can develop infinite velocity in finite time, is one of the Clay Institute's Millennium Prize Problems, with a million-dollar prize. Practice does not wait: computational fluid dynamics solves them numerically, with turbulence models, to design aircraft and cars, cool electronics, forecast weather and ocean currents, model blood flow in arteries, and render smoke and water in films and games. Special cases include the Euler equations (no viscosity) and Stokes flow (very slow and viscous).",
+      "principles": "A fluid is a continuum of parcels, each obeying Newton's second law, and this equation is that law. Its nonlinearity is why weather is unpredictable and why a proof of its basic properties remains one of the great open problems.",
+      "requires": [
+        "pde",
+        "vector-fields"
+      ]
+    },
+    {
+      "id": "schrodinger-equation",
+      "picture": "The equation that says how a quantum state evolves in time.",
+      "mechanism": "iħ ∂ψ/∂t = Ĥψ, where ψ is the wave function and Ĥ the energy operator (for one particle, −(ħ²/2m)∇² + V). It is linear, so states can be added: superposition. |ψ|² gives the probability density of finding the particle at a place. Steady states with definite energy satisfy the time-independent form Ĥψ = Eψ.",
+      "detail": "Erwin Schrödinger published it in 1926. Solving it for the hydrogen atom explains the observed energy levels and orbital shapes, and through them the periodic table and chemical bonding. In a box only certain wavelengths fit, so energy is quantized. Tunneling emerges naturally: ψ decays inside a barrier but does not vanish, so particles can leak through, which powers nuclear fusion in the Sun, flash memory, and scanning tunneling microscopes.\n\nThe equation evolves smoothly and deterministically; the puzzle of measurement, where a definite outcome appears, lies outside it and gives rise to interpretations such as Copenhagen, many-worlds, and pilot wave. Time evolution is unitary, conserving total probability. It solves exactly for only a few systems (hydrogen, the harmonic oscillator, a particle in a box); everything else uses perturbation theory, variational methods, or density functional theory, which underlie computational chemistry and materials design.",
+      "principles": "It is the law of motion for the very small, and it is a wave equation for something that is not a wave in space but a wave of probability. From its solutions come the structure of atoms, the periodic table, and the workings of every semiconductor.",
+      "requires": [
+        "pde"
+      ]
+    },
+    {
+      "id": "maxwell-equations",
+      "picture": "Four equations that describe electricity, magnetism, and light as one thing.",
+      "mechanism": "Gauss's law: electric charges are sources of electric field. Gauss's law for magnetism: there are no magnetic monopoles. Faraday's law: a changing magnetic field creates an electric field. The Ampère–Maxwell law: currents, and changing electric fields, create a magnetic field. In vacuum they combine into a wave equation: electromagnetic waves travel at c = 1/√(μ₀ε₀).",
+      "detail": "James Clerk Maxwell completed them in the 1860s, adding the displacement current to Ampère's law. From the constants for the electric and magnetic forces, he computed the wave speed and found it equal to the measured speed of light, concluding that light is an electromagnetic wave. Heinrich Hertz produced radio waves in 1887, confirming it.\n\nThe equations are the basis of electric power, motors, radio, radar, Wi-Fi, optics, and all of electronics; in vector calculus they are written with divergence and curl, and their integral forms follow from the divergence and Stokes theorems. They contained special relativity: the speed c is the same in all frames, which puzzled physicists until Einstein in 1905 accepted it as a law. Oliver Heaviside gave them their modern form, reducing Maxwell's twenty equations to four. Quantum electrodynamics later quantized the field, while the classical equations remain accurate for nearly all engineering.",
+      "principles": "Two forces that looked unrelated turn out to be aspects of one field, and the field can carry itself through empty space as light. Few equations have changed the world as much, or unified so much with so little.",
+      "requires": [
+        "pde",
+        "vector-fields"
+      ]
+    }
+  ]
+}

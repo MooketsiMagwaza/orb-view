@@ -1,0 +1,31 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "taoism-religion",
+  "description": "Taoism as a personal thread (care, limits, non-forcing, regret) and religion as a subject described with context and care. Nothing here is a definitive account of a tradition.",
+  "concepts": [
+    {"id":"taoism","title":"Taoism","voice":"layered","orb":"breathing","parents":["culture"],"wiki":"Taoism","met":"Daoist immortals painting","summary":"A personal thread, not a definitive account of Taoism. What I take from it: care can be worth giving even when it costs me something, and I don't have to read that cost as regret. The gift belongs to the moment; the lesson is to hold the outcome more loosely."},
+    {"id":"tao","title":"The Tao","voice":"layered","orb":"breathing","parents":["taoism"],"wiki":"Tao","summary":"The Way: the unnamed pattern things follow when nothing forces them. The Tao Te Ching opens by saying the Tao that can be told is not the eternal Tao, which is a fair warning about summaries like this one."},
+    {"id":"yin-yang","title":"Yin and Yang","voice":"layered","orb":"working","parents":["taoism"],"wiki":"Yin and yang","summary":"Two poles that define and become each other: dark and light, rest and action, receiving and giving. Each holds a seed of the other, and health is balance in motion, not a winner."},
+    {"id":"non-forcing","title":"Non-forcing","voice":"layered","orb":"composing","parents":["taoism"],"wiki":"Wu wei","summary":"Acting without forcing. Water goes around the stone instead of arguing with it. This isn't passivity, just effort that moves with the grain of a situation rather than across it."},
+    {"id":"compassion","title":"Compassion","voice":"layered","orb":"listening","parents":["taoism","care"],"wiki":"Compassion","summary":"Caring about someone's suffering without needing to be the one who ends it. It can be warm without being possessive, and steady without erasing yourself."},
+    {"id":"boundaries","title":"Boundaries","voice":"layered","orb":"shaping","parents":["taoism"],"wiki":"Personal boundaries","summary":"A boundary is where care stays sustainable. It says: I'll give this much, gladly, and I'll tell you honestly where it ends."},
+    {"id":"intention","title":"Intention","voice":"layered","orb":"searching","parents":["taoism"],"wiki":"Intention","summary":"What I meant to do, kept apart from what happened. Intention never guarantees an outcome, but it's the part of an act that is fully mine."},
+    {"id":"consequence","title":"Consequence","voice":"layered","orb":"connecting","parents":["taoism"],"wiki":"Consequentialism","summary":"What an act does after I've let go of it, including things I never chose or foresaw. Consequence is real, and only partly mine to carry."},
+    {"id":"regret","title":"Regret","voice":"layered","orb":"weaving","parents":["taoism"],"wiki":"Regret","summary":"Regret can teach or trap. Held loosely, it points to where a boundary belonged. Held tightly, it rewrites the caring as a mistake. Learn from it without punishing the person who cared."},
+    {"id":"religion","title":"Religion","voice":"layered","orb":"searching","parents":["culture"],"wiki":"Religion","sensitive":true,"summary":"Religions grow inside particular places, powers, and inherited stories, and answer the same old questions of death, belonging, right and wrong, and awe in very different voices. I try to ask what a practice does for the people inside it before deciding what it means from outside."},
+    {"id":"myth","title":"Myth","voice":"layered","orb":"weaving","parents":["religion"],"wiki":"Myth","summary":"Stories a people tell about where things came from and what they mean. Myth isn't a synonym for false; it's a way of carrying truths that don't fit in a fact, and many still shape how we see."},
+    {"id":"sacred","title":"The Sacred","voice":"layered","orb":"breathing","parents":["religion"],"wiki":"Sacredness","summary":"What a community sets apart as beyond ordinary use: a place, a text, a day, a name. Treating something as sacred is a way of saying that it matters more than the calculation would suggest."},
+    {"id":"meditation","title":"Meditation","voice":"layered","orb":"listening","parents":["religion"],"wiki":"Meditation","summary":"Deliberately training attention, usually by returning it again and again to something simple like the breath. It appears in many traditions and is now studied on its own for what it does to stress and focus."},
+    {"id":"buddhism","title":"Buddhism","voice":"layered","orb":"shaping","parents":["religion"],"wiki":"Buddhism","sensitive":true,"summary":"A tradition that begins with the observation that clinging to what changes brings suffering, and offers practices for loosening the grip. It shares ground with Taoism on impermanence and non-attachment, and differs on much else."}
+  ],
+  "links": [
+    ["taoism", "cycles"], ["taoism", "religion"], ["taoism", "buddhism"], ["taoism", "poetry"], ["taoism", "meditation"],
+    ["tao", "nature"], ["tao", "meaning"], ["tao", "emptiness"], ["yin-yang", "symmetry"], ["yin-yang", "cycles"],
+    ["yin-yang", "contradiction"], ["non-forcing", "nature"], ["non-forcing", "feedback"], ["non-forcing", "peace"], ["non-forcing", "free-will"],
+    ["non-forcing", "meditation"], ["boundaries", "kindness"], ["boundaries", "family"], ["boundaries", "friendship"], ["intention", "consequence"],
+    ["intention", "attention"], ["consequence", "regret"], ["regret", "time"], ["regret", "learning"], ["religion", "peace"],
+    ["religion", "history"], ["religion", "meaning"], ["myth", "meaning"], ["myth", "cosmos"], ["myth", "moon"],
+    ["myth", "language"], ["sacred", "ritual"], ["sacred", "wonder"], ["meditation", "buddhism"], ["buddhism", "compassion"],
+    ["buddhism", "grief"]
+  ]
+}

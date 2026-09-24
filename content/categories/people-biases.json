@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "people-biases",
+  "group": "People",
+  "order": 6,
+  "title": "Biases of the Mind",
+  "blurb": "The shortcuts minds take, and how they mislead.",
+  "orb": "listening",
+  "entry": "cognitive-biases",
+  "path": [
+    "cognitive-biases",
+    "confirmation-bias",
+    "anchoring",
+    "availability-heuristic",
+    "sunk-cost",
+    "hindsight-bias",
+    "motivated-reasoning",
+    "framing-effect",
+    "dunning-kruger",
+    "survivorship-bias",
+    "base-rate-fallacy",
+    "gamblers-fallacy"
+  ]
+}

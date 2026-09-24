@@ -1,0 +1,222 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part one: the subject as a whole, and the functions it studies: polynomials, exponentials, logarithms, and trigonometry, each in four layers.",
+  "depth": [
+    {
+      "id": "calculus",
+      "picture": "The mathematics of change and accumulation.",
+      "mechanism": "It rests on one idea, the limit, and grows two branches. Differential calculus studies how fast something changes at an instant (derivatives). Integral calculus adds up infinitely many tiny pieces to find totals (integrals). The fundamental theorem says the two are inverse operations.",
+      "detail": "Almost every quantitative science uses it. Physics: motion, forces, waves, heat, fields. Engineering: control, signals, circuits, fluid flow. Economics: marginal cost and revenue, optimization. Biology: population growth, drug concentration, epidemics. Machine learning: training by gradient descent.\n\nNewton and Leibniz developed it independently in the late 1600s; rigor came in the 1800s with Cauchy and Weierstrass, who defined limits precisely. Study usually runs from functions and limits, to derivatives and their uses, to integrals and their uses, to series, and then to several variables and differential equations. Its core skill is turning a question about change (how fast? how much in total? what is best?) into an equation you can solve.",
+      "principles": "Calculus tames the infinite: infinitely small steps, infinitely many of them, summed to a definite answer. It is the language in which nature's laws are written, and the reason we can predict motion, heat, and growth.",
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "functions",
+      "picture": "A rule that gives exactly one output for each input.",
+      "mechanism": "A function f takes an input x from its domain and returns a single output f(x) in its range. It can be given by a formula (f(x) = x²), a table, a graph, or a program. The vertical-line test says a graph is a function if no vertical line crosses it twice.",
+      "detail": "Terms: the domain is the allowed inputs (x ≥ 0 for √x), the range is the outputs actually produced. Functions can be one-to-one (different inputs give different outputs, so an inverse exists), even (f(−x) = f(x)) or odd (f(−x) = −f(x)). Transformations shift, stretch, and reflect graphs: f(x − 2) shifts right by 2.\n\nThe modern definition, a set of input–output pairs with no input repeated, is due to Dirichlet and others in the nineteenth century; earlier, Euler and Leibniz thought of functions as formulas. Functions model dependence: distance over time, price against demand, dose against response. In programming a function is the same idea, except that it may also have side effects. Calculus asks about a function's rate of change, its total accumulation, and its behavior near a point.",
+      "principles": "A function is a dependence made precise. It says that one quantity determines another, which is the raw material for asking how the second changes when the first does.",
+      "example": {
+        "label": "A rule, applied to inputs",
+        "code": "import math\n\ndef f(x):\n    return x ** 2 - 3 * x + 2\n\nfor x in (-1, 0, 1, 2, 3):\n    print(x, f(x))               # each input gives exactly one output\n\nprint(math.sqrt(9), math.sin(0), math.exp(0))    # 3.0 0.0 1.0"
+      },
+      "requires": [
+        "numbers"
+      ]
+    },
+    {
+      "id": "polynomials",
+      "picture": "Sums of powers of x, like 3x² − 2x + 5.",
+      "mechanism": "A polynomial is a sum of terms cxⁿ with whole-number powers. Its degree is the highest power. Polynomials can be added, subtracted, multiplied, and evaluated using only arithmetic, and differentiating and integrating them is simple: each term follows the power rule.",
+      "detail": "A degree-n polynomial has at most n roots and n − 1 turning points, and its behavior for large x is set by the leading term. The fundamental theorem of algebra says every degree-n polynomial has exactly n roots over the complex numbers, counting multiplicity. There are formulas for roots up to degree 4, and Abel and Galois showed there is none for general degree 5 and up.\n\nPolynomials matter in calculus because they approximate: near a point a smooth function looks like a polynomial (Taylor), and through interpolation any finite set of points has a polynomial through it. They also underlie splines in graphics, error-correcting codes, and cryptographic secret sharing. Horner's method evaluates one with the fewest multiplications.",
+      "principles": "Polynomials are the functions people and computers can handle completely. Much of calculus, and of numerical analysis, is the art of replacing something complicated with a polynomial that is close enough.",
+      "example": {
+        "label": "Horner's method, and a derivative by the power rule",
+        "code": "def horner(coeffs, x):                 # coefficients from the highest power: 3x^2 - 2x + 5\n    result = 0\n    for c in coeffs:\n        result = result * x + c\n    return result\n\np = [3, -2, 5]\nprint(horner(p, 2))                    # 3*4 - 4 + 5 = 13\nd = [c * (len(p) - 1 - i) for i, c in enumerate(p[:-1])]     # derivative: 6x - 2\nprint(d, horner(d, 2))                 # [6, -2] 10"
+      },
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "exponential-function",
+      "picture": "A curve whose steepness is proportional to its height, so it grows faster the bigger it gets.",
+      "mechanism": "f(x) = aˣ multiplies by a for each step of 1 in x. With the special base e ≈ 2.718, the function eˣ has the remarkable property that its slope at every point equals its value: d/dx eˣ = eˣ. Any exponential can be written with base e as e^(kx).",
+      "detail": "Rate proportional to amount is the signature of exponential change: money at compound interest, bacteria dividing, radioactive decay (k negative), coffee cooling toward room temperature, a discharging capacitor, and the early spread of an epidemic. The solutions of y′ = ky are exactly y = Ce^(kx). Its inverse is the logarithm.\n\nProperties: e^(a+b) = eᵃeᵇ, it is always positive, it grows faster than any polynomial, and it never reaches zero. It can be defined by its power series 1 + x + x²/2! + x³/3! + …, which extends to complex numbers and connects to sine and cosine through Euler's formula. Doubling time is ln 2 divided by the rate, about 0.69/k.",
+      "principles": "Exponentials describe anything whose growth feeds on itself. Because eˣ is its own rate of change, it is the natural solution to the simplest differential equation, and so it turns up wherever things grow or fade in proportion to how much there is.",
+      "example": {
+        "label": "The slope of eˣ equals its height",
+        "code": "import math\n\nfor x in (0, 1, 2, 3):\n    print(x, round(math.exp(x), 4))              # 1.0, 2.7183, 7.3891, 20.0855\n\nh = 1e-6\nx = 1.5\nslope = (math.exp(x + h) - math.exp(x)) / h\nprint(round(slope, 4), round(math.exp(x), 4))    # 4.4817 4.4817"
+      },
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "euler-number",
+      "picture": "About 2.71828: the number whose exponential curve has slope equal to its height.",
+      "mechanism": "e is the limit of (1 + 1/n)ⁿ as n grows: what you get by compounding 100 percent interest ever more finely. Equivalently e = 1 + 1 + 1/2! + 1/3! + 1/4! + …, and it is the unique base for which the derivative of bˣ is bˣ itself.",
+      "detail": "Jacob Bernoulli found it in 1683 studying compound interest; Euler named it e and computed it to many places in the 1730s. It is irrational and in fact transcendental (Hermite, 1873): not the root of any polynomial with whole-number coefficients.\n\nIt appears as the base of natural logarithms, in the normal distribution, in the probability that a random permutation has no fixed point (1/e), in the secretary problem (stop after looking at about 1/e of the candidates), in Stirling's formula for factorials, and in Euler's identity. Calculus becomes cleanest with e, since d/dx eˣ = eˣ and the integral of 1/x is ln x.",
+      "principles": "e is what growth looks like in the limit of continuous compounding. It is not chosen but discovered, the constant that falls out whenever change is proportional to size.",
+      "example": {
+        "label": "Two roads to e",
+        "code": "import math\n\nfor n in (1, 10, 100, 10_000, 1_000_000):\n    print(n, (1 + 1 / n) ** n)          # creeping up toward e\n\nprint(sum(1 / math.factorial(k) for k in range(15)), math.e)"
+      },
+      "requires": [
+        "exponential-function"
+      ]
+    },
+    {
+      "id": "exponential-growth",
+      "picture": "Growth that speeds up as it gets bigger, doubling again and again.",
+      "mechanism": "When the rate of growth is proportional to the current amount, y′ = ky, the amount is y = y₀e^(kt). It doubles every fixed time, the doubling time ln 2 / k, however big it already is.",
+      "detail": "Early exponential growth looks slow and then explodes, which is why it is so often underestimated: grains of rice doubling on a chessboard (the last square holds 2⁶³ grains), lily pads covering a pond, or the first weeks of a pandemic. Linear thinking adds a fixed amount; exponential growth adds a fixed fraction.\n\nReal growth is only exponential for a while: resources run out and it turns into logistic growth, an S-curve. Examples of exponential trends: Moore's law (transistor counts doubling about every two years for decades), viral spread, compound interest, chain reactions. Decay is the same with k negative: half-life. On a logarithmic scale exponential growth is a straight line, which is how you recognize it. By the rule of 70, doubling time is about 70 divided by the percentage growth rate.",
+      "principles": "Exponential growth is easy to state and hard to feel. The gap between how quickly it starts and how quickly it ends is one of the most useful, and most often misjudged, facts about the world.",
+      "example": {
+        "label": "Doubling time at 7 percent",
+        "code": "import math\n\nrate = 0.07                                   # 7% growth per year\nprint(round(math.log(2) / math.log(1 + rate), 1), \"years to double\")     # 10.2\nprint(round(70 / (rate * 100), 1), \"by the rule of 70\")                  # 10.0\nprint(2 ** 64 - 1, \"grains on a chessboard, doubling each square\")"
+      },
+      "requires": [
+        "exponential-function"
+      ]
+    },
+    {
+      "id": "compound-interest",
+      "picture": "Interest on interest: your earnings start earning too.",
+      "mechanism": "Each period the interest is added to the balance, and the next period's interest is computed on the larger total. After t years at rate r compounded n times a year, the balance is P(1 + r/n)^(nt); as n grows without bound this approaches Pe^(rt).",
+      "detail": "At 5 percent, 1,000 grows to 1,050 in a year with annual compounding, 1,051.16 with monthly, and 1,051.27 continuously: more frequent compounding helps, but with a ceiling given by e. Over long times the effect is large: 1,000 at 7 percent becomes about 7,600 in 30 years, against 3,100 with simple interest.\n\nThe rule of 72 estimates doubling time as 72 divided by the percentage rate. Compounding works against borrowers too, as with credit card debt. The annual percentage yield states the effective rate after compounding so accounts can be compared. Regular contributions turn it into a geometric series with a closed formula. The problem in which Jacob Bernoulli discovered e in 1683 was continuous compounding.",
+      "principles": "Time multiplies what you have, and the multiplier itself grows. The same arithmetic that builds savings builds debt, which is why the sign in front of the rate matters more than almost any other number in personal finance.",
+      "example": {
+        "label": "Thirty years at 5 percent",
+        "code": "import math\n\nprincipal, rate, years = 1000, 0.05, 30\nfor n, label in ((1, \"yearly\"), (12, \"monthly\"), (365, \"daily\")):\n    print(label, round(principal * (1 + rate / n) ** (n * years), 2))\nprint(\"continuous\", round(principal * math.exp(rate * years), 2))     # 4481.69\nprint(\"simple\", principal * (1 + rate * years))                       # 2500.0"
+      },
+      "requires": [
+        "exponential-growth",
+        "euler-number"
+      ]
+    },
+    {
+      "id": "logarithm",
+      "picture": "The power you have to raise a base to in order to get a number.",
+      "mechanism": "log_b(x) = y means bʸ = x: log₁₀(1000) = 3 because 10³ = 1000. It is the inverse of exponentiation. Its key property is log(xy) = log x + log y, so multiplication becomes addition. The natural logarithm ln uses base e.",
+      "detail": "John Napier published logarithm tables in 1614, and for 350 years they were how scientists multiplied: look up the logs, add, look up the antilog. Slide rules did the addition with lengths. Laws: log(x/y) = log x − log y, log(xᵏ) = k log x, and change of base log_b x = ln x / ln b.\n\nIn calculus, d/dx ln x = 1/x and the integral of 1/x is ln|x|, which fills the one gap in the power rule. Logarithms compress huge ranges, so they measure things by orders of magnitude (decibels, pH, the Richter scale), and they show up in algorithms: binary search takes log₂ n steps, the number of digits of n is about log₁₀ n, and information content in bits is log₂(1/p). A log-log plot straightens power laws, and a semi-log plot straightens exponentials.",
+      "principles": "Logarithms measure by ratios rather than differences: each step up multiplies. That is how the world often works, from sound to earthquakes to information, and it is why log scales feel natural where linear ones fail.",
+      "example": {
+        "label": "Multiplication turned into addition",
+        "code": "import math\n\nprint(math.log10(1000), math.log2(1024), round(math.log(math.e ** 3), 6))     # 3.0 10.0 3.0\na, b = 123.0, 456.0\nprint(round(math.log(a * b), 6), round(math.log(a) + math.log(b), 6))          # equal\nprint(math.ceil(math.log2(1_000_000)), \"steps to binary-search a million items\")   # 20"
+      },
+      "requires": [
+        "exponential-function",
+        "inverse-functions"
+      ]
+    },
+    {
+      "id": "logarithmic-scales",
+      "picture": "A ruler where each step multiplies instead of adds.",
+      "mechanism": "Plot or measure the logarithm of a quantity, not the quantity itself. Equal distances on the scale mean equal ratios: from 1 to 10 is the same distance as from 10 to 100. That fits quantities spanning many orders of magnitude into a readable range.",
+      "detail": "Examples: decibels (sound power, 10 log₁₀ of the ratio; 3 dB is a doubling of power), the Richter and moment magnitude scales (each whole number is about 32 times more energy), pH (a tenfold change in hydrogen-ion concentration per unit), stellar magnitude (five magnitudes is 100 times brightness, and lower is brighter), and the musical octave (each octave doubles frequency).\n\nHuman perception is roughly logarithmic, the Weber–Fechner law: we feel equal ratios of loudness, brightness, and weight as equal steps. Graphs on a log axis show exponential growth as a straight line and power laws on log-log plots. Caution: log scales can mislead readers who read them as linear, and zero and negative values cannot be shown.",
+      "principles": "When quantities range over many powers of ten, ratios matter more than differences. Log scales are the honest way to draw them, and the way our senses already work.",
+      "requires": [
+        "logarithm"
+      ]
+    },
+    {
+      "id": "trigonometric-functions",
+      "picture": "The functions that turn an angle into a ratio of lengths, and go round and round.",
+      "mechanism": "In a right triangle, sin θ = opposite/hypotenuse, cos θ = adjacent/hypotenuse, and tan θ = opposite/adjacent. On the unit circle, cos θ and sin θ are the x and y coordinates of the point at angle θ, which extends them to all angles and makes them periodic with period 2π.",
+      "detail": "Key facts: sin² θ + cos² θ = 1; the sum formula sin(a + b) = sin a cos b + cos a sin b; sine and cosine are shifted copies of each other by a quarter turn; tan = sin/cos. In radians, d/dx sin x = cos x and d/dx cos x = −sin x, which is why they solve y″ = −y.\n\nUses: surveying and navigation (the original purpose), astronomy, waves and oscillations, alternating current, rotations in computer graphics, signal analysis, and orbits. Their inverses (arcsin, arccos, arctan) give angles from ratios, and atan2 handles all four quadrants. Trigonometry began with Hipparchus and Ptolemy's chord tables, was developed in India (the sine) and the Islamic world, and reached Europe through translations.",
+      "principles": "Anything that repeats can be described with sine and cosine, and anything that turns can be described with them too. They are the mathematics of cycles, and the reason waves, orbits, and rotations obey the same equations.",
+      "example": {
+        "label": "Ratios, an identity, and a slope",
+        "code": "import math\n\nt = math.radians(30)\nprint(round(math.sin(t), 4), round(math.cos(t), 4), round(math.tan(t), 4))    # 0.5 0.866 0.5774\nprint(round(math.sin(t) ** 2 + math.cos(t) ** 2, 10))                          # 1.0\n\nh = 1e-6\nprint(round((math.sin(1 + h) - math.sin(1)) / h, 4), round(math.cos(1), 4))    # 0.5403 0.5403"
+      },
+      "requires": [
+        "unit-circle",
+        "radians"
+      ]
+    },
+    {
+      "id": "unit-circle",
+      "picture": "A circle of radius one, where angle and coordinates meet.",
+      "mechanism": "Centered at the origin, with equation x² + y² = 1. A point at angle θ measured counterclockwise from the positive x-axis has coordinates (cos θ, sin θ). Going round once returns to the start: a full turn is 360° or 2π radians.",
+      "detail": "It is the definition of sine and cosine for all angles, positive or negative: as the point moves around, cos goes 1, 0, −1, 0, 1 and sin goes 0, 1, 0, −1, 0. Special angles of 30°, 45°, and 60° give the familiar values 1/2, √2/2, and √3/2. The identity sin² + cos² = 1 is the Pythagorean theorem for the point, and signs by quadrant follow from the coordinates.\n\nArc length along the circle equals the angle in radians, which is why radians are natural. In complex numbers the unit circle is the set e^(iθ): multiplying by it is rotating, the origin of Euler's formula. The same picture generalizes to rotations in graphics, phases in signals, and, with the hyperbola x² − y² = 1, to the hyperbolic functions.",
+      "principles": "One picture defines all of trigonometry. By turning ratios of triangles into positions on a circle, it makes the functions periodic, extends them to every angle, and links them to rotation.",
+      "example": {
+        "label": "Points on the circle",
+        "code": "import math\n\nfor degrees in (0, 30, 45, 60, 90, 180, 270):\n    a = math.radians(degrees)\n    x, y = math.cos(a), math.sin(a)\n    print(f\"{degrees:3d} degrees -> ({x: .3f}, {y: .3f})   x^2 + y^2 = {x * x + y * y:.1f}\")"
+      },
+      "requires": [
+        "functions",
+        "pi"
+      ]
+    },
+    {
+      "id": "radians",
+      "picture": "Measuring an angle by the length of arc it cuts out of a circle of radius one.",
+      "mechanism": "An angle of 1 radian is the angle where the arc length equals the radius. A full circle, circumference 2πr, is 2π radians, so 180° = π radians and 1 radian is about 57.3°. Arc length is simply s = rθ.",
+      "detail": "Radians are the natural unit: with them d/dx sin x = cos x exactly, and the small-angle approximation sin θ ≈ θ holds. In degrees, every derivative of a trigonometric function carries an ugly factor of π/180. Formulas simplify: sector area is ½r²θ, and angular velocity ω in radians per second gives speed v = ωr.\n\nRoger Cotes described the idea in 1714, and the term radian appeared in the 1870s. Degrees survive from Babylonian base-60 arithmetic and are handy for everyday angles; gradians, 400 to a circle, exist in surveying. Calculators and programming languages use radians by default, a common source of bugs.",
+      "principles": "Radians are what you get when you let the circle define its own unit. That is why the calculus of angles has no stray constants, and why the mathematics of rotation is simplest when you measure turning by distance.",
+      "example": {
+        "label": "Radians in code",
+        "code": "import math\n\nprint(math.radians(180) == math.pi, round(math.degrees(1), 3))         # True 57.296\ntheta = 0.01\nprint(math.sin(theta), theta)                                           # for tiny angles sin(x) is almost x\nprint(math.sin(10), \"<- sin(10) means ten radians, not ten degrees\")"
+      },
+      "requires": [
+        "pi"
+      ]
+    },
+    {
+      "id": "sine-wave",
+      "picture": "The smooth wave that rises and falls forever, the shape of a pure tone.",
+      "mechanism": "y = A sin(2πft + φ): the amplitude A is the height, the frequency f is how many cycles per second, and the phase φ is where it starts. It is the projection of steady circular motion, and the only shape that is unchanged, apart from height and shift, by taking its derivative twice.",
+      "detail": "Sine waves are the building blocks of all waves: the Fourier theorem says any repeating signal is a sum of sine waves of different frequencies, so a musical note is a fundamental plus overtones, and its timbre is the mix. Physical systems that respond in proportion to displacement (springs, pendulums at small angles, LC circuits, atoms in crystals) oscillate sinusoidally: simple harmonic motion.\n\nWall-socket electricity is a 50 or 60 hertz sine wave, chosen because sine waves pass through linear circuits, transformers, and filters without changing shape. Adding two waves of nearby frequencies gives beats. Radio encodes information by modulating a sine wave's amplitude (AM), frequency (FM), or phase. In digital audio the Nyquist theorem says you must sample at more than twice the highest frequency.",
+      "principles": "The sine wave is the simplest oscillation and the atom of all others. Because linear systems treat sine waves so kindly, describing a complicated signal as a sum of them is the master key to analyzing sound, light, and circuits.",
+      "example": {
+        "label": "One cycle of concert A, sampled",
+        "code": "import math\n\nrate, freq = 8000, 440\nsamples = [round(math.sin(2 * math.pi * freq * i / rate), 3) for i in range(20)]\nprint(samples)             # one cycle of a 440 Hz tone takes about 18 samples at this rate\nprint(rate / freq)         # 18.18..."
+      },
+      "requires": [
+        "trigonometric-functions"
+      ]
+    },
+    {
+      "id": "inverse-functions",
+      "picture": "A function that undoes another: square root undoes squaring, logarithm undoes the exponential.",
+      "mechanism": "If f takes x to y, its inverse f⁻¹ takes y back to x, so f⁻¹(f(x)) = x. To find it, swap x and y in y = f(x) and solve for y. It exists only if f is one-to-one. Graphically, the inverse is the mirror image across the line y = x.",
+      "detail": "Functions that are not one-to-one can be restricted: squaring is not invertible on all reals (2 and −2 both give 4), but on x ≥ 0 its inverse is the square root. Trigonometric functions are restricted to make arcsin, arccos, and arctan. Inverse pairs include exp and ln, xⁿ and the n-th root, and sin and arcsin.\n\nCalculus gives a neat rule: the slope of the inverse at f(a) is 1 / f′(a), which is how you derive d/dx ln x = 1/x from d/dx eˣ = eˣ, and the derivatives of the inverse trigonometric functions. In cryptography, one-way functions are easy to compute but hard to invert, the basis of hashing and public-key systems. Solving an equation is applying an inverse.",
+      "principles": "To undo is to invert. Inverse functions turn an answer back into a question, and the mirror symmetry of their graphs gives calculus a free rule for the slope of an inverse.",
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "function-composition",
+      "picture": "Feeding the output of one function into another.",
+      "mechanism": "(f ∘ g)(x) = f(g(x)): first apply g, then f. The order matters: sin(x²) and (sin x)² are different functions. Composition is associative, so chains f(g(h(x))) group freely, and it has an identity, the function that returns its input.",
+      "detail": "Complicated functions are built by composing simple ones: e^(sin x) is the exponential after the sine; √(1 + x²) chains a polynomial and then a root. Recognizing the layers is the first step to differentiating, because the chain rule handles exactly this structure. Decomposition also drives integration by substitution.\n\nIn programming, composition is the pipeline: Unix pipes, method chains, and compose operators. A neural network is a composition of layers, each a simple function of the last, which is why training uses the chain rule (backpropagation). Inverse functions are defined by composition: f ∘ f⁻¹ is the identity.",
+      "principles": "Big behavior comes from chaining small steps. Composition is how simple pieces make complex functions, and, in reverse, how calculus takes complex ones apart, one layer at a time.",
+      "example": {
+        "label": "Order matters",
+        "code": "import math\n\ncompose = lambda f, g: lambda x: f(g(x))\n\ndouble = lambda x: 2 * x\ninc = lambda x: x + 1\nprint(compose(double, inc)(5), compose(inc, double)(5))    # 12 11\n\nh = compose(math.exp, math.sin)          # e^(sin x)\nprint(round(h(1.0), 4))                  # 2.3198"
+      },
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "hyperbolic-functions",
+      "picture": "Sinh, cosh, and tanh: the exponential's answer to sine and cosine.",
+      "mechanism": "sinh x = (eˣ − e⁻ˣ)/2, cosh x = (eˣ + e⁻ˣ)/2, and tanh x = sinh x / cosh x. The point (cosh t, sinh t) traces the hyperbola x² − y² = 1, just as (cos t, sin t) traces the circle, and cosh² − sinh² = 1.",
+      "detail": "Their derivatives are as neat as the trigonometric ones, with fewer signs: d/dx sinh x = cosh x and d/dx cosh x = sinh x. A flexible chain hanging under its own weight forms a catenary, y = a cosh(x/a); the Gateway Arch in St. Louis is an inverted, flattened catenary. Galileo thought a hanging chain was a parabola.\n\nTanh is an S-shaped curve squashing all reals into (−1, 1), used as an activation function in neural networks and closely related to the logistic function. In relativity, rapidity, which adds under boosts, is hyperbolic: velocity is c times tanh of the rapidity. They also appear in wave speeds in deep and shallow water and in integral tables. Their relation to trigonometric functions runs through complex numbers: cos(ix) = cosh x.",
+      "principles": "Replace the circle with the hyperbola and you get a parallel set of functions. Their appearance in hanging chains and in relativity shows how one mathematical structure can turn up in very different worlds.",
+      "example": {
+        "label": "A hyperbola instead of a circle",
+        "code": "import math\n\nfor x in (0.0, 0.5, 1.0, 2.0):\n    print(x, round(math.sinh(x), 4), round(math.cosh(x), 4), round(math.tanh(x), 4))\nprint(round(math.cosh(1.3) ** 2 - math.sinh(1.3) ** 2, 10))      # 1.0"
+      },
+      "requires": [
+        "exponential-function"
+      ]
+    }
+  ]
+}

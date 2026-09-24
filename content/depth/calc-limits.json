@@ -1,0 +1,133 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part two: limits, continuity, and the ways functions can misbehave, each in four layers.",
+  "depth": [
+    {
+      "id": "limits",
+      "picture": "What a function is heading toward as its input approaches a point, even if it never arrives.",
+      "mechanism": "We write lim f(x) = L as x → a when f(x) can be made as close to L as we like by taking x close enough to a, but not equal to it. The value at a itself is irrelevant; only the trend matters. One-sided limits approach from the left or the right, and the limit exists only if both agree.",
+      "detail": "Limits let us handle \"instantaneous\" and \"infinitely many\" rigorously. The slope at a point is the limit of slopes over shrinking intervals; an area is the limit of sums of thinner rectangles; an infinite sum is the limit of its partial sums.\n\nBasic rules: the limit of a sum, product, or quotient is the sum, product, or quotient of the limits, when defined. Direct substitution works for continuous functions; when it gives 0/0, algebra (factoring, rationalizing) or L'Hôpital's rule is needed. Limits at infinity describe long-run behavior. Important examples: sin x / x → 1 as x → 0, and (1 + 1/n)ⁿ → e. Cauchy and Weierstrass gave the rigorous epsilon–delta definition in the nineteenth century, resolving the centuries-old worry about infinitesimals.",
+      "principles": "A limit asks where things are going rather than where they are. That shift, from value to trend, is what makes it possible to do arithmetic with the infinitely small and the infinitely many.",
+      "example": {
+        "label": "A limit at a point where the formula fails",
+        "code": "import math\n\nfor x in (1, 0.1, 0.01, 0.001, 0.0001):\n    print(x, math.sin(x) / x)              # tends to 1 as x -> 0, though sin(0)/0 is undefined\n\nf = lambda x: (x * x - 1) / (x - 1)        # undefined at x = 1, yet...\nprint(f(1.001), f(0.999))                  # about 2 from both sides"
+      },
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "epsilon-delta",
+      "picture": "A limit as a game: you name a tolerance, and I must find how close the input has to be.",
+      "mechanism": "lim f(x) = L as x → a means: for every ε > 0 (how close you want f(x) to L) there is a δ > 0 (how close x must be to a) such that whenever 0 < |x − a| < δ, we have |f(x) − L| < ε. The challenger picks ε; the prover finds δ.",
+      "detail": "Example: to prove lim (2x + 1) = 7 as x → 3, given ε, choose δ = ε/2; then |x − 3| < δ implies |(2x + 1) − 7| = 2|x − 3| < ε. For harder functions δ depends on both ε and a.\n\nThe definition replaces the vague gets closer and infinitesimally small with a statement about ordinary numbers and quantifiers (for all, there exists), and the order of the quantifiers is essential. Bolzano and Cauchy prepared it, and Weierstrass gave it its final form in the 1860s. Variants define continuity (the limit equals the value), uniform continuity (δ independent of a), limits at infinity (replace δ with a large N), and convergence of sequences. It is famously hard for students at first; the trick is to work backward from the desired inequality to find δ.",
+      "principles": "Rigor turned into a challenge and response. The epsilon–delta definition shows that one can say exactly what it means to approach something, which is what finally put calculus on solid ground.",
+      "example": {
+        "label": "Choosing delta for a given epsilon",
+        "code": "f = lambda x: 2 * x + 1                     # claim: the limit at x = 3 is 7\nfor eps in (1, 0.1, 0.001):\n    delta = eps / 2\n    worst = max(abs(f(3 + s * delta * 0.999) - 7) for s in (-1, 1))\n    print(f\"epsilon={eps}: delta={delta}, largest error inside delta = {worst:.6f} < {eps}\")"
+      },
+      "requires": [
+        "limits",
+        "proof"
+      ]
+    },
+    {
+      "id": "continuity",
+      "picture": "You can draw the graph without lifting your pen.",
+      "mechanism": "f is continuous at a if three things hold: f(a) exists, the limit of f(x) as x → a exists, and the two are equal. Equivalently, small changes in the input produce small changes in the output. It is continuous on an interval if it is continuous at every point.",
+      "detail": "Polynomials, sine, cosine, and exponentials are continuous everywhere; rational functions are continuous wherever their denominators are nonzero; sums, products, and compositions of continuous functions are continuous. Continuous functions on a closed interval have strong properties: they attain a maximum and a minimum (the extreme value theorem) and take every value in between (the intermediate value theorem).\n\nContinuity is needed for differentiability but not enough: |x| is continuous but has a corner at 0, and the Weierstrass function is continuous everywhere and differentiable nowhere. Physically, continuity says things do not teleport: position changes smoothly with time. In topology continuity is defined by open sets, where preimages of open sets are open, and it is the central notion there.",
+      "principles": "Continuity is the mathematical way of saying nothing jumps. It is the assumption behind most of the physical world we model, and the property that makes limits and substitution behave.",
+      "requires": [
+        "limits"
+      ]
+    },
+    {
+      "id": "intermediate-value-theorem",
+      "picture": "If a continuous curve starts below a line and ends above it, it must cross it.",
+      "mechanism": "If f is continuous on [a, b] and N is any number between f(a) and f(b), then f(c) = N for some c between a and b. In particular, if f(a) < 0 < f(b), there is a root in between.",
+      "detail": "It sounds obvious but depends on the completeness of the real numbers: over the rationals it fails, since x² − 2 goes from negative to positive yet has no rational root. It proves that equations have solutions without solving them: x³ + x − 1 = 0 has a root between 0 and 1. It underlies the bisection method, which halves the interval containing a sign change at each step and gains one binary digit of accuracy each time.\n\nSurprising consequences: at any moment there are two antipodal points on Earth with the same temperature, a wobbly table can be steadied by turning it, and any continuous map of [0, 1] into itself has a fixed point.",
+      "principles": "A continuous journey has to pass through every level between its start and end. That single fact guarantees that equations have solutions, and gives the simplest reliable way to find them.",
+      "example": {
+        "label": "Bisection: finding a root by halving",
+        "code": "def bisect(f, lo, hi, tol=1e-10):\n    assert f(lo) * f(hi) < 0, \"needs a sign change\"\n    while hi - lo > tol:\n        mid = (lo + hi) / 2\n        if f(lo) * f(mid) <= 0:\n            hi = mid\n        else:\n            lo = mid\n    return (lo + hi) / 2\n\nroot = bisect(lambda x: x ** 3 + x - 1, 0, 1)\nprint(round(root, 8))          # 0.6823278"
+      },
+      "requires": [
+        "continuity"
+      ]
+    },
+    {
+      "id": "discontinuities",
+      "picture": "The ways a graph can break: a hole, a jump, or a blow-up.",
+      "mechanism": "A function is discontinuous at a if continuity fails there. The types: removable (the limit exists but the value is missing or wrong, a hole), jump (left and right limits exist but differ), infinite (the function blows up, a vertical asymptote), and oscillating (no limit, like sin(1/x) near 0).",
+      "detail": "A removable discontinuity can be repaired by redefining the function at that point: (x² − 1)/(x − 1) equals x + 1 everywhere except x = 1, where filling in 2 removes the hole. Jump discontinuities appear in step functions, such as an on–off signal or a tax bracket. Infinite discontinuities occur at zeros of denominators, like 1/x at 0. Essential discontinuities cannot be repaired.\n\nA monotonic function has at most countably many jumps. Real quantities are continuous, but idealizations such as a switch flipping, a shock wave, or a collision are modeled with jumps, and calculus is extended to handle them (the Heaviside step, the Dirac delta, distributions). In computing, floating-point rounding introduces discontinuities into supposedly smooth functions, which can wreck numerical methods.",
+      "principles": "Knowing how a function can fail tells you where the standard tools stop working. Each kind of discontinuity has its own remedy, and the categories are a checklist of places to look for trouble.",
+      "requires": [
+        "continuity"
+      ]
+    },
+    {
+      "id": "infinitesimals",
+      "picture": "Numbers smaller than any positive number, but not zero.",
+      "mechanism": "An infinitesimal is a quantity ε with 0 < |ε| < 1/n for every whole number n. Newton and Leibniz treated them as vanishingly small steps: dy/dx is a ratio of two infinitesimals, and an integral is a sum of infinitely many of them. Nineteenth-century analysis replaced them with limits, but they were later made rigorous.",
+      "detail": "Leibniz's dx and dy still shape notation and intuition: integral signs, the chain rule as cancelling fractions, and physicists' arguments about a small element of volume. Bishop Berkeley mocked them in 1734 as ghosts of departed quantities: if dx is zero, dividing by it is illegal; if it is not zero, the results are not exact. Cauchy and Weierstrass answered by eliminating them in favor of epsilon–delta limits.\n\nIn 1960 Abraham Robinson used model theory to build the hyperreal numbers, an ordered field containing infinitesimals and infinite numbers, which gives nonstandard analysis: a logically sound way to do calculus with them, with a transfer principle saying first-order truths about the reals hold for the hyperreals. Also, smooth infinitesimal analysis from category theory uses nilsquare infinitesimals (ε² = 0) to make derivatives algebraic. Ordinary real numbers contain no infinitesimals.",
+      "principles": "An idea can be useful long before it is justified, and can return in rigorous form long after being banished. The history of infinitesimals is a lesson in how intuition and rigor take turns.",
+      "requires": [
+        "limits"
+      ]
+    },
+    {
+      "id": "lhopital",
+      "picture": "When a limit is 0/0 or ∞/∞, differentiate the top and bottom separately and try again.",
+      "mechanism": "If f(x) and g(x) both approach 0, or both approach ±∞, as x → a, and the limit of f′(x)/g′(x) exists, then the limit of f(x)/g(x) equals it. Repeat if the result is still indeterminate.",
+      "detail": "Example: sin x / x is 0/0 at 0; the derivatives give cos x / 1, which tends to 1. The rule was published by Guillaume de l'Hôpital in 1696 in the first calculus textbook, but it is due to Johann Bernoulli, who was paid for his results. Other indeterminate forms (0·∞, ∞ − ∞, 0⁰, 1^∞, ∞⁰) are first rewritten, often by taking logarithms.\n\nCautions: apply it only when the form really is indeterminate, and only if the limit of the derivatives exists; sometimes it loops, and sometimes it is circular, as when proving sin x / x → 1 using the derivative of sine, which itself needs that limit. Repeated application shows that exponentials beat every polynomial, and polynomials beat logarithms.",
+      "principles": "When numerator and denominator are both collapsing, the rates at which they collapse decide the outcome. The rule says to compare the speeds, which is the deepest meaning of a derivative.",
+      "example": {
+        "label": "Applying the rule twice, and a growth race",
+        "code": "import math\n\n# (e^x - 1 - x) / x^2 as x -> 0 is 1/2, by L'Hopital applied twice\nf = lambda x: (math.exp(x) - 1 - x) / x ** 2\nfor x in (0.1, 0.01, 0.001):\n    print(x, round(f(x), 5))          # approaches 0.5\n\n# exponentials beat polynomials: x^10 / e^x -> 0\nprint([round(x ** 10 / math.exp(x), 3) for x in (10, 50, 100, 200)])"
+      },
+      "requires": [
+        "derivatives",
+        "indeterminate-forms"
+      ]
+    },
+    {
+      "id": "squeeze-theorem",
+      "picture": "If a function is trapped between two others heading to the same place, it must go there too.",
+      "mechanism": "If g(x) ≤ f(x) ≤ h(x) near a, and the limits of g and h are both L, then the limit of f is L. It is also called the sandwich theorem.",
+      "detail": "A classic use is x² sin(1/x) as x → 0. Since sine lies between −1 and 1, −x² ≤ x² sin(1/x) ≤ x², both bounds go to 0, and so does the function, though sin(1/x) itself oscillates wildly. The geometric proof that sin x / x → 1 squeezes the area of a sector between two triangles, and it is a step in deriving the derivative of sine.\n\nFor sequences: if aₙ ≤ bₙ ≤ cₙ and both outer sequences converge to L, so does bₙ. The comparison test for series uses the same idea. The spirit is ancient: Archimedes trapped π between the perimeters of inscribed and circumscribed 96-sided polygons, getting 3 10/71 < π < 3 1/7.",
+      "principles": "Pin a difficult function between two easy ones. When the bounds close in on the same value, the trapped function has no choice: a way of proving something by bounding it, not computing it.",
+      "example": {
+        "label": "Squeezing x² sin(1/x)",
+        "code": "import math\n\nf = lambda x: x * x * math.sin(1 / x)\nfor x in (0.1, 0.01, 0.001, 0.0001):\n    print(x, f(x), \"between\", -x * x, \"and\", x * x)     # squeezed to 0\n\nprint(3 + 10 / 71, math.pi, 3 + 1 / 7)                  # Archimedes' bounds on pi"
+      },
+      "requires": [
+        "limits"
+      ]
+    },
+    {
+      "id": "asymptotes",
+      "picture": "A line the curve gets closer and closer to but never quite reaches.",
+      "mechanism": "A vertical asymptote at x = a occurs when f(x) grows without bound as x → a. A horizontal asymptote y = L means f(x) → L as x → ±∞. A slant asymptote y = mx + b occurs when f(x) − (mx + b) → 0 at infinity, typically for rational functions whose numerator's degree is one more than the denominator's.",
+      "detail": "For a rational function, compare the degrees of numerator and denominator: lower degree on top gives the horizontal asymptote y = 0; equal degrees give the ratio of leading coefficients; one degree higher on top gives a slant asymptote, found by polynomial division. Vertical asymptotes sit at zeros of the denominator not cancelled by the numerator. A function can cross a horizontal asymptote, and even touch it repeatedly, so never touches is not a rule.\n\nAsymptotes summarize end behavior and blow-ups: a reaction's terminal concentration, terminal velocity in a fall, saturation of an S-curve. A physical singularity is a vertical asymptote of a quantity such as density. In algorithms, asymptotic analysis studies behavior as n grows without bound, which is Big O.",
+      "principles": "Asymptotes describe what a function does at its edges and near its trouble spots. They are the outline of the graph, and often the most useful thing to know about it.",
+      "requires": [
+        "limits",
+        "functions"
+      ]
+    },
+    {
+      "id": "indeterminate-forms",
+      "picture": "Expressions like 0/0 whose value cannot be read off, because it depends on how fast each part moves.",
+      "mechanism": "When direct substitution into a limit produces 0/0, ∞/∞, 0·∞, ∞ − ∞, 0⁰, 1^∞, or ∞⁰, the value is undetermined: different functions of the same form have different limits. The work is to rewrite or analyze the expression to expose the true behavior.",
+      "detail": "Compare x/x², x²/x, and x/x as x → 0: each is 0/0, yet the limits are ∞, 0, and 1. Tools: algebraic manipulation (factor and cancel: (x² − 1)/(x − 1) = x + 1), rationalizing a numerator, a common denominator for ∞ − ∞, the squeeze theorem, and L'Hôpital's rule. Exponential forms (1^∞, 0⁰, ∞⁰) are handled by taking logarithms: (1 + 1/n)ⁿ has the form 1^∞ and equals e in the limit.\n\nNote that 1/0 and ∞ + ∞ are not indeterminate: the first is an infinite limit or undefined, the second is ∞. 0/0 is not a number, but as a limit form it can have any value. Understanding these forms is understanding that zero and infinity are not numbers to be manipulated like the others.",
+      "principles": "Zero and infinity are not ordinary numbers, and an expression built from them has no answer until you know how fast each part approaches its limit. The forms mark exactly where naive arithmetic breaks.",
+      "example": {
+        "label": "Three ratios of the form 0/0",
+        "code": "for x in (0.1, 0.001, 0.00001):\n    print(x, x / x ** 2, x ** 2 / x, x / x)     # limits: infinity, 0, and 1\n\nn = 10 ** 6\nprint((1 + 1 / n) ** n)      # the form 1^infinity, which settles at e = 2.71828..."
+      },
+      "requires": [
+        "limits"
+      ]
+    }
+  ]
+}

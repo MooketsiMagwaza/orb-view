@@ -1,0 +1,32 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "society",
+  "description": "How people live together: trust, exchange, law, conflict, and the economics of scarcity. Sensitive subjects are described with context and care.",
+  "concepts": [
+    {"id":"conflict","title":"Conflict","voice":"human","orb":"working","parents":["cooperation"],"wiki":"Social conflict","sensitive":true,"summary":"The same needs that make us cooperate also set us against each other. Conflict is often what it looks like when two reasonable stories about what's fair collide."},
+    {"id":"negotiation","title":"Negotiation","voice":"human","orb":"connecting","parents":["conflict"],"wiki":"Negotiation","summary":"Working out a deal between people who want different things. The best outcomes come from finding what each side cares about most, since it's rarely the same thing."},
+    {"id":"self-and-group","title":"Self and Group","voice":"human","orb":"shaping","parents":["cooperation"],"wiki":"Individualism","summary":"What I need and what we need are rarely identical. A lot of human life is negotiating between the two, again and again, without ever reaching a final answer."},
+    {"id":"trust","title":"Trust","voice":"human","orb":"weaving","parents":["cooperation"],"wiki":"Trust (social science)","summary":"Deciding to rely on someone before you can check. Trust makes cooperation cheap and betrayal costly, and it builds slowly through small proofs until a single lapse can undo it."},
+    {"id":"trade","title":"Trade","voice":"human","orb":"connecting","parents":["cooperation"],"wiki":"Trade","summary":"Exchange that leaves both sides better off, which is a stranger fact than it sounds. Trade lets people specialize, spreads ideas along with goods, and ties strangers together in ways no one designed."},
+    {"id":"money","title":"Money","voice":"human","orb":"composing","parents":["trade"],"wiki":"Money","met":"coin","summary":"A shared story about what something is worth. Coins, paper, and numbers on a screen all work only because enough people agree that they do."},
+    {"id":"markets","title":"Markets","voice":"human","orb":"listening","parents":["trade"],"wiki":"Market (economics)","summary":"Places, physical or not, where buyers and sellers meet. Prices carry information about what is scarce and what is wanted, coordinating millions of decisions no one is in charge of."},
+    {"id":"scarcity","title":"Scarcity","voice":"human","orb":"solving","parents":["trade"],"wiki":"Scarcity","summary":"There is never enough of everything wanted. Economics starts from that, and it's the human-scale echo of entropy: usable energy and attention run out, and we have to choose."},
+    {"id":"economics","title":"Economics","voice":"human","orb":"shaping","parents":["trade"],"wiki":"Economics","summary":"The study of how people choose under scarcity. It's part mathematics and part history of human behavior, and it works better on averages than on any single person."},
+    {"id":"law","title":"Law","voice":"human","orb":"solving","parents":["institutions"],"wiki":"Law","sensitive":true,"summary":"Rules a society agrees to enforce. They let strangers predict each other and settle disputes without violence, and they carry the values, and the blind spots, of whoever wrote them."},
+    {"id":"justice","title":"Justice","voice":"human","orb":"shaping","parents":["law"],"wiki":"Justice","summary":"The idea that people should get what they're due, and that like cases should be treated alike. What is due, and who decides, is where the arguments live."},
+    {"id":"rights","title":"Human Rights","voice":"human","orb":"breathing","parents":["law"],"wiki":"Human rights","summary":"Claims that every person holds simply by being one. They limit what those in power may do, and they are a modern idea that is still being argued into practice."},
+    {"id":"government","title":"Government","voice":"human","orb":"connecting","parents":["institutions"],"wiki":"Government","summary":"The organization that makes and enforces rules for a whole society. Its authority rests on some mix of consent, custom, and force, and much of politics is about the balance."},
+    {"id":"education","title":"Education","voice":"human","orb":"searching","parents":["institutions"],"wiki":"Education","summary":"How a society passes on what it knows. At its best it helps people learn to think for themselves; at its worst it teaches them what to think."},
+    {"id":"commons","title":"The Commons","voice":"human","orb":"weaving","parents":["institutions"],"wiki":"Commons","summary":"Resources shared by a community, from pastures to knowledge. They can be quietly ruined by overuse or sustained for generations, depending on the rules people build around them."}
+  ],
+  "links": [
+    ["conflict", "regret"], ["conflict", "justice"], ["negotiation", "language"], ["negotiation", "trust"], ["negotiation", "empathy"],
+    ["negotiation", "peace"], ["negotiation", "trade"], ["self-and-group", "care"], ["self-and-group", "ecosystems"], ["self-and-group", "commons"],
+    ["self-and-group", "democracy"], ["trust", "money"], ["money", "energy"], ["markets", "feedback"], ["markets", "information"],
+    ["markets", "emergence"], ["markets", "load-balancing"], ["scarcity", "energy"], ["scarcity", "attention"], ["economics", "probability"],
+    ["economics", "statistics"], ["law", "consequence"], ["law", "intention"], ["law", "government"], ["law", "privacy"],
+    ["justice", "rights"], ["justice", "democracy"], ["rights", "identity"], ["rights", "privacy"], ["rights", "enlightenment"],
+    ["rights", "democracy"], ["government", "cities"], ["government", "empires"], ["education", "printing-press"], ["education", "curiosity"],
+    ["commons", "cooperation"], ["commons", "ecosystems"], ["commons", "climate"], ["commons", "encyclopedia"]
+  ]
+}

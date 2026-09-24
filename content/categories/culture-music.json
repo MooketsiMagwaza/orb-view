@@ -1,0 +1,25 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "culture-music",
+  "group": "Culture",
+  "order": 1,
+  "title": "Music & Music Theory",
+  "blurb": "Scales, tuning, harmony, and rhythm, from physics to feeling.",
+  "orb": "listening",
+  "entry": "music",
+  "path": [
+    "music",
+    "music-theory",
+    "scales",
+    "tuning",
+    "harmonic-series",
+    "equal-temperament",
+    "consonance",
+    "harmony",
+    "chords",
+    "tonality",
+    "counterpoint",
+    "rhythm",
+    "silence"
+  ]
+}

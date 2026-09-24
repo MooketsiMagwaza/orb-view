@@ -1,0 +1,253 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Algorithms, part one: what an algorithm is, how cost is measured, the limits of efficiency (P versus NP), and the family of sorting algorithms, each in four layers.",
+  "depth": [
+    {
+      "id": "algorithms",
+      "picture": "A precise recipe: a finite list of steps that turns an input into an answer.",
+      "mechanism": "An algorithm is unambiguous (each step is exactly defined), finite (it ends), and effective (each step can actually be carried out). Given the same input it gives the same output. It can be written as plain steps, pseudocode, or a program, and the same algorithm can be expressed in any language.",
+      "detail": "The word comes from al-Khwarizmi, a ninth-century mathematician in Baghdad whose name was Latinized as Algoritmi. Euclid's method for the greatest common divisor is over two thousand years old and still in use.\n\nAsking about an algorithm means asking three things: is it correct (does it always give the right answer, and can you prove it), how fast is it as the input grows, and how much memory does it need. Different algorithms for one problem can differ by astronomical factors: sorting a million items takes about twenty million steps with a good algorithm and a trillion with a bad one. Design draws on a small set of paradigms: brute force, divide and conquer, greedy choice, dynamic programming, backtracking, randomization, and reduction to a known problem. Some problems have no algorithm at all.",
+      "principles": "An algorithm is a way of thinking made checkable: a procedure so exact that a machine, or a patient person with no insight, could carry it out. Knowing which recipe to reach for, and what it costs, is the craft of programming.",
+      "example": {
+        "label": "Euclid's algorithm for the greatest common divisor",
+        "code": "def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n\nprint(gcd(1071, 462))   # 21"
+      },
+      "requires": [
+        "logic"
+      ]
+    },
+    {
+      "id": "big-o",
+      "picture": "A way of saying how the cost of a method grows as the problem gets bigger.",
+      "mechanism": "Count the steps an algorithm takes as a function of the input size n, then keep only the fastest-growing term and drop constants. 3n² + 5n + 20 becomes O(n²). It says how the cost scales, not how many seconds it takes.",
+      "detail": "Common classes, from slowest to fastest growth: O(1) constant (array lookup), O(log n) logarithmic (binary search), O(n) linear (scan a list), O(n log n) (good sorting), O(n²) quadratic (compare every pair), O(2ⁿ) exponential (try every subset), O(n!) factorial (try every ordering). The difference is dramatic: for n = 1,000,000, log n is about 20, n log n is 20 million, and n² is a trillion.\n\nFormally, f(n) is O(g(n)) if f is eventually bounded above by a constant multiple of g. Related notations are Ω (lower bound) and Θ (tight bound). It is asymptotic: for small inputs a worse algorithm with small constants can win, so real performance also depends on constants, caches, and the data. Bachmann and Landau introduced the notation in number theory; Knuth popularized it for algorithms.",
+      "principles": "Growth rate beats speed. A faster computer helps a linear algorithm ten times, but a better growth rate helps by orders of magnitude as the input grows, which is why a slow machine running the right algorithm can beat a fast one running the wrong one.",
+      "requires": [
+        "algorithms"
+      ]
+    },
+    {
+      "id": "time-complexity",
+      "picture": "How the number of steps grows as the input grows.",
+      "mechanism": "Pick the basic operation (a comparison, an addition), count how many times it runs as a function of the input size n, and classify by the shape of that function. Do it for the worst case, the best case, or the average.",
+      "detail": "Reading one array item is O(1). A single loop over n items is O(n). Nested loops over the same items give O(n²). Halving the problem each step, as in binary search, gives O(log n). Doing O(n) work at each of log n levels, as in merge sort, gives O(n log n). Trying every subset is O(2ⁿ).\n\nRules of thumb: consecutive steps add (keep the larger), nested steps multiply, and recursive calls need a recurrence solved. For about a second of computing, O(n) handles roughly 10⁸ items, O(n log n) about 10⁷, O(n²) about 10⁴, and O(2ⁿ) only about 25. Polynomial time is called tractable and exponential is not, a distinction that underlies the P versus NP question.",
+      "principles": "Time complexity is a forecast: it tells you what will happen when the input grows tenfold. The point is not precision but knowing which problems will stay easy and which will become impossible as they scale.",
+      "example": {
+        "label": "Doubling n roughly quadruples an O(n²) loop",
+        "code": "import time\n\ndef count_pairs(n):          # O(n^2): visit every pair\n    total = 0\n    for i in range(n):\n        for j in range(n):\n            total += 1\n    return total\n\nfor n in [500, 1000, 2000]:\n    start = time.perf_counter()\n    count_pairs(n)\n    print(n, round(time.perf_counter() - start, 3), \"s\")"
+      },
+      "requires": [
+        "big-o"
+      ]
+    },
+    {
+      "id": "space-complexity",
+      "picture": "How much extra memory a method needs as the input grows.",
+      "mechanism": "Count the memory an algorithm uses beyond its input, as a function of the input size n. Recursion counts too: each nested call takes stack space, so a recursion n levels deep uses O(n) even if it stores nothing else.",
+      "detail": "Reversing an array in place uses O(1) extra space; copying it uses O(n). Merge sort uses O(n) for its temporary arrays whereas heapsort sorts in place with O(1). Time and space often trade against each other: a lookup table or memoization spends memory to save time, while streaming and compression spend time to save memory.\n\nConstraints differ by setting: an embedded chip may have kilobytes, a server gigabytes, and a big-data job must process more than any one machine holds, so it works in passes. External-memory algorithms count disk reads instead of operations. Space also affects speed, since bigger working sets fall out of caches. Techniques to reduce it include in-place updates, keeping only the last row of a dynamic programming table, generators, bit packing, and probabilistic structures such as Bloom filters.",
+      "principles": "Memory is the other currency. Many clever algorithms are really exchanges of one resource for the other, and knowing which is scarcer in your situation decides which trade to make.",
+      "requires": [
+        "big-o",
+        "ram"
+      ]
+    },
+    {
+      "id": "amortized-analysis",
+      "picture": "Averaging the cost across a whole run of operations, so one costly step is spread thin.",
+      "mechanism": "Some operations are usually cheap and occasionally expensive. Amortized analysis proves that the total cost of any sequence of n operations is bounded, so the cost per operation, averaged over the sequence, is small. It is a guarantee about the worst sequence, not an average over random inputs.",
+      "detail": "The classic case is appending to a dynamic array that doubles when full. Most appends cost 1; occasionally one copies n items. Total copying over n appends is at most n + n/2 + n/4 + … < 2n, so the amortized cost is O(1) per append.\n\nThree methods: aggregate (total cost divided by n), accounting (charge each cheap operation a little extra and bank the credit to pay for expensive ones later), and potential (define a stored-energy function that rises on cheap steps and drops on costly ones). Other cases include union-find with path compression, splay trees, binary counters (flipping a long run of bits is rare), and hash table resizing. The difference from average-case analysis is that amortized bounds hold for every sequence, with no assumption about randomness.",
+      "principles": "A rare disaster does not doom a system if it is paid for by many small savings. Amortization is the accounting behind usually fast, occasionally slow, always fine overall, though real-time systems must still worry about the slow moments.",
+      "requires": [
+        "big-o"
+      ]
+    },
+    {
+      "id": "case-analysis",
+      "picture": "The same method can be quick on easy input and slow on hard input.",
+      "mechanism": "Analyze the cost three ways: best case (the most favorable input), worst case (the most punishing input), and average case (the expected cost over a distribution of inputs). Worst case is the safest guarantee; average case is often the most realistic.",
+      "detail": "Linear search: best case one comparison (item first), worst case n (item last or missing), average about n/2. Quicksort: average O(n log n) but worst case O(n²) when pivots are chosen badly, as with a naive first-element pivot on already sorted data. Insertion sort: best case O(n) on sorted input, worst case O(n²) on reversed input.\n\nThe average case needs an assumption about the input distribution, which may not hold; randomization gets average behavior on every input by making the algorithm's own choices random. Worst case matters for security (an attacker feeds crafted inputs, as in hash-flooding) and for real-time systems (deadlines). Smoothed analysis is a refinement for algorithms that do better in practice than their worst case suggests, such as the simplex method.",
+      "principles": "A single number rarely describes an algorithm. Asking what is the worst that can happen? and what usually happens? together gives an honest picture, and shows how a guarantee and a typical outcome can be different things.",
+      "requires": [
+        "big-o",
+        "probability"
+      ]
+    },
+    {
+      "id": "p-vs-np",
+      "picture": "If a solution is easy to check, is it always easy to find? Nobody knows.",
+      "mechanism": "P is the class of problems solvable in polynomial time; NP is the class whose solutions can be checked in polynomial time. Every problem in P is in NP, since if you can solve it you can check it. The question is whether they are the same: does easy to check imply easy to solve?",
+      "detail": "Sudoku is the everyday picture: checking a completed grid is quick, while solving a hard one seems to take real effort (generalized to n × n grids it is NP-complete). Most researchers believe P ≠ NP, since decades of effort have found no fast algorithm for thousands of NP-complete problems, but there is no proof.\n\nStephen Cook and Leonid Levin formulated it independently around 1971 to 1973, and it is one of the seven Millennium Prize Problems, with a million-dollar prize from the Clay Institute. If P = NP, much of modern cryptography would fail, optimization and scheduling would be transformed, and proofs of reasonable length could be found by machine. If P ≠ NP, it formalizes that search and creativity are genuinely harder than verification. Barriers with names like relativization and natural proofs explain why standard techniques have not worked.",
+      "principles": "It asks whether cleverness can always be automated: whether finding a proof is ever much harder than checking one. The question is precise, central, and unresolved, a rare practical problem tied to something like a law of nature.",
+      "requires": [
+        "time-complexity",
+        "proof"
+      ]
+    },
+    {
+      "id": "np-completeness",
+      "picture": "The hardest problems in NP: solve one quickly and you can solve them all.",
+      "mechanism": "A problem is NP-complete if it is in NP and every other NP problem can be converted into it in polynomial time (a reduction). So a fast algorithm for any one NP-complete problem would give a fast algorithm for all of NP.",
+      "detail": "Cook and Levin proved that Boolean satisfiability (SAT) is NP-complete. Richard Karp then showed in 1972 that 21 other problems are, through chains of reductions, including the traveling salesman problem, graph coloring, knapsack, clique, vertex cover, and subset sum. Thousands of problems from scheduling, packing, circuit design, and puzzles such as Sudoku, Minesweeper, and Tetris are now known to be NP-complete.\n\nRecognizing one tells you not to hunt for an efficient exact algorithm, and to use approximation algorithms with a provable bound, heuristics, special cases, small-input exact solvers, or SAT solvers, which despite the worst-case theory handle industrial instances with millions of variables. NP-hard problems are at least as hard but need not be in NP: the halting problem is undecidable, hence NP-hard but not in NP.",
+      "principles": "One problem can carry the difficulty of a whole class. Reductions turn the question of hardness into a question of translation, and they give programmers a practical tool: recognize a hard problem early and choose a strategy that does not pretend it is easy.",
+      "requires": [
+        "p-vs-np"
+      ]
+    },
+    {
+      "id": "travelling-salesman",
+      "picture": "Visit every city once and return home by the shortest route.",
+      "mechanism": "Given cities and the distances between them, find the shortest tour that visits each exactly once and returns to the start. Checking a tour is easy; finding the best means choosing among (n − 1)!/2 possible tours.",
+      "detail": "With 10 cities there are about 181,000 tours; with 20 about 6 × 10¹⁶; with 60 more than the number of atoms in the galaxy. Brute force is hopeless. Dynamic programming (Held–Karp) does it in O(n² 2ⁿ), feasible to about 25 cities. Exact solvers based on branch and cut have found optimal tours through 85,900 points, a chip-design instance.\n\nPractical approaches: nearest-neighbor heuristics; the Christofides algorithm, which guarantees a tour within 1.5 times optimal for metric distances; 2-opt and Lin–Kernighan local search, reaching within a few percent; and simulated annealing and genetic algorithms. Applications include delivery routing, drilling circuit boards, DNA sequencing, and telescope scheduling. It is NP-hard and the standard example of a combinatorial explosion.",
+      "principles": "Some problems are easy to state and impossible to solve exactly at scale. The traveling salesman problem is the emblem of that gap, and of the practical wisdom of accepting good routes instead of perfect ones.",
+      "example": {
+        "label": "Brute force: fine for five cities, hopeless for twenty-five",
+        "code": "from itertools import permutations\nfrom math import dist\n\ncities = [(0, 0), (2, 1), (5, 0), (6, 4), (1, 5)]\n\ndef tour_length(order):\n    stops = [cities[0]] + [cities[i] for i in order] + [cities[0]]\n    return sum(dist(a, b) for a, b in zip(stops, stops[1:]))\n\nbest = min(permutations(range(1, len(cities))), key=tour_length)\nprint(best, round(tour_length(best), 2))"
+      },
+      "requires": [
+        "np-completeness",
+        "graphs"
+      ]
+    },
+    {
+      "id": "sorting",
+      "picture": "Putting things in order.",
+      "mechanism": "Given a list and a rule for comparing two items, rearrange it so every item is no greater than the next. Comparison sorts decide order by asking which of two is bigger; other sorts use the structure of the keys (digits, small ranges) instead.",
+      "detail": "Any comparison-based sort needs Ω(n log n) comparisons in the worst case: there are n! possible orderings, each comparison at best halves the possibilities, so about log₂(n!) ≈ n log n are needed. Merge sort, heapsort, and quicksort (on average) reach this bound. Non-comparison sorts such as counting and radix sort can beat it for keys of restricted form.\n\nProperties to compare: stability (equal items keep their original order, which matters when sorting by several keys in turn), in-place versus extra memory, adaptivity (faster on nearly sorted input), and worst-case guarantees. Simple quadratic sorts are for small inputs; production libraries use hybrids, such as Timsort in Python and Java, and introsort in C++. Sorting is also a building block that makes binary search, deduplication, merging, and many geometric and graph algorithms possible.",
+      "principles": "Order is what turns a pile into something you can search, compare, and merge. The n log n barrier is a rare case where we know the best possible answer, a limit proved by counting possibilities.",
+      "example": {
+        "label": "Sorting by one key, keeping ties in order",
+        "code": "records = [(\"Ana\", 31), (\"Ben\", 25), (\"Cy\", 31), (\"Di\", 25)]\nby_age = sorted(records, key=lambda r: r[1])     # stable: ties keep their order\nprint(by_age)    # [('Ben', 25), ('Di', 25), ('Ana', 31), ('Cy', 31)]"
+      },
+      "requires": [
+        "algorithms",
+        "arrays",
+        "big-o"
+      ]
+    },
+    {
+      "id": "bubble-sort",
+      "picture": "Swap neighbors that are out of order, over and over, until nothing moves.",
+      "mechanism": "Walk through the list comparing each adjacent pair and swapping if the first is larger. After one pass the largest item has bubbled to the end. Repeat on the shorter remaining list until a pass makes no swaps.",
+      "detail": "Worst and average case O(n²); best case O(n) on sorted input if you stop when a pass makes no swaps. It is stable and in place. It is the standard first sorting algorithm in teaching and among the least used in practice: it does far more swaps than insertion sort, though the comparisons are similar. Knuth judged that it has little to recommend it beyond a catchy name.\n\nCocktail shaker sort bubbles in both directions; comb sort and shell sort improve on it by comparing items far apart first. Its one virtue is simplicity of code and how easy it is to show that it works.",
+      "principles": "The simplest idea that works, and a warning about it: repeatedly fixing local disorder gets there, but takes far longer than approaches that use the structure of the whole problem.",
+      "example": {
+        "label": "Bubble sort with early exit",
+        "code": "def bubble_sort(a):\n    a = list(a)\n    for end in range(len(a) - 1, 0, -1):\n        swapped = False\n        for i in range(end):\n            if a[i] > a[i + 1]:\n                a[i], a[i + 1] = a[i + 1], a[i]\n                swapped = True\n        if not swapped:\n            break\n    return a\n\nprint(bubble_sort([5, 2, 9, 1, 5, 6]))   # [1, 2, 5, 5, 6, 9]"
+      },
+      "requires": [
+        "sorting"
+      ]
+    },
+    {
+      "id": "insertion-sort",
+      "picture": "Sorting playing cards in your hand: pick up each new card and slide it into place.",
+      "mechanism": "Keep the left part of the list sorted. Take the next item and shift larger sorted items one place right until you find its spot, then drop it in. The sorted region grows by one each time.",
+      "detail": "O(n²) in the worst case (reverse order) but O(n) on nearly sorted input; it uses O(1) extra memory and is stable. It is adaptive: the work is proportional to n plus the number of inversions, pairs that are out of order.\n\nThat makes it the best choice for small arrays and for finishing nearly sorted data, so hybrid sorts use it on small pieces: Timsort, introsort, and many quicksort implementations switch to insertion sort below about 16 to 64 elements. It is also an online algorithm: it can sort items as they arrive. Shell sort generalizes it by insertion-sorting items far apart first. Binary insertion sort finds the spot by binary search, cutting comparisons to O(n log n), though moves remain O(n²).",
+      "principles": "Doing the work incrementally, keeping what you have so far in good order, is often both simple and efficient when the input is small or already close to sorted. The best algorithm depends on the data you actually have.",
+      "example": {
+        "label": "Slide each item back into the sorted part",
+        "code": "def insertion_sort(a):\n    a = list(a)\n    for i in range(1, len(a)):\n        item, j = a[i], i - 1\n        while j >= 0 and a[j] > item:\n            a[j + 1] = a[j]        # shift larger items right\n            j -= 1\n        a[j + 1] = item\n    return a\n\nprint(insertion_sort([5, 2, 9, 1, 5, 6]))   # [1, 2, 5, 5, 6, 9]"
+      },
+      "requires": [
+        "sorting"
+      ]
+    },
+    {
+      "id": "selection-sort",
+      "picture": "Find the smallest and put it first; find the next smallest and put it second; and so on.",
+      "mechanism": "On each pass, scan the unsorted part for its minimum and swap it into the first unsorted position. After n − 1 passes the list is sorted.",
+      "detail": "Always O(n²) comparisons, even for sorted input, since it must scan to be sure. But it makes at most n − 1 swaps, the fewest of any common sort, which matters when writing is expensive: flash memory wear, or moving large records.\n\nIt is in place and, in the usual form, not stable, since a swap can jump an item over an equal one. Its behavior is completely predictable: the same number of comparisons whatever the input. Heapsort is a selection sort that uses a heap to find the minimum in O(log n) instead of O(n), an example of improving an algorithm by replacing its data structure.",
+      "principles": "Sometimes the right measure is not time but a particular operation. Selection sort minimizes writes, and heapsort shows that the same idea gets much faster once find the minimum is given the right structure.",
+      "example": {
+        "label": "Repeatedly select the minimum",
+        "code": "def selection_sort(a):\n    a = list(a)\n    for i in range(len(a) - 1):\n        smallest = min(range(i, len(a)), key=lambda k: a[k])\n        a[i], a[smallest] = a[smallest], a[i]\n    return a\n\nprint(selection_sort([64, 25, 12, 22, 11]))   # [11, 12, 22, 25, 64]"
+      },
+      "requires": [
+        "sorting"
+      ]
+    },
+    {
+      "id": "merge-sort",
+      "picture": "Split the list in half, sort each half, and zip the two sorted halves together.",
+      "mechanism": "Recursively split until pieces have one item (trivially sorted). Then merge: repeatedly take the smaller of the two front items of two sorted lists. Merging n items takes n steps, and there are log n levels of merging.",
+      "detail": "Time is O(n log n) in every case, best and worst. It is stable and needs O(n) extra space for merging (in-place versions exist but are complicated). John von Neumann described it in 1945.\n\nIts merge step reads two streams in order, so it works well for data on disks and tapes (external sorting: sort chunks that fit in memory, then merge them), for linked lists (no extra space needed), and for parallel processing, since the halves can be sorted independently. It is the basis of Timsort and of distributed sorting in MapReduce-style systems. Bottom-up merge sort avoids recursion by merging runs of size 1, 2, 4, 8, and so on, and a small modification counts inversions in O(n log n).",
+      "principles": "Divide and conquer at its cleanest: splitting is free, combining does the work, and the halving gives the logarithm. Two sorted lists are easy to combine, which is why sorted structure is so valuable.",
+      "example": {
+        "label": "Stable merge sort",
+        "code": "def merge_sort(a):\n    if len(a) <= 1:\n        return a\n    mid = len(a) // 2\n    left, right = merge_sort(a[:mid]), merge_sort(a[mid:])\n    out, i, j = [], 0, 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:          # <= keeps equal items in order\n            out.append(left[i]); i += 1\n        else:\n            out.append(right[j]); j += 1\n    return out + left[i:] + right[j:]\n\nprint(merge_sort([38, 27, 43, 3, 9, 82, 10]))   # [3, 9, 10, 27, 38, 43, 82]"
+      },
+      "requires": [
+        "divide-and-conquer"
+      ]
+    },
+    {
+      "id": "quicksort",
+      "picture": "Pick a pivot, put smaller things before it and larger after it, and repeat on each side.",
+      "mechanism": "Choose a pivot item, partition the list so everything smaller is on its left and everything larger on its right (the pivot is then in its final place), and recursively sort both sides. There is no merge step: the partitioning does the work.",
+      "detail": "Average time is O(n log n) with small constants, and it sorts in place with good cache behavior, which is why it is usually the fastest in practice. The worst case is O(n²), when pivots are consistently the smallest or largest, for instance always choosing the first element of already sorted data.\n\nDefenses include choosing a random pivot, the median of three, or falling back to heapsort when the recursion gets too deep (introsort, used by C++). Tony Hoare invented it in 1959 while working on machine translation in Moscow. Partitioning schemes include Lomuto's (simple), Hoare's (fewer swaps), and three-way partitioning (efficient with many duplicates). It is not stable. Quickselect uses the same idea to find the k-th smallest item in O(n) average time.",
+      "principles": "Do the hard work up front, dividing things so the parts no longer interact. A little randomness protects the algorithm from unlucky or hostile inputs, turning a bad worst case into a very unlikely event.",
+      "example": {
+        "label": "Quicksort with a random pivot",
+        "code": "import random\n\ndef quicksort(a):\n    if len(a) <= 1:\n        return a\n    pivot = random.choice(a)\n    smaller = [x for x in a if x < pivot]\n    equal   = [x for x in a if x == pivot]\n    larger  = [x for x in a if x > pivot]\n    return quicksort(smaller) + equal + quicksort(larger)\n\nprint(quicksort([33, 10, 55, 71, 29, 3, 18]))   # [3, 10, 18, 29, 33, 55, 71]"
+      },
+      "requires": [
+        "divide-and-conquer"
+      ]
+    },
+    {
+      "id": "heapsort",
+      "picture": "Pile everything into a heap, then repeatedly pull the largest off the top.",
+      "mechanism": "First arrange the array into a max-heap, where each parent is at least as large as its children. Then swap the top (the largest) with the last item, shrink the heap by one, and sift the new top down to restore the heap. Repeat until the heap is empty.",
+      "detail": "O(n log n) in every case and O(1) extra space: it sorts in place with a guaranteed worst case, which quicksort does not offer. J. W. J. Williams invented it in 1964. In practice it is often two to three times slower than quicksort, because its memory access jumps between distant parent and child positions, defeating caches, and it is not stable.\n\nIt is used when a worst-case guarantee and tight memory both matter, such as embedded and real-time systems, and as the fallback in introsort. Building the heap is O(n), not O(n log n), a small surprise that comes from most nodes being near the bottom.",
+      "principles": "A data structure can turn a slow idea into a fast one. Selection sort is quadratic; give it a heap to find the maximum cheaply and it becomes n log n, with a guarantee that comes from the structure.",
+      "example": {
+        "label": "In-place heapsort",
+        "code": "def heapsort(a):\n    a = list(a)\n    n = len(a)\n\n    def sift_down(root, end):\n        while (child := 2 * root + 1) < end:\n            if child + 1 < end and a[child + 1] > a[child]:\n                child += 1\n            if a[root] >= a[child]:\n                return\n            a[root], a[child] = a[child], a[root]\n            root = child\n\n    for start in range(n // 2 - 1, -1, -1):\n        sift_down(start, n)\n    for end in range(n - 1, 0, -1):\n        a[0], a[end] = a[end], a[0]\n        sift_down(0, end)\n    return a\n\nprint(heapsort([12, 11, 13, 5, 6, 7]))   # [5, 6, 7, 11, 12, 13]"
+      },
+      "requires": [
+        "heaps",
+        "sorting"
+      ]
+    },
+    {
+      "id": "counting-sort",
+      "picture": "Tally how many of each value there are, then write them out in order.",
+      "mechanism": "For integers in the range 0 to k, make a count array of size k + 1, count how many times each value occurs, and then write the values out in order. No two items are ever compared.",
+      "detail": "Time is O(n + k) and space O(n + k), so it is linear when the range k is comparable to n, beating the n log n limit that applies only to comparison sorts. A version that turns counts into starting positions is stable, which matters for radix sort. It is impractical when the range is huge: sorting 64-bit integers directly would need a table of 2⁶⁴ counters.\n\nUses include sorting ages, grades, characters (k = 256), and pixel intensities (histogram equalization), and it serves as the digit-sorting step inside radix sort. Harold Seward described it in 1954. Bucket sort generalizes it: distribute items into buckets by value range, then sort each bucket, which is linear on average for uniformly distributed data.",
+      "principles": "The n log n limit is a limit on comparing. If you know more about the keys than their order, that they are small whole numbers, you can skip comparisons entirely: knowing your data can beat a general lower bound.",
+      "example": {
+        "label": "Sorting small integers without comparing",
+        "code": "def counting_sort(a, k):\n    counts = [0] * (k + 1)\n    for x in a:\n        counts[x] += 1\n    out = []\n    for value, c in enumerate(counts):\n        out.extend([value] * c)\n    return out\n\nprint(counting_sort([4, 2, 2, 8, 3, 3, 1], 8))   # [1, 2, 2, 3, 3, 4, 8]"
+      },
+      "requires": [
+        "sorting",
+        "arrays"
+      ]
+    },
+    {
+      "id": "radix-sort",
+      "picture": "Sort by the last digit, then the next, and so on up to the first; the order falls out.",
+      "mechanism": "Treat each key as a string of digits. Starting with the least significant digit, do a stable sort on that digit alone (typically counting sort); then repeat with the next digit up. Stability preserves the earlier work, so after the most significant digit the whole list is sorted.",
+      "detail": "For n keys of d digits in base b, time is O(d(n + b)), linear in n for fixed-length keys. It works for integers, fixed-length strings, dates, IP addresses, and anything decomposable into ordered digits.\n\nIt was used for sorting punched cards: tabulating machines sorted cards column by column, which is exactly least-significant-digit radix sort, decades before computers. Most-significant-digit-first radix sort handles variable-length strings and can stop early, behaving like a trie. In practice it can be very fast for large arrays of integers and GPU sorting libraries use it, though its many passes over memory and its need for extra space count against it on small data.",
+      "principles": "Breaking a key into parts and sorting one part at a time, from the least significant up, works because stability lets each pass keep the previous pass's order. It is a machine-friendly version of how people sort mail or cards.",
+      "example": {
+        "label": "Radix sort in base ten",
+        "code": "def radix_sort(nums):\n    place = 1\n    while place <= max(nums):\n        buckets = [[] for _ in range(10)]\n        for n in nums:\n            buckets[(n // place) % 10].append(n)   # stable by construction\n        nums = [n for b in buckets for n in b]\n        place *= 10\n    return nums\n\nprint(radix_sort([170, 45, 75, 90, 802, 24, 2, 66]))   # [2, 24, 45, 66, 75, 90, 170, 802]"
+      },
+      "requires": [
+        "counting-sort"
+      ]
+    },
+    {
+      "id": "timsort",
+      "picture": "A sort designed for real data, which is usually partly in order already.",
+      "mechanism": "Scan the list for natural runs (stretches already ascending or descending), extend short ones to a minimum length with insertion sort, and then merge runs following rules that keep the merges balanced. A galloping mode skips ahead when one run keeps winning comparisons.",
+      "detail": "Tim Peters wrote it in 2002 for Python; it is now the default sort in Python, in Java for objects, in Android, and in JavaScript engines such as V8. Worst case O(n log n), stable, and O(n) on already sorted or reverse-sorted data, because the whole list is one run. It is designed to minimize comparisons, which are expensive in high-level languages where comparing means calling a function.\n\nIt is more complex than merge sort or quicksort, with minimum run lengths, merge-stack invariants, and temporary storage. In 2015 researchers using formal verification found a bug in those invariants that had lurked in the Python and Java implementations for over a decade, a lesson in how subtle even a well-tested algorithm can be.",
+      "principles": "Real data has structure, and an algorithm that notices it can beat one built for the worst case. Engineering is often a matter of combining simple ideas, insertion for small pieces and merging for large, and adapting to the input in front of you.",
+      "requires": [
+        "insertion-sort",
+        "merge-sort"
+      ]
+    }
+  ]
+}

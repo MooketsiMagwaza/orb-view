@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-deep",
+  "group": "Abstract",
+  "order": 2,
+  "title": "The Deepest Questions",
+  "blurb": "Truth, knowledge, reality, existence, and nothing: where every path ends up.",
+  "orb": "breathing",
+  "entry": "truth",
+  "path": [
+    "truth",
+    "knowledge",
+    "reality",
+    "existence",
+    "nothing",
+    "emptiness",
+    "meaning",
+    "causality",
+    "determinism",
+    "possibility"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-algorithms-more",
+  "group": "Tech",
+  "order": 13,
+  "title": "Number Theory & Sketches",
+  "blurb": "The arithmetic behind cryptography, the transform behind audio and images, and the tricks for counting things too big to store.",
+  "orb": "searching",
+  "entry": "modular-arithmetic",
+  "path": ["modular-arithmetic", "euclid", "sieve", "modular-exponentiation", "fft", "streaming-algorithms", "hyperloglog", "count-min", "computational-geometry", "convex-hull"]
+}

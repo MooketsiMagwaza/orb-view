@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orb View depth file",
+  "type": "object",
+  "required": ["depth"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "depth": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "picture", "mechanism", "detail", "principles"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "A concept id." },
+          "picture": { "type": "string", "description": "What it is, in one or two plain sentences." },
+          "mechanism": { "type": "string", "description": "How it works, in a few sentences." },
+          "detail": { "type": "string", "description": "The specifics: numbers, steps, fields, names. Paragraphs are separated by a blank line." },
+          "principles": { "type": "string", "description": "Why it works, and why it was built this way." },
+          "example": {
+            "type": "object",
+            "required": ["label", "code"],
+            "properties": { "label": { "type": "string" }, "code": { "type": "string" } },
+            "description": "Something to try, as a command or snippet."
+          },
+          "requires": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Concept ids this idea is built on. Each should be explained by its own card."
+          }
+        }
+      }
+    }
+  }
+}

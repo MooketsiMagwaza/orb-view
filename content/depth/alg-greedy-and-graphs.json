@@ -1,0 +1,271 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Algorithms, part three: greedy methods (Huffman codes, spanning trees, scheduling) and the family of graph algorithms (traversal, shortest paths, ordering, flow, ranking), each in four layers.",
+  "depth": [
+    {
+      "id": "greedy-algorithms",
+      "picture": "Always take the best-looking choice right now, and never look back.",
+      "mechanism": "At each step pick the option that looks best by some simple rule, commit to it, and continue with what remains. It never reconsiders, which is why it is fast: it never explores alternatives.",
+      "detail": "It gives the optimal answer only when the problem has the greedy-choice property, that some locally best choice is always part of a globally best solution, together with optimal substructure. The standard proof techniques are the exchange argument (show any optimal solution can be transformed to use the greedy choice without getting worse) and greedy stays ahead.\n\nSuccesses: interval scheduling (earliest finish first), Huffman coding, Kruskal's and Prim's spanning trees, Dijkstra's shortest paths with non-negative edges, fractional knapsack, and coin change for standard currencies. Failures: 0/1 knapsack, coin change with odd denominations, and the traveling salesman problem, where nearest-neighbor can be far from optimal. When greedy is not optimal it is often a good quick approximation: for set cover the greedy method achieves a ratio of about ln n, provably close to the best possible.",
+      "principles": "Sometimes being short-sighted is exactly right. Greedy algorithms show that global optimality can hide in a sequence of local decisions, provided you can prove no better choice was being missed, and the proof is the real work.",
+      "requires": [
+        "algorithms",
+        "optimal-substructure"
+      ]
+    },
+    {
+      "id": "huffman-coding",
+      "picture": "Give common letters short codes and rare ones long codes, so the whole message gets shorter.",
+      "mechanism": "Count how often each symbol occurs. Repeatedly take the two least frequent items, join them under a new node whose weight is their sum, and put it back. When one tree remains, read each symbol's code from the path to it: left is 0, right is 1.",
+      "detail": "David Huffman invented it in 1952 as a student in Robert Fano's class at MIT, having chosen to solve the problem instead of taking the final exam. The result is a prefix code, in which no code is the start of another, so decoding is unambiguous without separators, and it is provably optimal among codes that give each symbol a whole number of bits.\n\nEfficient construction uses a priority queue, O(n log n). A limit: symbols get whole bits, so it cannot quite reach the entropy of the source; arithmetic coding and ANS get closer and are used in modern formats. Huffman coding is a stage in DEFLATE (ZIP, gzip, PNG), JPEG, and MP3. The decoder needs the code table or tree, sent along with the data.",
+      "principles": "Give the frequent things short names. Huffman coding proves that this intuition is exactly optimal for whole-bit codes, and the bound it approaches is the entropy of the source, tying the algorithm to information theory.",
+      "example": {
+        "label": "Coding abracadabra",
+        "code": "import heapq\nfrom collections import Counter\n\ndef huffman(text):\n    heap = [[freq, i, [sym, \"\"]] for i, (sym, freq) in enumerate(Counter(text).items())]\n    heapq.heapify(heap)\n    counter = len(heap)\n    while len(heap) > 1:\n        lo, hi = heapq.heappop(heap), heapq.heappop(heap)\n        for pair in lo[2:]:\n            pair[1] = \"0\" + pair[1]\n        for pair in hi[2:]:\n            pair[1] = \"1\" + pair[1]\n        heapq.heappush(heap, [lo[0] + hi[0], counter] + lo[2:] + hi[2:])\n        counter += 1\n    return dict(heap[0][2:])\n\ntext = \"abracadabra\"\ncodes = huffman(text)\nbits = \"\".join(codes[ch] for ch in text)\nprint(codes)\nprint(len(bits), \"bits versus\", 8 * len(text))     # 23 bits versus 88"
+      },
+      "requires": [
+        "greedy-algorithms",
+        "heaps",
+        "binary-trees"
+      ]
+    },
+    {
+      "id": "coin-change",
+      "picture": "Pay an amount with the fewest coins.",
+      "mechanism": "The greedy method takes the largest coin that fits, repeatedly. For many currencies that is optimal, but not for all. The dynamic-programming method computes the fewest coins for every amount from 0 up, using the best of this coin plus the fewest for the remainder.",
+      "detail": "With coins of 1, 5, 10, and 25, greedy is optimal, and the same holds for most real currencies, which are designed so; such systems are called canonical. With coins of 1, 3, and 4 and a target of 6, greedy gives 4 + 1 + 1 (three coins) while 3 + 3 (two coins) is best. Whether a given coin system is canonical can be checked in polynomial time.\n\nThe dynamic-programming version takes O(amount × number of coins) and also counts the number of ways to make change, a classic exercise. The minimum-coins problem is a form of knapsack and is NP-hard when numbers are measured by their bit length, though the table method is fast for realistic amounts.",
+      "principles": "A greedy rule that works for one set of numbers can fail on another, and the difference lies in the structure of the problem. The safe habit is to prove the greedy choice, or to use dynamic programming, which does not need to be lucky.",
+      "example": {
+        "label": "Where greedy fails",
+        "code": "def greedy(amount, coins):\n    used = []\n    for c in sorted(coins, reverse=True):\n        while amount >= c:\n            amount -= c\n            used.append(c)\n    return used\n\ndef fewest(amount, coins):\n    best = [0] + [float(\"inf\")] * amount\n    for a in range(1, amount + 1):\n        best[a] = min(best[a - c] + 1 for c in coins if c <= a)\n    return best[amount]\n\nprint(greedy(6, [1, 3, 4]), fewest(6, [1, 3, 4]))              # [4, 1, 1] 2\nprint(greedy(63, [1, 5, 10, 25]), fewest(63, [1, 5, 10, 25]))  # [25, 25, 10, 1, 1, 1] 6"
+      },
+      "requires": [
+        "greedy-algorithms",
+        "dynamic-programming"
+      ]
+    },
+    {
+      "id": "minimum-spanning-tree",
+      "picture": "Connect every point with the least total cable, and no loops.",
+      "mechanism": "A spanning tree connects all nodes of a graph using n − 1 edges and no cycles. The minimum spanning tree is the one with the smallest total edge weight. Two greedy algorithms find it: Kruskal's (add the cheapest edge that does not form a cycle) and Prim's (grow one tree by adding the cheapest edge leaving it).",
+      "detail": "Both are correct thanks to the cut property: for any way of splitting the nodes into two groups, the cheapest edge crossing between them belongs to some minimum spanning tree. Kruskal runs in O(E log E) with union-find; Prim runs in O(E log V) with a binary heap. If edge weights are distinct the tree is unique.\n\nBorůvka's algorithm, from 1926, is the oldest and was designed for building an electrical grid in Moravia; it parallelizes well. Uses: designing cable, pipe, road, or electrical networks at minimum cost; clustering (cut the heaviest edges of the tree to get groups); approximating the traveling salesman problem (the tree gives a factor-two bound); and image segmentation. The shortest-path tree from one source is a different thing and is generally not a minimum spanning tree.",
+      "principles": "A network that connects everyone as cheaply as possible has a clean structure, and a greedy method can find it without ever going back. It is one of the cleanest examples of a local rule delivering a global optimum.",
+      "requires": [
+        "greedy-algorithms",
+        "graphs"
+      ]
+    },
+    {
+      "id": "kruskal",
+      "picture": "Sort the edges cheapest first, and add each one unless it would close a loop.",
+      "mechanism": "Sort all edges by weight. Go through them in order; for each edge, check whether its endpoints are already connected (using union-find). If not, add the edge and merge their groups; if so, skip it. Stop when n − 1 edges have been chosen.",
+      "detail": "Joseph Kruskal published it in 1956. Sorting costs O(E log E) and dominates, since the union-find operations are nearly constant, so total time is O(E log E). It works on the edge list alone, so it is convenient for sparse graphs and for data that arrives as a list of weighted pairs.\n\nIt builds a forest of small trees that merge as edges are added, and if the graph is disconnected it produces a minimum spanning forest. Its correctness follows from the cut property: the cheapest edge connecting two different components is always safe to add. Compare Prim's, which grows from a single starting node and is often better on dense graphs.",
+      "principles": "Cheapest first, unless it wastes an edge. The rule is one line and the proof is one exchange argument, and the union-find structure is what makes checking would this make a loop? almost free.",
+      "example": {
+        "label": "Cheapest network over five nodes",
+        "code": "def kruskal(n, edges):\n    parent = list(range(n))\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x\n    total, chosen = 0, []\n    for w, a, b in sorted(edges):\n        ra, rb = find(a), find(b)\n        if ra != rb:                    # joins two separate groups: keep it\n            parent[ra] = rb\n            total += w\n            chosen.append((a, b, w))\n    return total, chosen\n\nedges = [(4, 0, 1), (8, 0, 2), (2, 1, 2), (6, 1, 3), (3, 2, 3), (9, 2, 4), (5, 3, 4)]\nprint(kruskal(5, edges))   # (14, [(1, 2, 2), (2, 3, 3), (0, 1, 4), (3, 4, 5)])"
+      },
+      "requires": [
+        "minimum-spanning-tree",
+        "union-find"
+      ]
+    },
+    {
+      "id": "prim",
+      "picture": "Grow one tree outward, always attaching the cheapest connection to something new.",
+      "mechanism": "Start at any node. Keep a priority queue of edges leaving the current tree. Repeatedly take the cheapest edge whose far end is not yet in the tree, add that node, and push its edges. Stop when all nodes are in.",
+      "detail": "Vojtěch Jarník found it in 1930, and Robert Prim and Edsger Dijkstra rediscovered it in 1957 and 1959, so it is also called Jarník's algorithm. With a binary heap it runs in O(E log V); with a Fibonacci heap O(E + V log V), better for dense graphs; with an adjacency matrix and no heap O(V²), best for very dense graphs.\n\nIt looks very like Dijkstra's algorithm, with one difference: Prim picks by edge weight alone, while Dijkstra picks by total distance from the source. Unlike Kruskal's, it always keeps a single connected tree, useful when you want a usable partial network at every step.",
+      "principles": "Grow from what you have, always taking the cheapest way to reach something new. Prim's algorithm is Dijkstra's with a different notion of cost, a reminder of how much of algorithm design is choosing what to compare.",
+      "example": {
+        "label": "Growing the tree from node 0",
+        "code": "import heapq\n\ndef prim(graph, start=0):\n    seen, total, chosen = {start}, 0, []\n    heap = [(w, start, v) for v, w in graph[start]]\n    heapq.heapify(heap)\n    while heap and len(seen) < len(graph):\n        w, u, v = heapq.heappop(heap)\n        if v in seen:\n            continue\n        seen.add(v); total += w; chosen.append((u, v, w))\n        for nxt, nw in graph[v]:\n            if nxt not in seen:\n                heapq.heappush(heap, (nw, v, nxt))\n    return total, chosen\n\ngraph = {0: [(1, 4), (2, 8)], 1: [(0, 4), (2, 2), (3, 6)], 2: [(0, 8), (1, 2), (3, 3), (4, 9)],\n         3: [(1, 6), (2, 3), (4, 5)], 4: [(2, 9), (3, 5)]}\nprint(prim(graph))    # (14, [(0, 1, 4), (1, 2, 2), (2, 3, 3), (3, 4, 5)])"
+      },
+      "requires": [
+        "minimum-spanning-tree",
+        "priority-queue"
+      ]
+    },
+    {
+      "id": "interval-scheduling",
+      "picture": "Fit in as many non-overlapping jobs as possible: always take the one that ends soonest.",
+      "mechanism": "Sort the intervals by finish time. Take the first. Then repeatedly take the next interval that starts after the last chosen one ends, skipping anything that overlaps.",
+      "detail": "Time is O(n log n) for the sort. The proof is an exchange argument: in any optimal schedule, replacing its first job with the job that finishes earliest cannot cause conflicts, since it leaves at least as much room, so an optimal schedule exists that starts with the greedy choice; repeat on the rest. The other natural rules fail: earliest start first, shortest job first, and fewest conflicts first all have counterexamples.\n\nVariants: weighted interval scheduling, where jobs have values, cannot be solved greedily and needs dynamic programming; interval partitioning, using the fewest rooms to hold all meetings, is solved greedily by sorting by start time and tracking free rooms with a heap. Applications include booking a conference room, scheduling jobs on a machine, and allocating channels.",
+      "principles": "Leaving the most room for what comes next is a surprisingly strong strategy. Interval scheduling is the neatest proof that a greedy rule can be exactly right, and that which greedy rule you choose matters.",
+      "example": {
+        "label": "The most meetings in one room",
+        "code": "def max_meetings(intervals):\n    chosen, last_end = [], float(\"-inf\")\n    for start, end in sorted(intervals, key=lambda iv: iv[1]):    # earliest finish first\n        if start >= last_end:\n            chosen.append((start, end))\n            last_end = end\n    return chosen\n\nmeetings = [(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11)]\nprint(max_meetings(meetings))    # [(1, 4), (5, 7), (8, 11)]"
+      },
+      "requires": [
+        "greedy-algorithms"
+      ]
+    },
+    {
+      "id": "graph-algorithms",
+      "picture": "Ways of exploring, measuring, and ordering a network.",
+      "mechanism": "Most begin with a traversal, visiting every node reachable from a start, either level by level (breadth-first, using a queue) or as deep as possible first (depth-first, using a stack). Other algorithms build on these: shortest paths, spanning trees, ordering, flow, and connectivity.",
+      "detail": "Problems and standard answers: Is there a route from A to B? BFS or DFS. Fewest steps? BFS. Cheapest route? Dijkstra, Bellman–Ford, A*, Floyd–Warshall. Cheapest way to connect everything? Kruskal or Prim. A valid order respecting dependencies? Topological sort. Groups of mutually reachable nodes? Connected components. Maximum throughput? Max-flow. Pairing things up? Matching. Importance of nodes? PageRank and centrality. Most run in O(V + E) or O(E log V).\n\nRepresentation matters: adjacency lists suit traversal on sparse graphs. Real graphs can be enormous, with trillions of edges on the web, so systems shard the graph across machines and use frameworks such as Pregel, where each node computes and sends messages in rounds.",
+      "principles": "Once a problem is seen as a graph, decades of algorithms become available. Learning to spot the graph hiding inside a problem, whether routes, dependencies, or relationships, is one of the highest-leverage skills in programming.",
+      "requires": [
+        "graphs",
+        "algorithms"
+      ]
+    },
+    {
+      "id": "bfs",
+      "picture": "Spread out from the start in rings: everything one step away, then two, then three.",
+      "mechanism": "Put the start node in a queue and mark it seen. Repeatedly take a node from the front, look at its neighbors, and add every unseen neighbor to the back, marking it seen. Nodes come out in order of distance from the start.",
+      "detail": "Time O(V + E), space O(V). In an unweighted graph the first time BFS reaches a node is by a shortest path (fewest edges), and recording each node's parent lets you rebuild that path.\n\nUses: shortest paths in unweighted graphs (fewest moves in a puzzle, degrees of separation in a social network), web crawlers, finding connected components, testing whether a graph is bipartite (color alternately by level), flood fill in image editors, and level-order tree traversal. Its downside is memory: the frontier can be huge, since a branching factor of 10 means a million nodes at depth 6, where DFS uses little. Iterative deepening combines BFS's completeness with DFS's memory economy.",
+      "principles": "Exploring in rings guarantees that the first time you arrive somewhere, you took the fewest steps. A queue is what enforces fairness between the nearby and the far.",
+      "example": {
+        "label": "Fewest steps from A to F",
+        "code": "from collections import deque\n\ndef bfs_path(graph, start, goal):\n    parent, queue = {start: None}, deque([start])\n    while queue:\n        node = queue.popleft()\n        if node == goal:\n            path = []\n            while node is not None:\n                path.append(node)\n                node = parent[node]\n            return path[::-1]\n        for nxt in graph[node]:\n            if nxt not in parent:\n                parent[nxt] = node\n                queue.append(nxt)\n    return None\n\ngraph = {\"A\": [\"B\", \"C\"], \"B\": [\"D\"], \"C\": [\"D\", \"E\"], \"D\": [\"F\"], \"E\": [\"F\"], \"F\": []}\nprint(bfs_path(graph, \"A\", \"F\"))    # ['A', 'B', 'D', 'F']"
+      },
+      "requires": [
+        "graph-algorithms",
+        "queues"
+      ]
+    },
+    {
+      "id": "dfs",
+      "picture": "Go as deep as you can down one path, then back up and try the next.",
+      "mechanism": "From a node, pick an unvisited neighbor and go there; repeat until stuck; then backtrack to the last node with unvisited neighbors. It is implemented with recursion (the call stack) or an explicit stack, and marking visited nodes prevents loops.",
+      "detail": "Time O(V + E), space proportional to the depth. It records two timestamps per node, when it was first reached and when all its descendants finished, and the pattern of them classifies edges as tree, back, forward, or cross. A back edge means a cycle.\n\nUses: detecting cycles, topological sorting (order by decreasing finish time), finding connected and strongly connected components (Tarjan, Kosaraju), solving mazes, finding bridges and articulation points in networks, and generating mazes. Backtracking search is depth-first search over a tree of choices. Charles Pierre Trémaux studied it in the nineteenth century as a maze-solving method, and Hopcroft and Tarjan showed its algorithmic uses in the 1970s. It does not find shortest paths.",
+      "principles": "Committing fully to one direction before trying another uses very little memory and reveals structure: cycles, dependencies, and components. The cost is that the first path found is rarely the shortest.",
+      "example": {
+        "label": "Visiting order of a depth-first walk",
+        "code": "def dfs_order(graph, start):\n    seen, order = set(), []\n    def visit(node):\n        seen.add(node)\n        order.append(node)\n        for nxt in graph[node]:\n            if nxt not in seen:\n                visit(nxt)\n    visit(start)\n    return order\n\ngraph = {\"A\": [\"B\", \"C\"], \"B\": [\"D\"], \"C\": [\"D\", \"E\"], \"D\": [\"F\"], \"E\": [\"F\"], \"F\": []}\nprint(dfs_order(graph, \"A\"))    # ['A', 'B', 'D', 'F', 'C', 'E']"
+      },
+      "requires": [
+        "graph-algorithms",
+        "stacks",
+        "recursion"
+      ]
+    },
+    {
+      "id": "shortest-path",
+      "picture": "The cheapest route between two places in a network.",
+      "mechanism": "Edges carry weights: distance, time, or cost. The length of a path is the sum of its edge weights, and the goal is the path with the least total. Which algorithm applies depends on whether weights are all non-negative and whether you need one source, one pair, or all pairs.",
+      "detail": "Options: BFS for unweighted graphs, O(V + E); Dijkstra for non-negative weights, O((V + E) log V); Bellman–Ford when weights may be negative, O(VE), which also detects negative cycles; A* for one pair, with a heuristic guiding the search; Floyd–Warshall for all pairs, O(V³); and for DAGs a single pass in topological order, O(V + E).\n\nShortest paths have optimal substructure, which is why dynamic programming applies. Real systems add tricks: bidirectional search, contraction hierarchies and hub labeling for road networks, answering continental routes in microseconds, and time-dependent weights for traffic. Applications include GPS navigation, internet routing (OSPF, RIP), flight planning, game AI, and currency arbitrage detection, which is a negative cycle in log-exchange rates.",
+      "principles": "Any piece of a shortest path is itself a shortest path. That single observation is why the whole family of algorithms works, and it is optimal substructure in a form people meet every time they ask for directions.",
+      "requires": [
+        "graph-algorithms"
+      ]
+    },
+    {
+      "id": "dijkstra",
+      "picture": "Always extend from the closest place you have not finished, and its distance is then final.",
+      "mechanism": "Keep the best known distance to every node (initially infinity, zero at the source) and a priority queue of nodes by distance. Repeatedly remove the closest unfinished node; for each neighbor, check whether going through this node gives a shorter route, and if so update it.",
+      "detail": "Edsger Dijkstra devised it in 1956 in about twenty minutes, without pencil and paper, sitting at a café in Amsterdam with his fiancée, and published it in 1959. With a binary heap it runs in O((V + E) log V).\n\nIt is correct because when a node is removed from the queue its distance cannot be improved: any other route would have to pass through an unfinished node that is at least as far away. That reasoning fails if an edge weight is negative, which is why Bellman–Ford is needed then. It finds shortest paths from one source to all nodes; stopping when the target is removed answers a single pair. Uses: maps and GPS, network routing (OSPF and IS-IS run it on every router), and as the base for A*. Setting all weights to one turns it into BFS.",
+      "principles": "Grow a frontier of certainty outward from the start: whatever is nearest cannot be beaten by a route through something farther. The whole algorithm rests on that one idea, and on weights never being negative.",
+      "example": {
+        "label": "Shortest distances from A",
+        "code": "import heapq\n\ndef dijkstra(graph, source):\n    dist = {node: float(\"inf\") for node in graph}\n    dist[source] = 0\n    heap = [(0, source)]\n    while heap:\n        d, node = heapq.heappop(heap)\n        if d > dist[node]:\n            continue                        # a stale entry: we already found better\n        for nxt, w in graph[node]:\n            if d + w < dist[nxt]:\n                dist[nxt] = d + w\n                heapq.heappush(heap, (d + w, nxt))\n    return dist\n\nroads = {\"A\": [(\"B\", 7), (\"C\", 9), (\"F\", 14)], \"B\": [(\"A\", 7), (\"C\", 10), (\"D\", 15)],\n         \"C\": [(\"A\", 9), (\"B\", 10), (\"D\", 11), (\"F\", 2)], \"D\": [(\"B\", 15), (\"C\", 11), (\"E\", 6)],\n         \"E\": [(\"D\", 6), (\"F\", 9)], \"F\": [(\"A\", 14), (\"C\", 2), (\"E\", 9)]}\nprint(dijkstra(roads, \"A\"))    # {'A': 0, 'B': 7, 'C': 9, 'D': 20, 'E': 20, 'F': 11}"
+      },
+      "requires": [
+        "shortest-path",
+        "priority-queue"
+      ]
+    },
+    {
+      "id": "bellman-ford",
+      "picture": "Keep relaxing every road until no route can be improved; negative costs are allowed.",
+      "mechanism": "Set the distance to the source to 0 and all others to infinity. Then repeat V − 1 times: for every edge (u, v, w), if dist[u] + w < dist[v], update dist[v]. After V − 1 rounds all shortest paths are found, since a shortest path has at most V − 1 edges. One more round that still improves something reveals a negative cycle.",
+      "detail": "Time O(V × E), slower than Dijkstra, but it handles negative edge weights and detects negative cycles: loops whose total is negative, which would make shortest meaningless since you could keep circling. It is named after Richard Bellman and Lester Ford Jr., who published it in the late 1950s, with earlier work by Alfonso Shimbel and Edward Moore.\n\nIt is a dynamic-programming algorithm: after round k, dist holds the best route using at most k edges. Its distributed form, in which each node repeatedly tells its neighbors its current best distances, is the distance-vector routing of RIP and the early ARPANET, and it explains the count-to-infinity problem. In finance, a negative cycle in the graph of negated log exchange rates is an arbitrage opportunity.",
+      "principles": "Patient repetition beats cleverness when the rules are messier. By simply trying every edge again and again, it copes with negative costs and can tell you when the problem itself is broken.",
+      "example": {
+        "label": "Negative edges, and a negative cycle",
+        "code": "def bellman_ford(n, edges, source):\n    dist = [float(\"inf\")] * n\n    dist[source] = 0\n    for _ in range(n - 1):\n        for u, v, w in edges:\n            if dist[u] + w < dist[v]:\n                dist[v] = dist[u] + w\n    for u, v, w in edges:\n        if dist[u] + w < dist[v]:\n            return None                     # a negative cycle is reachable\n    return dist\n\nedges = [(0, 1, 4), (0, 2, 5), (1, 2, -3), (2, 3, 4), (1, 3, 6)]\nprint(bellman_ford(4, edges, 0))                                # [0, 4, 1, 5]\nprint(bellman_ford(3, [(0, 1, 1), (1, 2, -3), (2, 1, 1)], 0))   # None"
+      },
+      "requires": [
+        "shortest-path",
+        "dynamic-programming"
+      ]
+    },
+    {
+      "id": "floyd-warshall",
+      "picture": "For every pair of places, ask: does going through this stop help?",
+      "mechanism": "Keep a table of best-known distances between every pair. For each intermediate node k in turn, and every pair (i, j), check whether going from i to k and then k to j is shorter than the current i to j, and update. After all k have been tried, the table is final.",
+      "detail": "Three nested loops give O(V³) time and O(V²) space, and the code is only a few lines. It handles negative edges, though not negative cycles, which show up as a negative distance from a node to itself. Robert Floyd published it in 1962, drawing on work by Bernard Roy and Stephen Warshall on transitive closure.\n\nIt is dynamic programming over the set of allowed intermediate nodes: after step k, each entry is the best path using only nodes up to k as stops. Uses: all-pairs shortest paths in dense or small graphs, transitive closure (which nodes can reach which), detecting negative cycles, and finding a graph's diameter. For large sparse graphs, running Dijkstra from every node, or Johnson's algorithm, is faster.",
+      "principles": "Allowing one more stopover at a time is a way of building the answer up from smaller versions of itself. The whole all-pairs problem yields to three loops because each step only needs the previous table.",
+      "example": {
+        "label": "All-pairs distances",
+        "code": "INF = float(\"inf\")\n\ndef floyd_warshall(dist):\n    n = len(dist)\n    d = [row[:] for row in dist]\n    for k in range(n):\n        for i in range(n):\n            for j in range(n):\n                if d[i][k] + d[k][j] < d[i][j]:\n                    d[i][j] = d[i][k] + d[k][j]\n    return d\n\ngraph = [[0, 3, INF, 7], [8, 0, 2, INF], [5, INF, 0, 1], [2, INF, INF, 0]]\nfor row in floyd_warshall(graph):\n    print(row)      # [0, 3, 5, 6] / [5, 0, 2, 3] / [3, 6, 0, 1] / [2, 5, 7, 0]"
+      },
+      "requires": [
+        "shortest-path",
+        "adjacency-matrix",
+        "dynamic-programming"
+      ]
+    },
+    {
+      "id": "a-star",
+      "picture": "Dijkstra with a sense of direction: try the roads that look like they lead toward the goal.",
+      "mechanism": "Like Dijkstra, but the priority of a node is f = g + h: the cost so far (g) plus a heuristic estimate of the remaining cost to the goal (h). Nodes that look closer to the goal are expanded first. If h never overestimates, it is called admissible, and the first time the goal is reached the path is optimal.",
+      "detail": "Peter Hart, Nils Nilsson, and Bertram Raphael published it in 1968 at SRI, as part of the Shakey robot project. With h = 0 it is Dijkstra; with a perfect h it heads straight for the goal. Typical heuristics: straight-line distance on a map, Manhattan distance on a grid, or the number of misplaced tiles in the sliding puzzle.\n\nA consistent heuristic, one obeying the triangle inequality, guarantees each node is expanded once. A better heuristic means fewer nodes expanded, and good ones can be built by solving simplified versions of the problem. Its weakness is memory, since it stores every frontier node; variants such as IDA* trade time for memory. Uses: video game pathfinding, robot navigation, route planning, and puzzle solving.",
+      "principles": "Knowing roughly where the goal is can save enormous effort, as long as your guess is never too optimistic. A* shows how domain knowledge enters a general search as a heuristic, and how the quality of the guess controls the work.",
+      "example": {
+        "label": "Shortest route through a grid with walls",
+        "code": "import heapq\n\ndef astar(grid, start, goal):\n    def h(p):                                   # Manhattan distance, never overestimates\n        return abs(p[0] - goal[0]) + abs(p[1] - goal[1])\n    heap, best = [(h(start), 0, start)], {start: 0}\n    while heap:\n        _, g, pos = heapq.heappop(heap)\n        if pos == goal:\n            return g\n        if g > best[pos]:\n            continue\n        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n            nr, nc = pos[0] + dr, pos[1] + dc\n            if 0 <= nr < len(grid) and 0 <= nc < len(grid[0]) and grid[nr][nc] == 0:\n                if g + 1 < best.get((nr, nc), float(\"inf\")):\n                    best[(nr, nc)] = g + 1\n                    heapq.heappush(heap, (g + 1 + h((nr, nc)), g + 1, (nr, nc)))\n    return None\n\ngrid = [[0, 0, 0, 0],\n        [1, 1, 0, 1],\n        [0, 0, 0, 0],\n        [0, 1, 1, 0]]            # 1 = wall\nprint(astar(grid, (0, 0), (3, 3)))   # 6"
+      },
+      "requires": [
+        "dijkstra"
+      ]
+    },
+    {
+      "id": "topological-sort",
+      "picture": "Line up tasks so that every task comes after the ones it depends on.",
+      "mechanism": "It is only possible for a directed acyclic graph. Kahn's algorithm: repeatedly remove a node with no incoming edges, add it to the order, and delete its outgoing edges; if nodes remain but none is free, there is a cycle. The depth-first method: run DFS and list nodes in reverse order of finishing.",
+      "detail": "Time O(V + E). There is usually more than one valid order; the algorithm gives one. Uses: build systems (compile a file after those it includes), package installation, course scheduling with prerequisites, spreadsheet recalculation (compute a cell after its inputs), task pipelines, and evaluating a neural network's computation graph.\n\nDetecting a cycle is a built-in bonus: it means dependencies are circular and no valid order exists. Nodes free at the same time can run in parallel, so the layers of Kahn's algorithm show a schedule's parallelism, and the longest chain, the critical path, sets the minimum total time.",
+      "principles": "Dependencies define a partial order, and a topological sort turns that into something you can act on. If no such order exists, the sort tells you why: there is a cycle, and the plan is impossible as written.",
+      "example": {
+        "label": "Build order, and a cycle",
+        "code": "from collections import deque\n\ndef topological_order(deps):\n    indegree = {t: 0 for t in deps}\n    for t, prereqs in deps.items():\n        for p in prereqs:\n            indegree.setdefault(p, 0)\n            indegree[t] += 1\n    ready = deque(t for t, d in indegree.items() if d == 0)\n    order = []\n    while ready:\n        t = ready.popleft()\n        order.append(t)\n        for other, prereqs in deps.items():\n            if t in prereqs:\n                indegree[other] -= 1\n                if indegree[other] == 0:\n                    ready.append(other)\n    return order if len(order) == len(indegree) else None    # None means a cycle\n\nbuild = {\"app\": [\"lib\", \"utils\"], \"lib\": [\"core\"], \"utils\": [\"core\"], \"core\": []}\nprint(topological_order(build))                              # ['core', 'lib', 'utils', 'app']\nprint(topological_order({\"a\": [\"b\"], \"b\": [\"a\"]}))          # None"
+      },
+      "requires": [
+        "dag",
+        "dfs"
+      ]
+    },
+    {
+      "id": "max-flow",
+      "picture": "How much can flow from source to sink through pipes with limited capacity?",
+      "mechanism": "Each edge has a capacity. A flow assigns each edge an amount up to its capacity so that what flows into every intermediate node equals what flows out. The Ford–Fulkerson method repeatedly finds a path with spare capacity from source to sink, pushes as much as fits, and updates the residual capacities, including the ability to undo earlier flow, until no such path exists.",
+      "detail": "The max-flow min-cut theorem says the largest possible flow equals the capacity of the smallest cut, the cheapest set of edges whose removal separates source from sink. Edmonds–Karp chooses shortest augmenting paths with BFS and runs in O(VE²); Dinic's algorithm is faster, O(V²E), and much quicker in practice.\n\nApplications are broad: bipartite matching (assigning jobs to workers), image segmentation with graph cuts, airline scheduling, network reliability and bandwidth, project selection, and baseball elimination, deciding whether a team is mathematically out of the race. The theory was developed by Ford and Fulkerson at RAND in the 1950s, after a report by Harris and Ross for the US Air Force that modeled the capacity of the Soviet railway network.",
+      "principles": "Bottlenecks are structural. The max-flow min-cut theorem says the most you can move is exactly what the tightest cross-section allows, a duality that makes a maximization and a minimization the same problem.",
+      "requires": [
+        "graph-algorithms",
+        "directed-graphs"
+      ]
+    },
+    {
+      "id": "pagerank",
+      "picture": "A page is important if important pages link to it.",
+      "mechanism": "Imagine a surfer who follows random links, and with some probability jumps to a random page. PageRank is the long-run fraction of time spent on each page. A page's rank is the sum of the ranks of the pages linking to it, each divided by its number of outgoing links, damped by a factor, usually 0.85.",
+      "detail": "Larry Page and Sergey Brin described it in 1998 as the core of Google's ranking, building on ideas from citation analysis. It is the principal eigenvector of the web's link matrix, modified with the random jump, and is computed by power iteration: start with equal ranks and repeatedly redistribute along links until the values settle, which takes a few dozen rounds even on billions of pages.\n\nIt makes ranking hard to fake by adding your own links, since the links that count come from important pages. The damping term ensures convergence and handles dead ends. Search engines now combine hundreds of signals, but the idea spread widely: ranking scientific papers, finding influential accounts, recommending items, keyword extraction (TextRank), and analyzing food webs and protein networks.",
+      "principles": "Importance can be defined by the network itself: it is the standing you get from being pointed to by others who are themselves pointed to. A recursive definition that turns out to have a solution, and that ranked the web.",
+      "example": {
+        "label": "Ranking a four-page web",
+        "code": "def pagerank(links, damping=0.85, rounds=50):\n    pages = list(links)\n    rank = {p: 1 / len(pages) for p in pages}\n    for _ in range(rounds):\n        new = {p: (1 - damping) / len(pages) for p in pages}\n        for p, outs in links.items():\n            share = damping * rank[p] / (len(outs) or len(pages))\n            for q in (outs or pages):\n                new[q] += share\n        rank = new\n    return rank\n\nweb = {\"home\": [\"blog\", \"shop\"], \"blog\": [\"home\"], \"shop\": [\"home\", \"blog\"], \"old\": [\"home\"]}\nfor page, score in sorted(pagerank(web).items(), key=lambda kv: -kv[1]):\n    print(f\"{page:5s} {score:.3f}\")      # home ranks highest; nobody links to old"
+      },
+      "requires": [
+        "directed-graphs",
+        "probability"
+      ]
+    },
+    {
+      "id": "connected-components",
+      "picture": "The separate islands of a network, where everyone on an island can reach everyone else on it.",
+      "mechanism": "Run a traversal (BFS or DFS) from any unvisited node, marking everything it reaches as one component, then repeat from the next unvisited node until all are marked. Alternatively, use union-find, merging the endpoints of every edge.",
+      "detail": "Time O(V + E) for either method. For undirected graphs, components partition the nodes cleanly. For directed graphs, weak connectivity ignores edge directions while strong connectivity requires paths in both directions; strongly connected components are found by Tarjan's or Kosaraju's algorithms and reveal the cyclic core of a directed graph.\n\nUses: checking that a network is fully connected, finding isolated clusters in social networks, counting islands in a grid (flood fill), image segmentation, and detecting when removing a node or link would disconnect a network. Percolation theory studies when a giant component appears as connections are added, in physics and epidemics: in a growing random network a single giant component appears suddenly at a critical average degree.",
+      "principles": "Before asking how to get from here to there, ask whether you can. Splitting a network into pieces that cannot reach each other is the first fact about it, and often the cheapest one to learn.",
+      "example": {
+        "label": "Finding the islands",
+        "code": "def components(graph):\n    seen, groups = set(), []\n    for start in graph:\n        if start in seen:\n            continue\n        group, stack = [], [start]\n        seen.add(start)\n        while stack:\n            node = stack.pop()\n            group.append(node)\n            for nxt in graph[node]:\n                if nxt not in seen:\n                    seen.add(nxt)\n                    stack.append(nxt)\n        groups.append(sorted(group))\n    return groups\n\ng = {1: [2], 2: [1, 3], 3: [2], 4: [5], 5: [4], 6: []}\nprint(components(g))    # [[1, 2, 3], [4, 5], [6]]"
+      },
+      "requires": [
+        "dfs",
+        "union-find"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-calculus-equations",
+  "group": "Abstract",
+  "order": 7,
+  "title": "Equations of Change",
+  "blurb": "Differential equations: from cooling coffee to heat, waves, fluids, quanta, and light.",
+  "orb": "weaving",
+  "entry": "differential-equations",
+  "path": [
+    "differential-equations",
+    "ode",
+    "separable-equations",
+    "euler-method",
+    "harmonic-oscillator",
+    "logistic-growth",
+    "predator-prey",
+    "pde",
+    "heat-equation",
+    "wave-equation",
+    "maxwell-equations",
+    "schrodinger-equation",
+    "navier-stokes"
+  ]
+}

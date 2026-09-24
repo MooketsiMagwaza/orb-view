@@ -1,0 +1,23 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-web-attacks",
+  "group": "Tech",
+  "order": 6,
+  "title": "Web Attacks & Defenses",
+  "blurb": "XSS, CSRF, injection, and the browser rules that hold them back.",
+  "orb": "working",
+  "entry": "web-security",
+  "path": [
+    "web-security",
+    "same-origin",
+    "cors",
+    "csp",
+    "xss",
+    "csrf",
+    "sql-injection",
+    "network-security",
+    "firewalls",
+    "ddos",
+    "rate-limiting"
+  ]
+}

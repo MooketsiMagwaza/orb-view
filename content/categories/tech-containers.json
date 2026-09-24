@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-containers",
+  "group": "Tech",
+  "order": 8,
+  "title": "Containers, Docker & the Cloud",
+  "blurb": "Virtualization, containers, orchestration, and shipping code the same everywhere.",
+  "orb": "connecting",
+  "entry": "virtualization",
+  "path": [
+    "virtualization",
+    "virtual-machines",
+    "containers",
+    "namespaces",
+    "cgroups",
+    "docker",
+    "kubernetes",
+    "cloud",
+    "serverless",
+    "cdn",
+    "ci-cd",
+    "iac"
+  ]
+}

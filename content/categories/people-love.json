@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "people-love",
+  "group": "People",
+  "order": 3,
+  "title": "Love & Connection",
+  "blurb": "Attachment, friendship, family, loss, and the many faces of love.",
+  "orb": "weaving",
+  "entry": "love",
+  "path": [
+    "love",
+    "attachment",
+    "family",
+    "friendship",
+    "kindness",
+    "forgiveness",
+    "grief",
+    "loneliness",
+    "agape",
+    "gratitude"
+  ]
+}

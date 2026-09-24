@@ -1,0 +1,11 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-linear-algebra",
+  "group": "Abstract",
+  "order": 10,
+  "title": "Linear Algebra",
+  "blurb": "Vectors and matrices, and the transformations, systems, and decompositions built from them.",
+  "orb": "shaping",
+  "entry": "linear-algebra",
+  "path": ["linear-algebra", "vectors", "dot-product", "matrices", "matrix-multiplication", "determinant", "linear-transformations", "linear-systems", "gaussian-elimination", "eigenvalues", "svd", "pca"]
+}

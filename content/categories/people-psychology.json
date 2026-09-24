@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "people-psychology",
+  "group": "People",
+  "order": 2,
+  "title": "Psychology",
+  "blurb": "Perception, attention, memory, emotion, and the puzzle of being someone.",
+  "orb": "composing",
+  "entry": "consciousness",
+  "path": [
+    "consciousness",
+    "perception",
+    "attention",
+    "memory",
+    "learning",
+    "sleep",
+    "dreams",
+    "emotion",
+    "free-will",
+    "self"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "people-feelings",
+  "group": "People",
+  "order": 5,
+  "title": "Feelings",
+  "blurb": "Fear, joy, anger, shame, hope: what each is for and how to live with it.",
+  "orb": "working",
+  "entry": "emotion",
+  "path": [
+    "emotion",
+    "fear",
+    "courage",
+    "anxiety",
+    "anger",
+    "shame",
+    "guilt",
+    "joy",
+    "laughter",
+    "hope"
+  ]
+}

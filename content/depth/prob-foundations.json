@@ -1,0 +1,267 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Probability, part one: chance made precise, conditional probability and Bayes, random variables and the main distributions, and the two great theorems about averages, each in four layers.",
+  "depth": [
+    {
+      "id": "probability",
+      "picture": "A way to be precise about not knowing.",
+      "mechanism": "Assign each possible outcome a number from 0 (impossible) to 1 (certain), with the numbers over all outcomes adding to 1. The probability of an event is the sum for the outcomes it contains. Rules follow: P(not A) = 1 − P(A); P(A or B) = P(A) + P(B) − P(A and B); for independent events, P(A and B) = P(A)P(B).",
+      "detail": "Interpretations differ. Frequentists say probability is long-run relative frequency; Bayesians say it is degree of belief, updated by evidence; the classical view counts equally likely cases. Modern probability rests on Kolmogorov's axioms of 1933, which define probability as a measure on a set of outcomes and are agnostic about interpretation.\n\nIt began in 1654 in correspondence between Pascal and Fermat about how to split the stakes in an unfinished game of chance; Bernoulli, De Moivre, Bayes, and Laplace developed it, and Kolmogorov made it rigorous. Human intuition about probability is unreliable, as the gambler's fallacy, base rate neglect, and the conjunction fallacy show, so calculating matters. Applications: insurance, genetics, quantum mechanics, whose predictions are probabilities, machine learning, cryptography, and everyday decisions under uncertainty.",
+      "principles": "Probability turns not knowing into something you can compute with. It does not remove uncertainty; it measures it, so that decisions, bets, and beliefs can be made in proportion to the evidence.",
+      "example": {
+        "label": "Two dice, and the rules of chance",
+        "code": "import random\n\nrandom.seed(3)\nrolls = [random.randint(1, 6) + random.randint(1, 6) for _ in range(100_000)]\nprint(round(rolls.count(7) / len(rolls), 4), round(6 / 36, 4))       # P(sum = 7) = 6/36 = 0.1667\n\np_a, p_b, p_both = 0.5, 0.5, 0.25                                     # independent coin flips\nprint(p_a + p_b - p_both)                                            # P(A or B) = 0.75"
+      },
+      "requires": [
+        "numbers"
+      ]
+    },
+    {
+      "id": "randomness",
+      "picture": "Outcomes with no pattern you could use to predict them.",
+      "mechanism": "A sequence is random if no shortcut lets you predict the next value better than chance: each outcome is unpredictable from the past. In probability, randomness is a model: we treat a coin flip as random even though it is, in principle, determined by physics, because the initial conditions are unknowable.",
+      "detail": "Kinds: apparent randomness from complexity or chaos (dice, weather, the shuffle of cards); true randomness in quantum events, such as radioactive decay, whose statistics, according to tests of Bell's inequalities, are not explained by hidden information; and algorithmic randomness, where a string is random if it cannot be compressed.\n\nPseudorandom generators produce sequences that pass statistical tests from a short seed (Mersenne Twister, PCG, ChaCha), good for simulation but predictable if the seed is known, so cryptography needs unpredictable sources such as hardware noise and secure generators. People are poor judges: we see patterns in noise, and think real random sequences too streaky, alternating too much when asked to write one. Randomness is useful: it drives Monte Carlo methods, randomized algorithms, cryptographic keys, sampling, and random assignment in experiments.",
+      "principles": "Randomness is the absence of a usable pattern. Real randomness is lumpier than intuition expects, which is why streaks and coincidences are normal, and why producing good randomness, for security or fairness, takes care.",
+      "example": {
+        "label": "Real randomness is streakier than it feels",
+        "code": "import random\nfrom collections import Counter\nfrom itertools import groupby\n\nrandom.seed(7)\nflips = \"\".join(random.choice(\"HT\") for _ in range(200))\nlongest = max(len(list(g)) for _, g in groupby(flips))\nprint(flips[:40], \"...\")\nprint(\"longest streak in 200 fair flips:\", longest)          # usually 6 to 9\nprint(Counter(flips))"
+      },
+      "requires": [
+        "probability"
+      ]
+    },
+    {
+      "id": "conditional-probability",
+      "picture": "The chance of A once you know B has happened.",
+      "mechanism": "P(A | B) = P(A and B) / P(B): restrict attention to the cases where B holds, and ask what fraction of those also have A. Rearranged, P(A and B) = P(A | B) P(B), the multiplication rule for dependent events.",
+      "detail": "Example: from a deck, P(second card is an ace | first was an ace) = 3/51, not 4/52. Conditional probabilities are not symmetric: P(positive test | disease) is not P(disease | positive test), and confusing them is the prosecutor's fallacy and a common medical mistake. The law of total probability splits an event across cases: P(A) is the sum of P(A | Bᵢ) P(Bᵢ). Tree diagrams organize this.\n\nThe Monty Hall problem hinges on it: after the host opens a door with a goat, switching wins 2/3 of the time, because the host's choice was informative. Conditioning is how new information enters probability, and Bayes' theorem is the rule for reversing the condition. Care is needed about exactly what is conditioned on: at least one child is a girl and the older child is a girl give different answers.",
+      "principles": "Information changes what is likely. Conditional probability is the rule for how, and its asymmetry, that the chance of A given B differs from B given A, is behind some of the most costly errors in medicine and law.",
+      "example": {
+        "label": "The Monty Hall problem, simulated",
+        "code": "import random\n\nrandom.seed(1)\ndef monty(switch, trials=100_000):\n    wins = 0\n    for _ in range(trials):\n        car, pick = random.randrange(3), random.randrange(3)\n        opened = next(d for d in range(3) if d != pick and d != car)\n        if switch:\n            pick = next(d for d in range(3) if d != pick and d != opened)\n        wins += pick == car\n    return wins / trials\n\nprint(\"stay:\", round(monty(False), 3), \" switch:\", round(monty(True), 3))    # about 0.333 and 0.667"
+      },
+      "requires": [
+        "probability"
+      ]
+    },
+    {
+      "id": "bayes-theorem",
+      "picture": "Updating what you believe when new evidence arrives.",
+      "mechanism": "P(H | E) = P(E | H) P(H) / P(E). Start with the prior P(H), your belief before the evidence. Multiply by the likelihood P(E | H): how expected the evidence would be if H were true. Divide by P(E), how expected the evidence is overall. The result is the posterior.",
+      "detail": "A worked example: a disease affects 1 percent of people; a test detects it 90 percent of the time and gives false positives to 9 percent of healthy people. Given a positive test, P(disease) = 0.9 × 0.01 / (0.9 × 0.01 + 0.09 × 0.99), about 9 percent, not 90. The prior, the rarity, dominates. Natural frequencies make this clear: of 1,000 people, 10 have it (9 test positive) and 990 do not (about 89 test positive), so about 9 of 98 positives are real.\n\nThomas Bayes's essay was published posthumously in 1763, and Laplace developed and generalized it. In odds form, posterior odds equal prior odds times the likelihood ratio. Uses: medical diagnosis, spam filtering, searches for lost objects at sea, forensic evidence, and scientific inference. Ignoring priors is the base rate fallacy; ignoring the likelihood is the reverse.",
+      "principles": "Evidence should shift belief in proportion to how surprising it is, starting from where you were. Bayes' theorem is the arithmetic of learning, and its central lesson is that a rare thing stays unlikely even after a fairly good test.",
+      "example": {
+        "label": "A positive test, and a second one",
+        "code": "def posterior(prior, sensitivity, false_positive_rate):\n    evidence = sensitivity * prior + false_positive_rate * (1 - prior)\n    return sensitivity * prior / evidence\n\nprint(round(posterior(0.01, 0.90, 0.09), 3))      # 0.092: a positive test, yet only about a 9% chance of disease\nprint(round(posterior(0.30, 0.90, 0.09), 3))      # the same test in a high-risk group\n\np = 0.01                                           # update with two independent positive tests\nfor _ in range(2):\n    p = posterior(p, 0.90, 0.09)\nprint(round(p, 3))                                 # about one half"
+      },
+      "requires": [
+        "conditional-probability"
+      ]
+    },
+    {
+      "id": "independence",
+      "picture": "Knowing one thing tells you nothing about the other.",
+      "mechanism": "Events A and B are independent if P(A and B) = P(A) P(B), equivalently P(A | B) = P(A). Then probabilities of joint events multiply: two fair coins both land heads with probability ½ × ½ = ¼.",
+      "detail": "Independence is a modeling assumption, and often a shaky one. Dice and coin flips are independent by construction; heights within a family, stock returns in a crisis, defects from a shared supplier, and the votes of neighbors are not. Assuming independence when events are correlated understates the chance of joint extremes: models leading up to the 2008 financial crisis treated mortgage defaults as nearly independent across regions, so simultaneous defaults looked impossible.\n\nPairwise independence does not imply mutual independence. Independent events are not mutually exclusive: if A and B are independent with positive probabilities they can happen together. Conditional independence, independence given a third variable, underlies Bayesian networks and Naive Bayes classifiers. The gambler's fallacy is a misunderstanding of independence, and the law of large numbers and central limit theorem assume it or weak dependence. In practice, ask whether events share a common cause.",
+      "principles": "Multiplying probabilities is only valid when events do not share a cause. Many disasters in finance and engineering come from assuming independence that was not there, so the question to ask is what could make these things happen together?",
+      "example": {
+        "label": "Independent and dependent pairs",
+        "code": "import random\n\nrandom.seed(5)\nn = 200_000\npairs = [(random.random() < 0.3, random.random() < 0.5) for _ in range(n)]\npa = sum(a for a, _ in pairs) / n\npb = sum(b for _, b in pairs) / n\npab = sum(a and b for a, b in pairs) / n\nprint(round(pab, 4), round(pa * pb, 4))                   # independent: the joint chance is the product\n\ndef pair():\n    a = random.random() < 0.3\n    return a, random.random() < (0.9 if a else 0.2)       # B happens more often when A does\npairs2 = [pair() for _ in range(n)]\npa = sum(a for a, _ in pairs2) / n\npb = sum(b for _, b in pairs2) / n\npab = sum(a and b for a, b in pairs2) / n\nprint(round(pab, 4), round(pa * pb, 4))                   # not equal: they are dependent"
+      },
+      "requires": [
+        "conditional-probability"
+      ]
+    },
+    {
+      "id": "bayesian-inference",
+      "picture": "Start with what you believe, see the data, and end with what you believe now.",
+      "mechanism": "Express uncertainty about an unknown quantity θ as a prior distribution. After observing data D, the posterior is proportional to likelihood times prior: p(θ | D) ∝ p(D | θ) p(θ). The posterior is your updated belief, and it becomes the prior for the next batch of data.",
+      "detail": "It answers the question people usually want: how probable is this hypothesis given the data? Frequentist methods instead give the probability of data given a hypothesis (p-values) or the coverage of procedures (confidence intervals). Example: to estimate a coin's bias, begin with a uniform Beta(1, 1) prior; after h heads and t tails the posterior is Beta(1 + h, 1 + t). Credible intervals are direct probability statements about θ.\n\nStrengths: it uses prior knowledge, handles small samples, gives full uncertainty, and combines naturally across sources in hierarchical models. Costs: priors are subjective, though they can be weak and their influence can be checked, and computation can be heavy, met by MCMC and variational inference. Applications: A/B testing, clinical trials, spam filters, recommender systems, astronomy, and machine-learning models such as Gaussian processes. Modern practice is pragmatic, using both schools.",
+      "principles": "Learning is updating. Bayesian inference makes that literal: beliefs are distributions, data reshapes them, and uncertainty is carried honestly to the end, with the price being that you must say what you believed at the start.",
+      "example": {
+        "label": "Learning a coin's bias batch by batch",
+        "code": "a, b = 1.0, 1.0                      # uniform prior over the bias\nfor heads, tails in [(3, 1), (6, 4), (30, 20)]:\n    a, b = a + heads, b + tails\n    mean = a / (a + b)\n    sd = (a * b / ((a + b) ** 2 * (a + b + 1))) ** 0.5\n    print(f\"after {heads}H {tails}T more: belief about bias = {mean:.3f} +/- {sd:.3f}\")"
+      },
+      "requires": [
+        "bayes-theorem"
+      ]
+    },
+    {
+      "id": "random-variables",
+      "picture": "A number determined by chance.",
+      "mechanism": "A random variable X assigns a number to each outcome of a random process: the sum of two dice, the height of a random person, the number of emails tomorrow. It is discrete if it takes separate values (a probability mass function) and continuous if it takes any value in a range (a probability density function).",
+      "detail": "Its distribution says how probability is spread over its possible values. The cumulative distribution function F(x) = P(X ≤ x) works for both kinds. For continuous variables, probabilities come from areas under the density; a single point has probability zero. Functions of random variables are random variables: the sum of two dice, the square of a measurement. Joint distributions describe several at once, with marginals (each alone) and conditionals.\n\nKey summaries are the expected value, the center, and the variance, the spread; others are the median, skewness, and higher moments. Random variables can be independent, and sums of independent ones lead to the central limit theorem. In machine learning, data points are treated as draws of random variables, and models are distributions over them.",
+      "principles": "Attaching a number to each outcome lets probability use the tools of arithmetic and calculus. A random variable is a way of turning the shape of uncertainty into something you can average, add, and plot.",
+      "example": {
+        "label": "The distribution of the sum of two dice",
+        "code": "import random\nfrom collections import Counter\n\nrandom.seed(11)\nsums = Counter(random.randint(1, 6) + random.randint(1, 6) for _ in range(100_000))\nfor total in range(2, 13):\n    p = sums[total] / 100_000\n    print(f\"{total:2d} {'#' * round(p * 200):24s} {p:.3f}   exact {(6 - abs(total - 7)) / 36:.3f}\")"
+      },
+      "requires": [
+        "probability",
+        "functions"
+      ]
+    },
+    {
+      "id": "expected-value",
+      "picture": "The long-run average of a chance process.",
+      "mechanism": "E[X] is the sum of each possible value times its probability (an integral for continuous variables). A fair die has E = (1 + 2 + … + 6)/6 = 3.5, a number it can never show. Expectation is linear: E[X + Y] = E[X] + E[Y], even if X and Y are dependent.",
+      "detail": "Linearity is powerful: the expected number of fixed points in a random shuffle is 1 whatever the size, since each position contributes 1/n. Decision-making by expected value: a one-dollar lottery ticket with a 1 in 10 million chance at 5 million has an expected value of 50 cents, a loss on average.\n\nBut expected value is not everything: Bernoulli's St. Petersburg paradox describes a game with infinite expected payoff that no one will pay much to play, leading to expected utility, where money's value is concave, and to risk aversion. Insurance is worth buying even at negative expected value because it reduces variance. Expected value governs casino edges, option pricing, and expected loss in machine learning. It does not always exist: the Cauchy distribution has no mean. The long run may be too long, and a single ruinous outcome makes averages misleading, as in the Kelly criterion for sizing bets.",
+      "principles": "Weighting outcomes by their probabilities gives the value of a gamble before you play it. Expectation ignores risk, so it is the beginning of decision-making, not the end, but it is the beginning everyone needs.",
+      "example": {
+        "label": "Expectation and its linearity",
+        "code": "import random\n\nfaces = range(1, 7)\nprint(sum(f / 6 for f in faces))                          # 3.5, the expected value of one die\n\nrandom.seed(2)\ndef shuffle_fixed_points(n):\n    deck = list(range(n)); random.shuffle(deck)\n    return sum(i == c for i, c in enumerate(deck))\nfor n in (5, 50, 500):\n    avg = sum(shuffle_fixed_points(n) for _ in range(20_000)) / 20_000\n    print(n, round(avg, 3))                               # about 1 whatever n is\n\nprint(\"lottery: a ticket returns on average\", 5_000_000 / 10_000_000, \"dollars for 1 dollar\")"
+      },
+      "requires": [
+        "random-variables"
+      ]
+    },
+    {
+      "id": "variance",
+      "picture": "How far outcomes typically stray from the average.",
+      "mechanism": "Var(X) = E[(X − μ)²]: the mean of the squared distance from the mean μ. Its square root is the standard deviation, in the original units. For independent variables, variances add: Var(X + Y) = Var(X) + Var(Y). Scaling by c scales variance by c².",
+      "detail": "Two gambles with the same expected value can differ hugely in variance: a fair coin paying 0 or 100 has mean 50 and standard deviation 50; a sure 50 has none. In finance, variance, or volatility, is a proxy for risk, and diversification reduces it because independent risks partly cancel: the variance of an average of n independent variables is σ²/n, so the standard deviation shrinks as 1/√n.\n\nComputation: Var(X) = E[X²] − (E[X])². A sample variance divides by n − 1 (Bessel's correction) to be unbiased when the mean is estimated from the same data. Squaring emphasizes large deviations and makes the math tractable, though it is sensitive to outliers. The bias–variance trade-off in machine learning splits a model's prediction error into systematic error and sensitivity to the training sample. Some distributions, including power laws with heavy tails, have infinite variance.",
+      "principles": "Spread is the other half of the story: two situations with the same average can feel entirely different. Because variances of independent things add, averaging tames them, which is the mathematical basis of diversification and of trusting big samples.",
+      "example": {
+        "label": "Variances add, and averaging shrinks spread",
+        "code": "import random, statistics\n\nrandom.seed(4)\nn = 100_000\nx = [random.gauss(0, 3) for _ in range(n)]\ny = [random.gauss(0, 4) for _ in range(n)]\nprint(round(statistics.pvariance(x), 2), round(statistics.pvariance(y), 2))                      # about 9 and 16\nprint(round(statistics.pvariance([a + b for a, b in zip(x, y)]), 2), \"vs 9 + 16 = 25\")            # variances add\nmeans = [statistics.mean(random.gauss(0, 3) for _ in range(25)) for _ in range(20_000)]\nprint(round(statistics.pstdev(means), 3), \"vs 3 / sqrt(25) =\", 3 / 5)                              # averaging shrinks the spread"
+      },
+      "requires": [
+        "expected-value"
+      ]
+    },
+    {
+      "id": "probability-distributions",
+      "picture": "The shape of all the ways something could turn out.",
+      "mechanism": "A distribution assigns probabilities to a random variable's possible values: for discrete variables, a probability for each value (a probability mass function); for continuous ones, a density curve whose area over an interval is the probability of landing in it. Its parameters, such as a mean and a spread, fix its exact shape.",
+      "detail": "Families model recurring situations: uniform (all equally likely), Bernoulli (one yes-or-no trial), binomial (successes in n trials), Poisson (rare events in an interval), geometric (trials until the first success), exponential (waiting time), normal (sums of many small effects), log-normal (products of many small effects, such as incomes), and power laws (heavy tails). Choosing one is modeling: is the data a count or a measurement? Bounded or not? Symmetric? Rare events?\n\nFit it by estimating the parameters (maximum likelihood, moments) and check by comparing to the data with a histogram or Q–Q plot. Moments summarize shape: mean, variance, skewness (asymmetry), and kurtosis (tail weight). Many distributions are linked: the Poisson approximates a binomial with rare events, and the normal approximates the binomial for many trials. Entropy measures a distribution's uncertainty, tying probability to information theory.",
+      "principles": "A distribution is the complete answer to how likely each outcome is. Recognizing which familiar shape a process follows, and why, is much of what applied probability is.",
+      "example": {
+        "label": "Three shapes as text histograms",
+        "code": "import random\nfrom collections import Counter\n\nrandom.seed(8)\ndef show(name, values, bins):\n    lo, hi = min(values), max(values)\n    width = (hi - lo) / bins\n    counts = Counter(min(int((v - lo) / width), bins - 1) for v in values)\n    print(name)\n    for b in range(bins):\n        print(f\"  {lo + b * width:7.2f} {'#' * (counts[b] * 60 // len(values))}\")\n\nshow(\"uniform\", [random.uniform(0, 10) for _ in range(20_000)], 6)\nshow(\"normal\", [random.gauss(0, 1) for _ in range(20_000)], 9)\nshow(\"exponential\", [random.expovariate(1) for _ in range(20_000)], 8)"
+      },
+      "requires": [
+        "random-variables"
+      ]
+    },
+    {
+      "id": "normal-distribution",
+      "picture": "The bell curve: most values near the middle, few far out.",
+      "mechanism": "Its density is (1/σ√(2π)) e^(−(x−μ)²/2σ²), set by a mean μ (the center) and standard deviation σ (the spread). It is symmetric. About 68 percent of values lie within one σ of the mean, 95 percent within two, and 99.7 percent within three.",
+      "detail": "It arises when many small independent effects add up, by the central limit theorem: heights (genes and environment), measurement errors, test scores, and sample averages. Gauss used it in 1809 for astronomical measurement errors, hence Gaussian; De Moivre found it in 1733 as an approximation to the binomial. Standardizing, z = (x − μ)/σ, converts any normal to the standard normal, so one table serves all, and z-scores say how unusual a value is.\n\nIt is the most studied distribution because it is mathematically friendly: sums of independent normals are normal, and it maximizes entropy for a given variance. Not everything is normal: incomes, city sizes, and stock returns have heavier tails, so extreme events are more likely than the normal curve predicts, and assuming normality contributed to underestimating financial crashes. IQ scores (mean 100, sd 15) and grading on a curve draw on it. The Galton board shows it emerging from random left-right bounces.",
+      "principles": "Many small independent nudges add up to a bell. Its ubiquity is a theorem, not a coincidence, and so is its danger: where effects multiply or compound, the world is not normal, and extremes come far more often than the curve suggests.",
+      "example": {
+        "label": "The 68-95-99.7 rule, and a Galton board",
+        "code": "import math, random\n\ndef normal_cdf(z):\n    return 0.5 * (1 + math.erf(z / math.sqrt(2)))\n\nfor k in (1, 2, 3):\n    print(f\"within {k} sd: {normal_cdf(k) - normal_cdf(-k):.4f}\")    # 0.6827, 0.9545, 0.9973\n\nrandom.seed(6)                                                          # 12 random left/right bounces\nboard = [sum(random.choice((0, 1)) for _ in range(12)) for _ in range(20_000)]\nfor slot in range(13):\n    print(f\"{slot:2d} {'#' * (board.count(slot) // 100)}\")"
+      },
+      "requires": [
+        "probability-distributions",
+        "euler-number"
+      ]
+    },
+    {
+      "id": "binomial-distribution",
+      "picture": "How many successes in a fixed number of tries?",
+      "mechanism": "n independent trials, each succeeding with probability p. The number of successes X has P(X = k) = C(n, k) pᵏ (1 − p)ⁿ⁻ᵏ, where C(n, k) counts which k of the n trials succeed. The mean is np and the variance np(1 − p).",
+      "detail": "Examples: heads in 20 flips, defective items in a batch of 50, patients who respond among 100 treated, clicks among 1,000 visitors. Jacob Bernoulli analyzed it in Ars Conjectandi (1713), proving the law of large numbers along the way. It is symmetric when p = ½ and skewed otherwise, and for large n it is approximately normal (De Moivre–Laplace) with mean np and standard deviation √(np(1 − p)); for rare events with small p and large n it approximates a Poisson.\n\nUses: polls (a proportion from n respondents has standard error √(p(1 − p)/n)), A/B tests, quality control, and genetics. It assumes independence and constant p; if trials are dependent or p varies, the variance is larger than predicted, a common real-world issue called overdispersion.",
+      "principles": "Counting successes among independent trials is the most common shape of question in applied statistics. The binomial gives exact answers for it, and for large samples the bell curve takes over.",
+      "example": {
+        "label": "Is 15 heads in 20 flips surprising?",
+        "code": "import math\n\ndef binom_pmf(n, p, k):\n    return math.comb(n, k) * p ** k * (1 - p) ** (n - k)\n\nn, p = 20, 0.5\nfor k in range(6, 15):\n    print(f\"{k:2d} {'#' * round(binom_pmf(n, p, k) * 200)} {binom_pmf(n, p, k):.4f}\")\n\nprint(round(sum(binom_pmf(20, 0.5, k) for k in range(15, 21)), 4), \"chance of 15 or more heads\")     # 0.0207"
+      },
+      "requires": [
+        "probability-distributions",
+        "combinations",
+        "independence"
+      ]
+    },
+    {
+      "id": "poisson-distribution",
+      "picture": "How many times a rare event happens in a fixed window.",
+      "mechanism": "If events occur independently at a constant average rate λ per interval, the count X in one interval has P(X = k) = λᵏ e^(−λ) / k!. Both mean and variance equal λ. It is the limit of a binomial with many trials and small success probability.",
+      "detail": "Siméon Denis Poisson derived it in 1837; it became famous through Ladislaus Bortkiewicz's 1898 study of Prussian cavalry soldiers killed by horse kicks, which fit it well, at about 0.6 deaths per corps-year. Other cases: phone calls per minute, radioactive decays, typos per page, customers arriving per hour, mutations per genome, goals per soccer match, and flying-bomb hits on districts of London in the Second World War, which R. D. Clarke showed in 1946 were random, not aimed.\n\nThe time between events is exponential. Clustering is a sign of dependence: if the variance far exceeds the mean (overdispersion), a negative binomial is often better. It underlies queueing theory (Poisson arrivals), insurance claim models, and count-data regression. The intuition: even at a low rate, in a large population something is bound to occur, as with lottery winners or coincidences.",
+      "principles": "Independent rare events arrive in a recognizable pattern, more clumpy than intuition expects. The Poisson distribution is the mathematics of surprise counts, and of why coincidences are expected.",
+      "example": {
+        "label": "Three emails an hour, on average",
+        "code": "import math\n\ndef poisson_pmf(lam, k):\n    return lam ** k * math.exp(-lam) / math.factorial(k)\n\nlam = 3.0\nfor k in range(0, 10):\n    print(f\"{k} emails: {'#' * round(poisson_pmf(lam, k) * 100)} {poisson_pmf(lam, k):.3f}\")\nprint(\"P(at least 8 in an hour) =\", round(1 - sum(poisson_pmf(lam, k) for k in range(8)), 4))\nprint(\"P(none in an hour) =\", round(poisson_pmf(lam, 0), 4))"
+      },
+      "requires": [
+        "binomial-distribution"
+      ]
+    },
+    {
+      "id": "exponential-distribution",
+      "picture": "How long you wait until the next event, when events arrive at random.",
+      "mechanism": "If events occur at a constant average rate λ, the waiting time T until the next has density λe^(−λt) and P(T > t) = e^(−λt). The mean wait is 1/λ. It is memoryless: P(T > s + t | T > s) = P(T > t): having waited already tells you nothing about the remaining wait.",
+      "detail": "It is the continuous-time partner of the Poisson: counts per interval are Poisson exactly when gaps between events are exponential. It models radioactive decay (half-life is ln 2 / λ), component lifetimes without wear-out, times between customer arrivals, and network packet gaps. Memorylessness is counterintuitive: the bus that has not arrived in ten minutes is no closer, if arrivals are truly random. In the waiting-time paradox you tend to arrive during a long gap, so the average wait seen by an arriving passenger exceeds half the average gap.\n\nIt is the only continuous memoryless distribution; the geometric is its discrete analog. Real lifetimes often show wear-out or infant mortality, described by Weibull distributions. Queueing theory uses exponential arrival and service times: mean wait grows like ρ/(1 − ρ) with utilization ρ, blowing up as ρ approaches 1.",
+      "principles": "Some waiting has no memory. When events are truly random, patience is never rewarded: the future is the same however long you have waited, which is both a fact about physics and a trap for intuition.",
+      "example": {
+        "label": "Waiting for a bus that has no memory",
+        "code": "import math, random\n\nrandom.seed(9)\nrate = 1 / 10                                    # one bus per ten minutes on average, at random times\nwaits = [random.expovariate(rate) for _ in range(100_000)]\nprint(round(sum(waits) / len(waits), 2), \"mean wait; theory\", 1 / rate)\n\nextra = [w - 10 for w in waits if w > 10]        # among those who already waited 10 minutes\nprint(round(sum(extra) / len(extra), 2), \"mean extra wait, given you already waited 10 minutes\")\nprint(round(sum(w > 20 for w in waits) / len(waits), 4), round(math.exp(-rate * 20), 4))"
+      },
+      "requires": [
+        "poisson-distribution",
+        "exponential-function"
+      ]
+    },
+    {
+      "id": "power-laws",
+      "picture": "A few enormous cases, and a vast number of tiny ones.",
+      "mechanism": "A quantity follows a power law when the probability of a value x falls as x^(−α): doubling x cuts the frequency by a fixed factor. On a log–log plot it is a straight line. There is no typical scale: the mean may be dominated by a rare giant, and for α ≤ 2 the variance is infinite.",
+      "detail": "Examples: city populations (Zipf's law: the second city is half the first), word frequencies, wealth (Pareto's 80/20 observation from 1896), earthquake energies (Gutenberg–Richter), links to web pages, the sizes of wars and forest fires, and citations of papers. Mechanisms include preferential attachment (the rich get richer), multiplicative growth with a barrier, and self-organized criticality.\n\nConsequences: extremes dominate, sample means converge slowly or not at all, and risk models based on the normal curve fail. Caution: many claimed power laws are actually log-normal or exponentially cut off, and fitting a straight line to a log–log plot is unreliable; proper statistical tests are needed. Scale-free networks have power-law degree distributions, so a few hubs hold most links.",
+      "principles": "Not every quantity has a typical size. Where a power law reigns, the extreme is part of the normal, and the average tells you almost nothing about what to expect.",
+      "example": {
+        "label": "A heavy-tailed sample",
+        "code": "import random\n\nrandom.seed(12)\nalpha = 2.2\nsizes = sorted((random.paretovariate(alpha - 1) for _ in range(100_000)), reverse=True)\ntotal = sum(sizes)\nprint(\"top 1% of cases hold\", round(100 * sum(sizes[:1000]) / total), \"% of the total\")\nprint(\"mean\", round(total / len(sizes), 2), \" median\", round(sizes[len(sizes) // 2], 2), \" largest\", round(sizes[0], 1))\n\nfor rank in (1, 10, 100, 1000):\n    print(rank, round(sizes[rank - 1], 2))       # roughly a straight line on log-log axes"
+      },
+      "requires": [
+        "probability-distributions",
+        "logarithmic-scales"
+      ]
+    },
+    {
+      "id": "uniform-distribution",
+      "picture": "Every value in the range is equally likely.",
+      "mechanism": "On the interval [a, b] the density is flat: 1/(b − a). The mean is (a + b)/2 and the variance (b − a)²/12. The discrete version gives each of n outcomes probability 1/n, as for a fair die.",
+      "detail": "The uniform on [0, 1] is the raw material of simulation: random number generators produce it, and other distributions are made by transforming it. Inverse transform sampling: if U is uniform and F is a target cumulative distribution, then F⁻¹(U) has that distribution. The Box–Muller method does this for normals.\n\nUniform also expresses ignorance: the principle of indifference gives equal probability to outcomes with no reason to differ, with well-known difficulties. Bertrand's paradox shows that a random chord of a circle has three different natural answers, depending on how random is defined. In cryptography, keys should be uniformly random over the key space, and hash functions aim to spread outputs uniformly. Tests of uniformity include chi-squared and Kolmogorov–Smirnov.",
+      "principles": "Equal likelihood is the simplest assumption and the seed of every simulation. From one uniform stream you can manufacture any distribution, which is why a good source of uniform randomness is worth so much.",
+      "example": {
+        "label": "Turning uniform numbers into waiting times",
+        "code": "import math, random\n\nrandom.seed(13)\nu = [random.random() for _ in range(100_000)]\nprint(round(sum(u) / len(u), 3), round(sum((x - 0.5) ** 2 for x in u) / len(u), 4), \"vs 0.5 and\", round(1 / 12, 4))\n\nrate = 2.0                                       # inverse transform sampling\nwaits = [-math.log(1 - x) / rate for x in u]\nprint(round(sum(waits) / len(waits), 3), \"vs mean\", 1 / rate)"
+      },
+      "requires": [
+        "probability-distributions"
+      ]
+    },
+    {
+      "id": "law-of-large-numbers",
+      "picture": "Keep counting, and the average settles on the truth.",
+      "mechanism": "Let X₁, X₂, … be independent observations with the same expected value μ. Then their running average (X₁ + … + Xₙ)/n approaches μ as n grows. The weak law says it does so in probability; the strong law says with probability 1.",
+      "detail": "Jacob Bernoulli proved a first version in 1713, after twenty years of work, calling it his golden theorem: the relative frequency of heads approaches the true probability. It justifies estimating probabilities from frequencies, polling, and Monte Carlo simulation, and it is why casinos, with a small edge per bet and vast numbers of bets, are reliably profitable while individual gamblers face great variance.\n\nA common misreading: it does not say short-run deviations are corrected, which is the gambler's fallacy; the average converges because new observations dilute old imbalances, not because they compensate. The typical error shrinks like σ/√n, so 100 times more data gives 10 times more precision. It can fail: for heavy-tailed variables without a mean, such as the Cauchy, averages never settle. Insurance is possible because of it: losses in a large pool are predictable though individual ones are not.",
+      "principles": "Enough independent observations reveal the truth, but only slowly: precision improves with the square root of the data. It is the reason an average can be trusted, and its failure for heavy tails is a warning about which averages cannot.",
+      "example": {
+        "label": "Dice settle; Cauchy draws never do",
+        "code": "import math, random\n\nrandom.seed(14)\ntotal = 0\nfor n in range(1, 100_001):\n    total += random.randint(1, 6)\n    if n in (10, 100, 1_000, 10_000, 100_000):\n        print(f\"{n:>7d} rolls: average {total / n:.4f} (expected 3.5)\")\n\ntotal = 0.0\nfor n in range(1, 100_001):\n    total += math.tan(math.pi * (random.random() - 0.5))          # a Cauchy draw\n    if n in (100, 10_000, 100_000):\n        print(f\"Cauchy, {n:>7d} draws: average {total / n:+.3f}\")"
+      },
+      "requires": [
+        "expected-value",
+        "independence"
+      ]
+    },
+    {
+      "id": "central-limit-theorem",
+      "picture": "Add up enough independent random things and you get a bell curve.",
+      "mechanism": "Take n independent observations from any distribution with finite variance and add them up, or average them. As n grows, the distribution of the sum, properly centered and scaled, approaches a normal distribution. The average of n has standard deviation σ/√n.",
+      "detail": "It explains why the normal distribution is so common, and why polls, quality control, and experiments can use normal-based methods even when the underlying values are not normal. De Moivre proved a special case for coin flips in 1733, Laplace generalized it in 1810, and Lyapunov and others made it rigorous. Convergence is fast for symmetric distributions (a sum of a dozen dice already looks normal) and slow for skewed ones; n around 30 is often enough for moderate skewness.\n\nIt underlies confidence intervals, z-tests and t-tests, and error bars, since the standard error of the mean is σ/√n. It requires finite variance, independence or weak dependence, and enough terms: sums of heavy-tailed variables converge to other stable laws, not normal, and financial returns and strongly dependent processes show failures in practice. It is a statement about emergence: the microscopic details wash out, and only the mean and variance survive in the aggregate.",
+      "principles": "Details wash out in the aggregate. Whatever the shape of the individual pieces, their sum forgets everything but a mean and a spread, which is why the bell curve is the shape of averages, and why statistics works.",
+      "example": {
+        "label": "Averages of a skewed distribution turn symmetric",
+        "code": "import random, statistics\n\nrandom.seed(15)\ndef sample_mean(n):                                   # start from a very skewed distribution: exponential\n    return statistics.mean(random.expovariate(1) for _ in range(n))\n\nfor n in (1, 2, 10, 50):\n    means = [sample_mean(n) for _ in range(20_000)]\n    mu, sd = statistics.mean(means), statistics.pstdev(means)\n    skew = statistics.mean(((m - mu) / sd) ** 3 for m in means)\n    print(f\"n={n:2d}: sd of the mean {sd:.3f} (theory {1 / n ** 0.5:.3f}), skewness {skew:.2f}\")"
+      },
+      "requires": [
+        "normal-distribution",
+        "law-of-large-numbers",
+        "variance"
+      ]
+    }
+  ]
+}

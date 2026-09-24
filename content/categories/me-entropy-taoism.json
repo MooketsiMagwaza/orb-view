@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "me-entropy-taoism",
+  "group": "Me",
+  "order": 1,
+  "title": "Entropy & Taoism",
+  "blurb": "Order, decay, and holding outcomes loosely: the thread that runs through my thinking.",
+  "orb": "working",
+  "entry": "entropy",
+  "path": [
+    "entropy",
+    "local-order",
+    "decay-renewal",
+    "waste-heat",
+    "taoism",
+    "non-forcing",
+    "care",
+    "boundaries",
+    "regret",
+    "forgiveness",
+    "peace",
+    "impermanence"
+  ]
+}

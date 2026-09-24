@@ -1,0 +1,67 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Economics: trade, money, markets, scarcity, and the discipline that studies them, each in four layers.",
+  "depth": [
+    {
+      "id": "trade",
+      "picture": "Exchanging what you have for what you want more.",
+      "mechanism": "Trade happens when two parties each value what the other holds more than what they give up, so both are better off after the exchange, even though nothing new was produced. This is the core insight behind comparative advantage, formalized by David Ricardo in 1817: even if one party is better at producing everything, both still gain by each specializing in what they are relatively best at and trading.",
+      "detail": "Before money, trade meant barter, which required a double coincidence of wants: you must find someone who has what you want and also wants what you have, a real friction that limited early exchange to small, close-knit groups. Trade routes such as the Silk Road connected civilizations for millennia and carried ideas, diseases, and technologies alongside goods.\n\nRicardo's comparative-advantage argument, still taught as one of economics' least intuitive but most robust results, shows why a country skilled at everything still benefits from trading with a country skilled at nothing in particular: opportunity cost, not absolute skill, decides what is worth specializing in. Modern global trade runs on this logic at enormous scale, and disputes over it, tariffs, trade deficits, and outsourcing, are largely disagreements about who bears the transition costs when comparative advantage reshuffles who makes what.",
+      "principles": "Trade creates value without creating anything new, simply by moving goods to whoever values them most. That a country with no absolute advantage in anything still gains from trade is one of economics' most counterintuitive and best-tested results.",
+      "example": {
+        "label": "Comparative advantage with two countries and two goods",
+        "code": "# Hours needed to make one unit of each good\nhours = {\n    \"Alpha\": {\"cloth\": 1, \"wine\": 2},   # Alpha is faster at everything\n    \"Beta\":  {\"cloth\": 4, \"wine\": 3},\n}\n\nfor country, costs in hours.items():\n    opportunity_cost_of_cloth = costs[\"cloth\"] / costs[\"wine\"]   # wine given up per unit of cloth\n    print(country, \"opportunity cost of 1 cloth:\", round(opportunity_cost_of_cloth, 2), \"units of wine\")\n\n# Alpha gives up less wine to make cloth -> Alpha should specialize in cloth\n# Beta gives up less cloth to make wine (relatively) -> Beta should specialize in wine\n# Both gain from trading, even though Alpha is faster at making both goods"
+      },
+      "requires": [
+        "cooperation"
+      ]
+    },
+    {
+      "id": "money",
+      "picture": "Whatever a group agrees to accept in exchange for anything else.",
+      "mechanism": "Money solves the double-coincidence-of-wants problem of barter by giving everyone something universally acceptable to trade for. To work, it needs three properties: it must serve as a medium of exchange (widely accepted), a unit of account (a common way to price things), and a store of value (it keeps its worth over time, at least reasonably well).",
+      "detail": "Early monies were commodities with intrinsic value, cattle, shells, salt, and eventually precious metals, which are durable, divisible, portable, and hard to counterfeit. Coinage, minted metal of a standard weight and purity, appeared in Lydia around the seventh century BCE and simplified verifying value. Paper money began as a claim on metal held in a vault, a promise to pay the bearer; fiat money, which most modern currencies now are, has value purely because a government mandates its acceptance and people trust it will keep that value, backed by nothing physical.\n\nThe quantity theory of money links the money supply to prices: roughly, if the amount of money in circulation grows faster than the goods and services available to buy, prices rise, which is inflation; the extreme case is hyperinflation, as in 1920s Germany or 2000s Zimbabwe, where trust in a currency collapses and prices spiral. Central banks manage the money supply and interest rates to try to keep inflation moderate and predictable, a balancing act with no perfect solution.",
+      "principles": "Money is a shared fiction that works because everyone believes everyone else believes in it. Its entire function rests on trust, which is why currencies collapse not from running out of paper or metal, but from people losing confidence that others will still accept it tomorrow.",
+      "requires": [
+        "trade"
+      ]
+    },
+    {
+      "id": "markets",
+      "picture": "Wherever buyers and sellers meet to set a price through their own choices.",
+      "mechanism": "A market coordinates what to produce, how much, and for whom, without anyone directing it, through the price mechanism: when demand exceeds supply, prices rise, which encourages more production and less consumption, until the two balance at an equilibrium price. Adam Smith called this self-correcting tendency the invisible hand in 1776: individuals pursuing their own interest can, without intending to, produce outcomes that serve everyone.",
+      "detail": "Markets work best under conditions economists call perfect competition: many buyers and sellers, so no one controls the price; easy entry and exit; good information; and no side effects on people outside the transaction. Real markets usually fall short of this in some way, which is where market failures arise: monopolies (one seller with pricing power), externalities (a transaction imposes costs or benefits on others, such as pollution, that the price ignores), public goods (things like clean air or national defense that markets underprovide because no one can be excluded from enjoying them without paying), and information asymmetry (one side knows much more than the other, which can cause otherwise-good deals to unravel).\n\nGovernment responses to these failures include antitrust law, pollution taxes or caps, public provision of goods markets underprovide, and disclosure requirements. The core debate in economics is not usually whether markets or government should run everything, almost no one holds either extreme, but where exactly the balance sits for a given good, and modern economies mix market allocation with substantial public provision and regulation nearly everywhere.",
+      "principles": "Prices are not arbitrary numbers; they are a compressed signal carrying information about scarcity and desire that lets millions of strangers coordinate without anyone in charge. When that signal is distorted or missing, as with pollution or monopoly, the coordination breaks down in a predictable direction.",
+      "requires": [
+        "trade"
+      ]
+    },
+    {
+      "id": "scarcity",
+      "picture": "There is never enough of everything for everyone to have all they want.",
+      "mechanism": "Scarcity is not about being rare; it is the basic condition that resources, time, land, labor, and money are limited relative to human wants, which are effectively unlimited. Because of scarcity, using a resource for one purpose means not using it for another: this trade-off is the opportunity cost, and economics is often defined as the study of how people, firms, and societies choose among scarce means to satisfy competing ends.",
+      "detail": "Even abundant things become scarce in the economic sense once there is a cost to acquiring or allocating them: air is not scarce to breathe but clean air in a polluted city is. A production possibilities frontier illustrates the trade-off graphically: given fixed resources, producing more of one good means producing less of another, and the frontier's outward bulge shows increasing opportunity costs as resources less suited to a task are pressed into it.\n\nScarcity forces every economic system, market, planned, or mixed, to answer the same three questions: what to produce, how to produce it, and who gets it. Growth (more resources, better technology, more efficient use) can push the frontier outward and ease scarcity's bite, but it never eliminates the underlying condition, since wants tend to expand along with means, a pattern economists call the treadmill of rising expectations.",
+      "principles": "Every choice is also a forgone alternative, and scarcity is what makes that true of nearly everything. Recognizing the hidden cost of what you did not choose, the opportunity cost, is the single habit of mind that separates economic reasoning from ordinary wishing.",
+      "example": {
+        "label": "A trade-off frontier: more of one thing means less of another",
+        "code": "# A simple production possibilities frontier: total effort is fixed at 100 units\ndef frontier(bread_effort, total=100):\n    wine_effort = total - bread_effort\n    bread = bread_effort ** 0.5          # diminishing returns as more effort goes to bread\n    wine = wine_effort ** 0.5\n    return bread, wine\n\nfor bread_effort in (0, 25, 50, 75, 100):\n    bread, wine = frontier(bread_effort)\n    print(f\"effort on bread={bread_effort:3d} -> bread={bread:.1f}, wine={wine:.1f}\")\n# every extra unit of bread costs some wine: that trade-off IS scarcity"
+      },
+      "requires": [
+        "trade"
+      ]
+    },
+    {
+      "id": "economics",
+      "picture": "The study of how people and societies choose among scarce means to meet unlimited wants.",
+      "mechanism": "Economics splits broadly into microeconomics, which studies individual decisions by households and firms and how they interact in specific markets, and macroeconomics, which studies economies as wholes: total output, unemployment, inflation, and growth. Both build models, deliberately simplified pictures of behavior, to make predictions that can be tested against data.",
+      "detail": "Adam Smith's The Wealth of Nations in 1776 is often marked as the founding text of modern economics, though earlier thinkers had studied trade and value. Classical economists (Smith, Ricardo, Malthus) focused on production and growth; the marginalist revolution of the 1870s (Jevons, Menger, Walras) reframed value around the extra satisfaction from one more unit of a good, not labor cost, founding modern price theory; Keynes in the 1930s, responding to the Great Depression, argued governments should actively manage demand rather than trust markets to self-correct quickly, founding macroeconomics as a distinct field.\n\nLater developments include behavioral economics, which incorporates the psychological biases real people show instead of assuming perfectly rational actors, and game theory, which studies strategic interaction between decision-makers who anticipate each other's choices. Economics is often criticized for its simplifying assumptions and for disagreements between schools of thought, but its core tools, thinking at the margin, tracing incentives, and accounting for opportunity cost, are used well beyond markets, in law, policy, biology, and everyday decisions.",
+      "principles": "Economics is less a set of answers than a set of habits for tracing consequences: what happens at the margin, who bears the cost, and what else could have been done with the same resources. Those habits apply anywhere choices are made under scarcity, which is nearly everywhere.",
+      "requires": [
+        "trade",
+        "money",
+        "markets",
+        "scarcity"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "description": "Extra cross-links inside and across the computing clusters: silicon, networking, security, infrastructure, and software.",
+  "links": [
+    ["sql", "data"], ["sql", "logic"], ["sql", "algorithms"], ["transactions", "logic"], ["transactions", "cooperation"], ["transactions", "trade"],
+    ["indexing", "cache"], ["indexing", "algorithms"], ["indexing", "encyclopedia"], ["html", "symbols"], ["html", "writing"], ["html", "urls"],
+    ["web-servers", "load-balancing"], ["web-servers", "cache"], ["web-servers", "processes"], ["virtualization", "operating-systems"], ["virtualization", "cpu"], ["virtual-machines", "operating-systems"],
+    ["virtual-machines", "abstraction"], ["virtual-machines", "cpu"], ["namespaces", "linux"], ["namespaces", "processes"], ["namespaces", "operating-systems"], ["serverless", "automation"],
+    ["serverless", "apis"], ["serverless", "scarcity"], ["packets", "tcp"], ["packets", "routing"], ["packets", "latency"], ["packets", "bandwidth"],
+    ["ethernet", "wifi"], ["ethernet", "latency"], ["ethernet", "bandwidth"], ["ethernet", "history"], ["cellular", "latency"], ["cellular", "bandwidth"],
+    ["cellular", "cities"], ["ip", "packets"], ["ip", "internet"], ["ipv6", "internet"], ["ipv6", "binary"], ["ipv6", "numbers"],
+    ["nat", "routing"], ["nat", "security"], ["nat", "internet"], ["subnets", "routing"], ["subnets", "boundaries"], ["subnets", "binary"],
+    ["symmetric-encryption", "hashing"], ["symmetric-encryption", "binary"], ["symmetric-encryption", "randomness"], ["key-exchange", "prime-numbers"], ["key-exchange", "trust"], ["key-exchange", "mathematics"],
+    ["salting", "information"], ["salting", "security"], ["mfa", "biometrics"], ["mfa", "body"], ["rbac", "law"], ["rbac", "identity"],
+    ["rbac", "automation"], ["acl", "boundaries"], ["acl", "file-systems"], ["acl", "institutions"], ["web-security", "trust"], ["web-security", "conflict"],
+    ["xss", "language"], ["xss", "trust"], ["csrf", "trust"], ["csrf", "identity"], ["sql-injection", "language"], ["sql-injection", "trust"],
+    ["cors", "trust"], ["cors", "boundaries"], ["csp", "boundaries"], ["csp", "trust"], ["network-security", "conflict"], ["network-security", "boundaries"],
+    ["network-security", "fear"], ["wafers", "circuits"], ["wafers", "patterns"], ["wafers", "moores-law"], ["integrated-circuits", "transistors"], ["integrated-circuits", "electricity"],
+    ["integrated-circuits", "software"], ["integrated-circuits", "culture"], ["doping", "transistors"], ["doping", "quantum-mechanics"], ["band-gap", "transistors"], ["band-gap", "sun"],
+    ["moores-law", "time"], ["moores-law", "economics"], ["software", "trust"], ["software", "language-models"], ["docker", "abstraction"], ["kubernetes", "automation"],
+    ["kubernetes", "emergence"], ["cryptography", "trust"], ["cryptography", "privacy"], ["cryptography", "conflict"], ["hashing", "memory"], ["hashing", "identity"],
+    ["tls", "privacy"], ["https", "trust"], ["passwords", "identity"], ["passwords", "fear"], ["authorization", "trust"], ["jwt", "time"],
+    ["jwt", "trust"], ["oauth", "care"], ["sessions", "time"], ["load-balancing", "networks"], ["reverse-proxy", "networks"], ["curl", "tcp"],
+    ["curl", "dns"], ["curl", "tls"], ["curl", "https"], ["curl", "urls"], ["curl", "shell"], ["curl", "apis"],
+    ["curl", "debugging"], ["curl", "json"], ["curl", "tools"]
+  ]
+}

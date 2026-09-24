@@ -1,0 +1,170 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part four: integrals, from Riemann sums and the fundamental theorem to the standard techniques of integration and their geometric applications, each in four layers.",
+  "depth": [
+    {
+      "id": "integrals",
+      "picture": "Adding up infinitely many infinitely thin slices to get a total.",
+      "mechanism": "The definite integral of f from a to b is the limit of Riemann sums: split [a, b] into n slices of width Δx, add up f(x) · Δx, and let n → ∞. It gives the signed area between the graph and the x-axis. The fundamental theorem links it to antiderivatives.",
+      "detail": "Area is just the beginning: distance from speed, total change from a rate, work from force (∫ F dx), mass from density, charge from current, probability from a density function, average value, volume, arc length, and center of mass. The notation is Leibniz's elongated S, for summa, with dx as the width of a thin slice. Areas below the axis count as negative. Properties: linearity, additivity over intervals, and reversing the limits flips the sign.\n\nContinuous functions, and those with a few jumps, are integrable. Riemann's definition (1854) and Lebesgue's (1902) differ in how they slice: by the input axis or by output values; Lebesgue's handles far wilder functions and is the foundation of modern probability. Archimedes' method for areas of curved shapes anticipated the idea 2,000 years earlier.",
+      "principles": "Totals are sums of pieces, and the integral is what such a sum becomes when the pieces are infinitely fine. Together with the derivative it makes calculus a complete theory of change and accumulation.",
+      "example": {
+        "label": "Area, and distance from speed",
+        "code": "import math\n\ndef integral(f, a, b, n=100_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx        # midpoint sum\n\nprint(round(integral(lambda x: x ** 2, 0, 3), 6))                   # 9.0, which is x^3/3 from 0 to 3\nprint(round(integral(math.sin, 0, math.pi), 6))                     # 2.0\nprint(round(integral(lambda t: 9.8 * t, 0, 3), 6))                  # 44.1: speed added up over time is distance"
+      },
+      "requires": [
+        "limits",
+        "functions"
+      ]
+    },
+    {
+      "id": "riemann-sum",
+      "picture": "Approximate an area with thin rectangles, then let the rectangles get thinner.",
+      "mechanism": "Split [a, b] into n subintervals, pick a sample point in each (left end, right end, or midpoint), and add f(sample) × width. As n grows, the sums converge to the integral, if f is integrable.",
+      "detail": "Left and right sums under- or over-estimate depending on whether f is increasing or decreasing; midpoint sums are usually better, and the trapezoid rule averages the left and right sums. The error shrinks like 1/n for left and right sums and like 1/n² for the midpoint and trapezoid rules.\n\nBernhard Riemann formalized it in 1854, in his habilitation thesis, while asking which functions can be represented by Fourier series. Darboux sums use the upper and lower rectangles and give a cleaner criterion: f is integrable if the two converge to the same limit. Riemann sums appear in physics (adding contributions), statistics (expected values), and computing (numerical integration). Each rectangle is a small piece of accumulated quantity, such as a slice of distance covered at a nearly constant speed.",
+      "principles": "An integral is defined by a limit of sums, not by an antiderivative. That is what lets it measure areas and totals even for functions with no formula, and it is what a computer does when it integrates.",
+      "example": {
+        "label": "Left and right sums squeezing toward 9",
+        "code": "f = lambda x: x ** 2\na, b = 0, 3\n\nfor n in (3, 10, 100, 1000):\n    dx = (b - a) / n\n    left  = sum(f(a + i * dx) for i in range(n)) * dx\n    right = sum(f(a + (i + 1) * dx) for i in range(n)) * dx\n    print(n, round(left, 4), round(right, 4))      # squeezing toward the true area, 9"
+      },
+      "requires": [
+        "integrals"
+      ]
+    },
+    {
+      "id": "numerical-integration",
+      "picture": "Approximating an integral by computer when no formula will do.",
+      "mechanism": "Sample the function at chosen points and combine the values with weights: the trapezoid rule fits straight segments, Simpson's rule fits parabolas through triples of points, and Gaussian quadrature picks special sample points to get exact answers for polynomials of high degree. Monte Carlo methods use random points.",
+      "detail": "Most integrals cannot be expressed in elementary functions (e^(−x²), sin x / x, √(1 + x³)), so numerical methods are the norm: computing the normal distribution's probabilities, engineering loads, and orbits. Simpson's rule error shrinks like 1/n⁴, and Gaussian quadrature is faster still for smooth functions. Adaptive methods use more points where the function varies quickly and fewer elsewhere. Romberg integration extrapolates from trapezoid estimates.\n\nHigh-dimensional integrals defeat grids, because the number of points grows exponentially with dimension: there Monte Carlo integration, whose error shrinks like 1/√N regardless of dimension, is the main tool. Numerical integration also solves differential equations step by step. Error analysis matters: rounding, singularities, and oscillations can wreck a naive rule.",
+      "principles": "When exact answers are out of reach, careful sampling gets you as close as you need. Choosing where to sample, and how to weigh the samples, is an art that trades effort against accuracy.",
+      "example": {
+        "label": "Trapezoid against Simpson, no elementary antiderivative",
+        "code": "import math\n\ndef trapezoid(f, a, b, n):\n    dx = (b - a) / n\n    return dx * (f(a) / 2 + sum(f(a + i * dx) for i in range(1, n)) + f(b) / 2)\n\ndef simpson(f, a, b, n):                       # n must be even\n    dx = (b - a) / n\n    return dx / 3 * (f(a) + f(b) + sum((4 if i % 2 else 2) * f(a + i * dx) for i in range(1, n)))\n\nf = lambda x: math.exp(-x * x)\nexact = math.sqrt(math.pi) / 2 * math.erf(1)\nprint(f\"trapezoid error {trapezoid(f, 0, 1, 10) - exact:.2e}, Simpson error {simpson(f, 0, 1, 10) - exact:.2e}\")"
+      },
+      "requires": [
+        "riemann-sum"
+      ]
+    },
+    {
+      "id": "antiderivative",
+      "picture": "A function whose slope is the function you started with.",
+      "mechanism": "F is an antiderivative of f if F′ = f. Since constants have zero derivative, if F is one antiderivative then F + C is another, for any constant C: the indefinite integral ∫ f dx = F(x) + C. Finding one means running differentiation backwards.",
+      "detail": "Basic ones follow from the derivative table: ∫ xⁿ dx = xⁿ⁺¹/(n + 1) + C for n ≠ −1, ∫ 1/x dx = ln|x| + C, ∫ eˣ dx = eˣ + C, ∫ cos x dx = sin x + C. Differentiating is mechanical, but antidifferentiating is not: there is no general recipe by hand, and many elementary functions have no elementary antiderivative (e^(−x²), sin x / x, 1/ln x). Risch's algorithm decides this for elementary functions, and computer algebra systems implement it.\n\nTechniques include substitution, integration by parts, trigonometric substitution, and partial fractions. Physically, position is an antiderivative of velocity, and the constant C is the initial position, which is why initial conditions are needed. Any two antiderivatives of a function on an interval differ by a constant, a consequence of the mean value theorem.",
+      "principles": "Undoing a derivative loses exactly one thing, a constant, because constants are invisible to slope. That missing constant is the mathematical shadow of needing to know where you started.",
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "fundamental-theorem",
+      "picture": "Adding up a rate of change gives the total change: integrals and derivatives undo each other.",
+      "mechanism": "Part 1: if F(x) is the integral of f(t) from a to x, then F′(x) = f(x): accumulating and then differentiating returns the original. Part 2: the integral of f from a to b equals G(b) − G(a) for any antiderivative G of f: to find a total, evaluate an antiderivative at the ends and subtract.",
+      "detail": "Before it, areas and slopes were separate problems, each solved case by case. Newton and Leibniz recognized the link, with precursors in Isaac Barrow, Newton's teacher, who saw it geometrically. It turns the hard task of summing infinitely many slices into the mechanical task of finding an antiderivative. Example: the integral of x² from 0 to 3 is [x³/3] from 0 to 3, which is 9.\n\nPhysical reading: the distance traveled is the integral of speed; equivalently, the change in position equals the sum of the tiny position changes. It generalizes: Green's, Stokes', and the divergence theorem relate an integral over a region to values on its boundary, and all are special cases of the generalized Stokes theorem. It requires f to be continuous, or at least integrable; discontinuities need care.",
+      "principles": "Two operations that look unrelated, finding slopes and finding areas, are inverses. That single link makes calculus one subject and turns the infinite sum into ordinary arithmetic.",
+      "example": {
+        "label": "Both halves, numerically",
+        "code": "import math\n\ndef integral(f, a, b, n=100_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx\n\nf = math.cos\na, b = 0.0, 1.0\nprint(round(integral(f, a, b), 6), round(math.sin(b) - math.sin(a), 6))    # Part 2: both 0.841471\n\nF = lambda x: integral(f, a, x, 20_000)                                     # Part 1: differentiate the accumulation\nx, h = 0.7, 1e-4\nprint(round((F(x + h) - F(x - h)) / (2 * h), 5), round(f(x), 5))            # both cos(0.7) = 0.76484"
+      },
+      "requires": [
+        "riemann-sum",
+        "antiderivative"
+      ]
+    },
+    {
+      "id": "integration-by-parts",
+      "picture": "The product rule read backwards: trade a hard integral for an easier one.",
+      "mechanism": "∫ u dv = uv − ∫ v du. Choose u to be something that becomes simpler when differentiated and dv something you can integrate. Then you integrate v du, which should be easier than the original.",
+      "detail": "Example: ∫ x eˣ dx. Let u = x and dv = eˣ dx, so du = dx and v = eˣ, giving x eˣ − ∫ eˣ dx = (x − 1) eˣ + C. The LIATE mnemonic ranks what to choose as u: Logarithmic, Inverse trigonometric, Algebraic, Trigonometric, Exponential.\n\nSpecial uses: ∫ ln x dx (take u = ln x, dv = dx), and integrals like ∫ eˣ sin x dx, where applying the method twice returns the original integral, which can then be solved for algebraically. Repeated use handles ∫ xⁿ eˣ. It derives reduction formulas and the Gamma function's recurrence. For definite integrals the boundary term is evaluated: [uv] from a to b, minus ∫ v du. In physics and analysis it is the tool for moving a derivative from one factor to another, as in weak formulations of differential equations.",
+      "principles": "Every product rule has a mirror image in integration. By moving a derivative from one factor to the other, integration by parts often turns a problem with no obvious foothold into one that has one.",
+      "example": {
+        "label": "The integral of x e^x from 0 to 2",
+        "code": "import math\n\ndef integral(f, a, b, n=200_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx\n\n# by parts: [(x - 1) e^x] from 0 to 2 = e^2 + 1\nprint(round(integral(lambda x: x * math.exp(x), 0, 2), 5), round(math.exp(2) + 1, 5))"
+      },
+      "requires": [
+        "antiderivative",
+        "product-rule"
+      ]
+    },
+    {
+      "id": "u-substitution",
+      "picture": "The chain rule read backwards: rename a tangled inner part as a single variable.",
+      "mechanism": "If the integrand has the form f(g(x)) g′(x), set u = g(x) so that du = g′(x) dx. Then the integral becomes ∫ f(u) du. Integrate in u, then substitute back. For definite integrals, change the limits to u-values and skip the back-substitution.",
+      "detail": "Example: ∫ 2x cos(x²) dx. Let u = x², du = 2x dx, giving ∫ cos u du = sin u + C = sin(x²) + C. Another: ∫₀¹ x √(1 + x²) dx with u = 1 + x² gives ½ ∫₁² √u du = (1/3)(2^(3/2) − 1).\n\nThe skill is spotting an inner function whose derivative is present, up to a constant, elsewhere in the integrand. If a constant factor is off, adjust for it; if a variable factor is off, the substitution is probably wrong. It generalizes to change of variables in multiple integrals, with the Jacobian determinant playing the role of g′. In probability, a change of variable transforms a density, and the same factor appears. Trigonometric substitutions are special cases with a clever choice of u.",
+      "principles": "Renaming a messy piece as a single variable is the most useful trick in integration. It works because the chain rule guarantees that the derivative of the inner function will show up, if you are looking at the right problem.",
+      "example": {
+        "label": "The integral of x·sqrt(1 + x²) from 0 to 1",
+        "code": "import math\n\ndef integral(f, a, b, n=200_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx\n\nprint(round(integral(lambda x: x * math.sqrt(1 + x * x), 0, 1), 6), round((2 ** 1.5 - 1) / 3, 6))"
+      },
+      "requires": [
+        "antiderivative",
+        "chain-rule"
+      ]
+    },
+    {
+      "id": "trig-substitution",
+      "picture": "For square roots of a² ± x², let x be a sine, tangent, or secant; the root becomes a plain trigonometric function.",
+      "mechanism": "For √(a² − x²), put x = a sin θ so that the root becomes a cos θ. For √(a² + x²), put x = a tan θ, giving a sec θ. For √(x² − a²), put x = a sec θ, giving a tan θ. Integrate in θ, then convert back with a right triangle.",
+      "detail": "The Pythagorean identities sin² + cos² = 1 and 1 + tan² = sec² are what collapse the square root. Example: the area of a circle of radius a is 4∫₀ᵃ √(a² − x²) dx; with x = a sin θ this becomes 4a² ∫ cos² θ dθ over a quarter turn, which is πa².\n\nIt produces standard integrals: ∫ dx/√(1 − x²) = arcsin x; ∫ dx/(1 + x²) = arctan x; ∫ √(1 + x²) dx involves a logarithm. The right-triangle sketch tells you sin, cos, and tan of θ in terms of x, needed to express the answer. Many arc-length and area problems, and integrals in physics involving Coulomb or gravitational potentials, use it. Hyperbolic substitutions (x = a sinh t) are an alternative that avoids trigonometric identities.",
+      "principles": "When a square root hides a right triangle, put the triangle to work. The substitution is a way of choosing coordinates in which the geometry of the problem does the algebra for you.",
+      "requires": [
+        "u-substitution",
+        "trigonometric-functions"
+      ]
+    },
+    {
+      "id": "partial-fractions",
+      "picture": "Break a complicated fraction of polynomials into simple ones you can integrate one at a time.",
+      "mechanism": "For a rational function P(x)/Q(x) with deg P < deg Q, factor Q into linear and irreducible quadratic factors and write the fraction as a sum of simpler terms: A/(x − r), B/(x − r)², (Cx + D)/(x² + bx + c), and so on. Solve for the constants by comparing coefficients or plugging in values. Each piece integrates to a logarithm or an arctangent.",
+      "detail": "Example: 1/((x − 1)(x + 2)) = (1/3)/(x − 1) − (1/3)/(x + 2), so the integral is (1/3) ln|(x − 1)/(x + 2)| + C. If deg P ≥ deg Q, divide first. Repeated factors need a term for each power. It works because every real polynomial factors into linear and quadratic pieces, from the fundamental theorem of algebra.\n\nThe same decomposition inverts Laplace transforms, which is why it is a staple of control and circuit analysis, and it gives closed forms for sequences through generating functions: the Fibonacci numbers' Binet formula comes from partial fractions of x/(1 − x − x²). The heavy lifting is factoring the denominator, which needs its roots. The integral of any rational function is a rational part plus logarithms and arctangents.",
+      "principles": "A hard fraction is a sum of easy ones in disguise. Splitting it is pure algebra, but it turns a problem with no method into a routine one, and the same trick reappears in transforms and generating functions.",
+      "requires": [
+        "antiderivative",
+        "polynomials"
+      ]
+    },
+    {
+      "id": "improper-integrals",
+      "picture": "Integrals over an infinite range, or of a function that blows up: does the area come out finite?",
+      "mechanism": "Replace the troublesome endpoint with a variable and take a limit: the integral from a to ∞ is the limit as b → ∞ of the integral from a to b. If the limit is finite the integral converges; otherwise it diverges. The same works for integrands with a vertical asymptote at an endpoint.",
+      "detail": "Key test cases: ∫₁^∞ 1/xᵖ dx converges when p > 1 and diverges when p ≤ 1; so 1/x² gives a finite area (1) but 1/x does not. ∫₀¹ 1/xᵖ dx converges when p < 1. Gabriel's horn, from rotating 1/x for x ≥ 1, has finite volume π but infinite surface area, a paradox of painting: you could fill it but not paint it, though the paradox depends on treating paint as having no thickness.\n\nImportant convergent integrals: ∫₀^∞ e^(−x) dx = 1, the Gaussian ∫ e^(−x²) dx over the whole line = √π, and the Gamma function, which generalizes factorials. Laplace and Fourier transforms are improper integrals. Comparison tests decide convergence without evaluating. Cauchy principal values assign meaning to some symmetric integrals that look divergent.",
+      "principles": "Infinity can be summed if the tail shrinks fast enough. The boundary between convergent and divergent, powers just above or below 1, is one of the sharpest lines in analysis.",
+      "example": {
+        "label": "1/x² settles, 1/x keeps growing",
+        "code": "import math\n\ndef integral(f, a, b, n=200_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx\n\nfor b in (10, 100, 1000):\n    print(b, round(integral(lambda x: 1 / x ** 2, 1, b), 4), round(integral(lambda x: 1 / x, 1, b), 4))\n# 1/x^2 settles toward 1; 1/x keeps growing like ln(b)\nprint(round(integral(lambda x: math.exp(-x * x), -6, 6), 6), round(math.sqrt(math.pi), 6))   # the Gaussian: sqrt(pi)"
+      },
+      "requires": [
+        "integrals",
+        "limits"
+      ]
+    },
+    {
+      "id": "volumes-of-revolution",
+      "picture": "Spin a curve around an axis and find the volume of the solid it sweeps out.",
+      "mechanism": "Disk method: slice perpendicular to the axis; each slice is a disk of radius f(x), with volume π f(x)² dx, so V = π ∫ f(x)² dx. The washer method subtracts an inner radius. The shell method uses thin cylindrical shells of radius x and height f(x): V = 2π ∫ x f(x) dx.",
+      "detail": "Revolving y = √x about the x-axis from 0 to 4 gives π ∫₀⁴ x dx = 8π; a cone or sphere follow the same way. A sphere of radius r comes from y = √(r² − x²) and gives V = (4/3)πr³, as Archimedes found by a different method and considered his finest result: a sphere and its circumscribed cylinder, in a volume ratio of 2 to 3, were engraved on his tomb. Pappus's theorem gives a volume as the area times the distance traveled by the centroid.\n\nChoose disks or shells by which is easier given the axis and the shape. Similar slicing finds volumes with known cross-sections (pyramids, wedges), and surface areas of revolution, 2π ∫ f √(1 + f′²) dx. Applications: designing vases, tanks, lenses, and turned wooden objects, and computing the amount of liquid in a partly filled tank.",
+      "principles": "A solid is a stack of thin slices, and each slice's volume is an area times a thickness. Integration turns that stack into a single formula, which is how Archimedes' sphere and every vase since are measured.",
+      "example": {
+        "label": "A sphere from stacked disks",
+        "code": "import math\n\ndef integral(f, a, b, n=100_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx\n\nr = 2.0\nsphere = math.pi * integral(lambda x: r * r - x * x, -r, r)        # disks of radius sqrt(r^2 - x^2)\nprint(round(sphere, 4), round(4 / 3 * math.pi * r ** 3, 4))        # both 33.5103"
+      },
+      "requires": [
+        "integrals"
+      ]
+    },
+    {
+      "id": "arc-length",
+      "picture": "The length of a curve, found by adding up tiny straight segments.",
+      "mechanism": "A small step along the curve is the hypotenuse of a horizontal step dx and a vertical step dy: ds = √(dx² + dy²) = √(1 + f′(x)²) dx. So L is the integral of √(1 + f′(x)²) from a to b. For parametric curves, L is the integral of √(x′(t)² + y′(t)²) dt.",
+      "detail": "Example: the length of y = x^(3/2) from 0 to 1 is ∫ √(1 + (9/4)x) dx = (8/27)((13/4)^(3/2) − 1), about 1.44. Few curves have closed-form lengths, and famously the ellipse's perimeter needs elliptic integrals, which got their name from this problem. A circle's circumference gives 2πr, and a catenary's length is a hyperbolic sine. Numerical integration handles the rest.\n\nWhether curved lengths were computable was doubted (Descartes thought not) until the 1650s, when William Neile, Hendrik van Heuraet, and Fermat rectified the semicubical parabola. The coastline paradox: for fractal curves the length depends on the ruler, and the integral diverges. Applications include cable and road lengths, the length of a path traveled, and the definition of speed along a curve as arc length per time.",
+      "principles": "Curved length is the limit of straight-line lengths. That a curve can be measured at all, and how, was a surprise to seventeenth-century mathematicians, and it shows how integration extends measurement beyond the straight.",
+      "example": {
+        "label": "The length of y = x^(3/2) on [0, 1]",
+        "code": "import math\n\ndef integral(f, a, b, n=200_000):\n    dx = (b - a) / n\n    return sum(f(a + (i + 0.5) * dx) for i in range(n)) * dx\n\n# y' = 1.5 * sqrt(x), so ds = sqrt(1 + y'^2) dx\nlength = integral(lambda x: math.sqrt(1 + (1.5 * math.sqrt(x)) ** 2), 0, 1)\nprint(round(length, 5), round(8 / 27 * ((13 / 4) ** 1.5 - 1), 5))         # 1.43971 both"
+      },
+      "requires": [
+        "integrals",
+        "derivatives"
+      ]
+    }
+  ]
+}

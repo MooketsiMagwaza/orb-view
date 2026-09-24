@@ -1,0 +1,35 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "life",
+  "description": "Matter that keeps itself in order: cells, heredity, evolution, energy, light, and death.",
+  "concepts": [
+    {"id":"life","title":"Life","voice":"quiet","orb":"weaving","parents":["nature"],"wiki":"Life","summary":"Matter that keeps itself in order by using energy and exporting disorder. A cell is a small, stubborn argument against entropy, and one that has been making its case for close to four billion years."},
+    {"id":"abiogenesis","title":"Origin of Life","voice":"quiet","orb":"searching","parents":["life"],"wiki":"Abiogenesis","summary":"How chemistry became biology, roughly four billion years ago. We don't know the path, only that it happened once, early, on a young wet planet, and that it started small."},
+    {"id":"cells","title":"Cells","voice":"quiet","orb":"breathing","parents":["life"],"wiki":"Cell (biology)","summary":"The smallest unit that counts as alive: a boundary, a chemistry running inside it, and instructions for building more. Every animal, plant, and fungus is a society of them."},
+    {"id":"mitochondria","title":"Mitochondria","voice":"quiet","orb":"working","parents":["cells"],"wiki":"Mitochondrion","summary":"The power plants inside most cells, descended from bacteria that took up residence over a billion years ago. They still carry their own small piece of DNA, and they burn food to make the cell's energy currency."},
+    {"id":"neurons","title":"Neurons","voice":"quiet","orb":"connecting","parents":["cells"],"wiki":"Neuron","summary":"Cells that pass signals by electricity and chemistry. A human brain holds tens of billions, each linked to thousands of others, and thought is what happens in the pattern of those links."},
+    {"id":"dna","title":"DNA","voice":"quiet","orb":"weaving","parents":["life"],"wiki":"DNA","summary":"A long molecule that stores instructions in a four-letter code, copied each time a cell divides. It's less a blueprint than a very old recipe book that keeps editing itself."},
+    {"id":"genes","title":"Genes","voice":"quiet","orb":"listening","parents":["dna"],"wiki":"Gene","summary":"Stretches of DNA that hold the instructions for making a particular protein or piece of RNA. Genes are switched on and off by the cell's circumstances, so the same code can build a neuron or a skin cell."},
+    {"id":"mutation","title":"Mutation","voice":"quiet","orb":"shaping","parents":["dna"],"wiki":"Mutation","summary":"A copying error, a chemical change, a stray bit of radiation. Most do nothing, some do harm, and a very few help, which is the raw material evolution has always worked with."},
+    {"id":"rna","title":"RNA","voice":"quiet","orb":"composing","parents":["dna"],"wiki":"RNA","summary":"DNA's working copy and much more: it carries instructions to the cell's protein makers, builds them, and can even act as an enzyme. Some think it came before DNA."},
+    {"id":"evolution","title":"Evolution","voice":"quiet","orb":"shaping","parents":["life"],"wiki":"Evolution","summary":"Copies that aren't quite perfect, in a world that keeps some more than others. Given enough time, that plain loop produces eyes, wings, and the person reading this. Nobody plans it."},
+    {"id":"natural-selection","title":"Natural Selection","voice":"quiet","orb":"solving","parents":["evolution"],"wiki":"Natural selection","summary":"Individuals that happen to suit their surroundings leave more offspring, so their traits become more common. No foresight is needed, only variation, inheritance, and time."},
+    {"id":"adaptation","title":"Adaptation","voice":"quiet","orb":"composing","parents":["evolution"],"wiki":"Adaptation","summary":"A trait that fits its owner to a way of life: a heron's legs, a cactus's spines. Each is a record of the problems that ancestors faced, written into the body."},
+    {"id":"extinction","title":"Extinction","voice":"quiet","orb":"breathing","parents":["evolution"],"wiki":"Extinction","summary":"Most species that have ever lived are gone. Some vanish slowly, others in mass events, and each clears room for something that couldn't have existed otherwise."},
+    {"id":"metabolism","title":"Metabolism","voice":"quiet","orb":"working","parents":["life"],"wiki":"Metabolism","summary":"The chemistry of staying organized: take in energy-rich food or light, spend some on building and repair, release the rest as heat. Life runs on a downhill flow and steers a little of it uphill."},
+    {"id":"atp","title":"ATP","voice":"quiet","orb":"solving","parents":["metabolism"],"wiki":"Adenosine triphosphate","summary":"The small molecule every living thing uses as energy currency. Cells make and spend it constantly, and a person turns over roughly their own body weight of it in a day."},
+    {"id":"photosynthesis","title":"Photosynthesis","voice":"quiet","orb":"listening","parents":["life"],"wiki":"Photosynthesis","nasa":"phytoplankton bloom","summary":"Plants, algae, and some bacteria catch sunlight and use it to turn air and water into sugar and oxygen. Nearly every food chain starts here, and the oxygen we breathe is a by-product."},
+    {"id":"death","title":"Death","voice":"quiet","orb":"composing","parents":["life"],"wiki":"Death","sensitive":true,"summary":"The end of a particular pattern, and the return of its material to the ground. Death is what keeps ecosystems turning over, and what gives memory, ritual, and love some of their weight."}
+  ],
+  "links": [
+    ["life", "part-of-nature"], ["life", "energy"], ["abiogenesis", "local-order"], ["abiogenesis", "water"], ["abiogenesis", "rna"],
+    ["abiogenesis", "emergence"], ["cells", "ecosystems"], ["cells", "water"], ["cells", "boundaries"], ["cells", "ageing"],
+    ["mitochondria", "atp"], ["mitochondria", "symbiosis"], ["mitochondria", "metabolism"], ["neurons", "consciousness"], ["neurons", "memory"],
+    ["neurons", "electricity"], ["neurons", "learning"], ["neurons", "perception"], ["dna", "memory"], ["genes", "evolution"],
+    ["genes", "identity"], ["mutation", "randomness"], ["mutation", "probability"], ["mutation", "evolution"], ["mutation", "ageing"],
+    ["rna", "information"], ["evolution", "probability"], ["evolution", "cooperation"], ["natural-selection", "randomness"], ["natural-selection", "feedback"],
+    ["adaptation", "learning"], ["adaptation", "climate"], ["extinction", "biodiversity"], ["extinction", "impermanence"], ["metabolism", "engines"],
+    ["metabolism", "thermodynamics"], ["atp", "energy"], ["atp", "batteries"], ["photosynthesis", "cycles"], ["photosynthesis", "water"],
+    ["photosynthesis", "food-webs"], ["photosynthesis", "carbon-cycle"], ["death", "religion"], ["death", "memory"]
+  ]
+}

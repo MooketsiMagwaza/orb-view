@@ -1,0 +1,23 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "me-stone-to-chip",
+  "group": "Me",
+  "order": 2,
+  "title": "Stone to Chip",
+  "blurb": "How sand becomes a thought a machine can hold, from quartz to RAM.",
+  "orb": "connecting",
+  "entry": "silicon",
+  "path": [
+    "silicon",
+    "stone",
+    "refinement",
+    "crystal-ingot",
+    "wafers",
+    "lithography",
+    "transistors",
+    "memory-cell",
+    "ram",
+    "cpu",
+    "binary"
+  ]
+}

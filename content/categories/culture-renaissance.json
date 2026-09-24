@@ -1,0 +1,20 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "culture-renaissance",
+  "group": "Culture",
+  "order": 4,
+  "title": "The Renaissance",
+  "blurb": "Humanism, perspective, printing, patronage, and a new way of seeing.",
+  "orb": "shaping",
+  "entry": "renaissance",
+  "path": [
+    "renaissance",
+    "humanism",
+    "perspective",
+    "printing-press",
+    "medici",
+    "leonardo",
+    "age-of-discovery",
+    "scientific-revolution"
+  ]
+}

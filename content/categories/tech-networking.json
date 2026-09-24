@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-networking",
+  "group": "Tech",
+  "order": 2,
+  "title": "Networking",
+  "blurb": "How machines talk: packets, addresses, protocols, names, and routes.",
+  "orb": "connecting",
+  "entry": "networks",
+  "path": [
+    "networks",
+    "packets",
+    "osi-model",
+    "ip",
+    "tcp",
+    "udp",
+    "ports",
+    "dns",
+    "routing",
+    "latency",
+    "bandwidth",
+    "internet"
+  ]
+}

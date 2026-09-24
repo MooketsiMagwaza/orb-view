@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orb View library",
+  "type": "object",
+  "required": ["faculties"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "faculties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "blurb", "orb", "voice", "departments"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "blurb": { "type": "string" },
+          "orb": { "enum": ["working", "searching", "solving", "listening", "connecting", "weaving", "composing", "breathing", "shaping"] },
+          "voice": { "enum": ["restless", "precise", "layered", "human", "quiet", "mechanical", "vast", "lucid"] },
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "blurb", "entries"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "blurb": { "type": "string" },
+                "entries": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Concept ids whose decks this department opens onto." }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "study-in-japan",
+  "description": "The whole journey of studying in Japan as a chain, start to finish: deciding, choosing a path, applying, the exams, placement, the visa, arrival, and settling in. The detailed reference (MEXT's seven categories, prerequisites, Botswana-specific notes) lives in the dedicated #/study-japan guide; this cluster is the map view of the same journey.",
+  "concepts": [
+    {"id":"study-in-japan","title":"Studying in Japan","voice":"human","orb":"searching","parents":["education"],"wiki":"International student","summary":"The decision to study abroad in Japan, and the shape of the path in: a scholarship or self-funded, a language-taught or English-taught program, a short exchange or a full degree. Every later step branches from this one choice."},
+    {"id":"choosing-a-path","title":"Choosing a Path","voice":"human","orb":"working","parents":["study-in-japan"],"wiki":"Scholarship","summary":"Fully funded through MEXT, partly funded through JASSO or a university, or fully self-funded through a language school first. Each path trades speed, cost, and competitiveness differently, and the choice shapes everything after it."},
+    {"id":"mext-scholarship","title":"The MEXT Scholarship","voice":"human","orb":"connecting","parents":["choosing-a-path"],"wiki":"Monbukagakusho Scholarship","summary":"Japan's own government scholarship: tuition waived, a monthly stipend, and a round-trip flight, across seven categories from undergraduate to working professionals. The most competitive path in, and the one most people mean by \"studying in Japan on scholarship.\""},
+    {"id":"embassy-application","title":"The Application","voice":"human","orb":"composing","parents":["mext-scholarship"],"wiki":"Diplomatic mission","summary":"Submitting transcripts, recommendation letters, a research plan or statement of purpose, and a medical certificate to a Japanese embassy or a partner university. The paperwork stage, and the one small errors most often derail."},
+    {"id":"exams-and-interview","title":"Exams and Interview","voice":"human","orb":"solving","parents":["embassy-application"],"wiki":"Japanese-Language Proficiency Test","summary":"Written exams in Japanese, English, and sometimes math or science, followed by an interview at the embassy. What's tested depends on the category applied for, and this is where most applicants are filtered out."},
+    {"id":"mext-placement","title":"Selection and Placement","voice":"human","orb":"listening","parents":["exams-and-interview"],"wiki":"University and college admission","summary":"The embassy recommends a shortlist to MEXT, MEXT finalizes its grantees, and a host university and supervisor are matched to each one. Months of waiting between an exam and an answer, ending in a Certificate of Eligibility."},
+    {"id":"student-visa-japan","title":"The Student Visa","voice":"human","orb":"breathing","parents":["mext-placement"],"wiki":"Visa policy of Japan","summary":"With a Certificate of Eligibility in hand, the actual visa application at a Japanese consulate is usually the fastest step in the whole process: paperwork that was hard to earn and easy to submit."},
+    {"id":"arrival-in-japan","title":"Arrival","voice":"human","orb":"shaping","parents":["student-visa-japan"],"wiki":"Foreigner registration in Japan","summary":"Landing, collecting a residence card, registering an address at the local ward office, and opening a bank account and phone line. The bureaucratic first week that has to happen before ordinary life can start."},
+    {"id":"japanese-prep-course","title":"Language Preparation","voice":"human","orb":"weaving","parents":["arrival-in-japan"],"wiki":"Japanese language education","summary":"Many MEXT scholars begin with six months to a year of intensive Japanese before their actual studies do, since the degree itself will often be taught in it. A prerequisite the scholarship builds in rather than assumes."},
+    {"id":"university-enrollment-jp","title":"Starting the Program","voice":"human","orb":"working","parents":["japanese-prep-course"],"wiki":"Higher education in Japan","summary":"Enrollment, orientation, and the actual coursework or research finally begins. Everything before this was preparation; this is the part the whole journey was for."},
+    {"id":"daily-life-in-japan","title":"Daily Life","voice":"human","orb":"connecting","parents":["university-enrollment-jp"],"wiki":"Culture shock","summary":"Budgeting a stipend, finding housing, a part-time job within the legal hour limit, and the slower adjustment of actually living somewhere rather than just studying it. Where the journey turns from a process into a life."},
+    {"id":"after-graduation-jp","title":"After Graduation","voice":"human","orb":"searching","parents":["daily-life-in-japan"],"wiki":"Immigration to Japan","summary":"Stay and work on a new visa category, go home with a degree and a language, or study further. The last branch point of the journey, and, for many, the reason the rest of it was worth doing."}
+  ],
+  "links": [
+    ["study-in-japan", "identity"], ["study-in-japan", "culture"], ["study-in-japan", "language"], ["study-in-japan", "curiosity"],
+    ["choosing-a-path", "scarcity"], ["choosing-a-path", "trade"],
+    ["mext-scholarship", "government"], ["mext-scholarship", "trust"],
+    ["embassy-application", "cooperation"], ["embassy-application", "burden-of-proof"],
+    ["exams-and-interview", "language"], ["exams-and-interview", "anxiety"],
+    ["mext-placement", "trust"], ["mext-placement", "regret"],
+    ["student-visa-japan", "government"], ["student-visa-japan", "rights"],
+    ["arrival-in-japan", "loneliness"], ["arrival-in-japan", "identity"],
+    ["japanese-prep-course", "language"], ["japanese-prep-course", "learning"],
+    ["university-enrollment-jp", "education"], ["university-enrollment-jp", "curiosity"],
+    ["daily-life-in-japan", "loneliness"], ["daily-life-in-japan", "friendship"], ["daily-life-in-japan", "money"],
+    ["after-graduation-jp", "identity"], ["after-graduation-jp", "regret"]
+  ]
+}

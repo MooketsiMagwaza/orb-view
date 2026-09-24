@@ -1,0 +1,24 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "culture",
+  "description": "The entrance to culture, plus ritual and its institutions. Language, art, music, history, religion, Taoism, and emotion are their own clusters.",
+  "concepts": [
+    {"id":"culture","title":"Culture","voice":"layered","orb":"weaving","parents":["entropy"],"wiki":"Culture","summary":"Meaning survives by changing. A story, a ritual, a word carries the marks of every hand it passed through, and each generation feels it from the inside, as if it had always been this way."},
+    {"id":"ritual","title":"Ritual","voice":"layered","orb":"weaving","parents":["culture"],"wiki":"Ritual","met":"ritual vessel","summary":"Repeated actions that mean more than they do. Lighting a candle, sharing a meal, raising a hand. A ritual lets a community hold a feeling steady long enough to share it."},
+    {"id":"institutions","title":"Institutions","voice":"layered","orb":"solving","parents":["ritual"],"wiki":"Institution","summary":"Repeat a ritual long enough and rules, roles, and buildings grow around it. Institutions are memory made durable, and sometimes made rigid."},
+    {"id":"festivals","title":"Festivals","voice":"layered","orb":"composing","parents":["ritual"],"wiki":"Festival","summary":"Shared time set aside from ordinary time: harvests, new years, saints' days. They mark the calendar, bind a community, and give people a reason to gather that isn't work."},
+    {"id":"funerals","title":"Funerals","voice":"layered","orb":"breathing","parents":["ritual"],"wiki":"Funeral","summary":"Almost every culture has a way of saying goodbye to the dead. The forms differ enormously, but the job is the same: to mark the loss, gather the living, and let the grief have somewhere to go."},
+    {"id":"food","title":"Food","voice":"layered","orb":"working","parents":["ritual"],"wiki":"Food","summary":"Fuel that became language. What people eat, when, and with whom carries memory, belonging, and identity, and a shared meal is possibly the oldest ritual there is."}
+  ],
+  "links": [
+    ["culture", "humanity"], ["culture", "silicon"], ["culture", "machines"], ["culture", "evolution"], ["culture", "engines"],
+    ["ritual", "music"], ["ritual", "cooperation"], ["ritual", "death"], ["ritual", "calendar"], ["ritual", "religion"],
+    ["ritual", "family"], ["ritual", "story"], ["ritual", "time"], ["ritual", "cycles"], ["ritual", "seasons"],
+    ["institutions", "trust"], ["institutions", "money"], ["institutions", "conflict"], ["institutions", "cooperation"], ["institutions", "religion"],
+    ["institutions", "certificates"], ["institutions", "firearms"], ["festivals", "music"], ["festivals", "food"], ["festivals", "seasons"],
+    ["festivals", "religion"], ["festivals", "joy"], ["festivals", "cities"], ["funerals", "death"], ["funerals", "grief"],
+    ["funerals", "religion"], ["funerals", "memory"], ["funerals", "music"], ["funerals", "love"], ["food", "family"],
+    ["food", "agriculture"], ["food", "trade"], ["food", "metabolism"], ["food", "silk-road"], ["food", "friendship"],
+    ["food", "story"]
+  ]
+}

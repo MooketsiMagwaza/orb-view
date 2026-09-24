@@ -1,0 +1,80 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part eight: how it was made: from Archimedes to Newton and Leibniz, the priority dispute, Berkeley's critique, and the rigorous rebuilding of the nineteenth century, each in four layers.",
+  "depth": [
+    {
+      "id": "calculus-history",
+      "picture": "Two thousand years of assembling an idea, then a century of making it rigorous.",
+      "mechanism": "Ancient Greeks found areas and volumes by exhaustion (Eudoxus, Archimedes). Indian mathematicians of the Kerala school, Madhava around 1400, discovered infinite series for sine, cosine, and arctangent. In the 1600s, Fermat, Descartes, Cavalieri, Wallis, and Barrow developed methods for tangents and areas; Newton and Leibniz unified them into a general system with the fundamental theorem. In the 1800s, Cauchy, Bolzano, and Weierstrass gave it foundations in limits.",
+      "detail": "Before Newton and Leibniz, piecemeal methods existed: Fermat's method of adequality for maxima and tangents (about 1636), Cavalieri's indivisibles (1635), Wallis's Arithmetica infinitorum (1656), and Barrow's geometric proof that tangents and areas are inverse problems. Newton's fluxions (1665–66, published later) and Leibniz's differentials (from 1675, published 1684) provided algorithms: rules anyone could apply.\n\nThe eighteenth century used calculus with astonishing success, through Euler, the Bernoullis, Lagrange, and Laplace, in mechanics, astronomy, and fluid dynamics, while its foundations remained murky. The nineteenth century's arithmetization of analysis rebuilt it: Cauchy's limits and continuity (1821), Riemann's integral (1854), Weierstrass's epsilon–delta, Dedekind's and Cantor's construction of the real numbers, and Lebesgue's measure (1902). In the twentieth, Robinson's nonstandard analysis (1960) revived infinitesimals rigorously.",
+      "principles": "Ideas grow by use before they are proved. Calculus was built in stages, method, then unification, then rigor, and that order was the reverse of how it is now taught.",
+      "requires": [
+        "derivatives",
+        "integrals"
+      ]
+    },
+    {
+      "id": "archimedes",
+      "picture": "The Greek who nearly invented integration two thousand years early.",
+      "mechanism": "Archimedes (about 287 to 212 BCE) found areas and volumes by slicing shapes into thin pieces and squeezing the answer between inner and outer bounds, the method of exhaustion, made rigorous by Eudoxus. In The Method, rediscovered in 1906 in a palimpsest, he described how he first found results by mentally balancing slices on a lever, then proved them by exhaustion.",
+      "detail": "Results: the area of a parabolic segment is 4/3 the area of the inscribed triangle, found by summing a geometric series; the volume of a sphere is 2/3 that of its circumscribing cylinder, and its surface is four times a great circle, which he regarded as his finest discovery and had carved on his tomb; π lies between 3 10/71 and 3 1/7, from 96-sided polygons; the area of a spiral; the principle of buoyancy; the law of the lever; centers of gravity; and the Sand Reckoner, an estimate of the number of grains of sand that would fill the universe, which needed a new way of naming large numbers.\n\nHe designed war machines defending Syracuse against Rome and was killed in 212 BCE when the city fell. The Archimedes Palimpsest, a tenth-century copy overwritten by a prayer book in the thirteenth century, has been recovered by imaging technology since 1998. His work was studied by Galileo, Kepler, Cavalieri, and Newton, and inspired the seventeenth century's rediscovery of integration.",
+      "principles": "Slicing a shape into pieces and letting the pieces get smaller is the idea behind every integral. Archimedes found it, used it, and even guessed the answers by mechanical intuition before proving them, which is how much of mathematics still goes.",
+      "requires": [
+        "integrals"
+      ]
+    },
+    {
+      "id": "newton",
+      "picture": "The man who invented calculus to explain why the planets move as they do.",
+      "mechanism": "Isaac Newton (1643–1727) developed the method of fluxions during the plague years of 1665–66: quantities that flow with time, and their rates of change. He treated derivatives as speeds and integration as the inverse operation, found the binomial series and other infinite-series methods, and used them to analyze motion, leading to the laws of motion and universal gravitation in the Principia of 1687.",
+      "detail": "Newton did not publish his calculus for decades: the first public presentation came in the 1704 appendix to his Opticks, De quadratura curvarum. The Principia proved its results geometrically, in the style of Euclid, resting on limits of ratios of vanishing quantities, his prime and ultimate ratios.\n\nKey results from calculus: an inverse-square force produces elliptical orbits, so Kepler's laws follow; the shell theorem, that a spherical body attracts as if its mass were at the center; and calculations of the Moon's motion and the tides. He also gave a method for finding roots, worked on interpolation and optics (the spectrum of white light), and built the reflecting telescope. He served as Master of the Mint and President of the Royal Society, and worked on alchemy and theology. His reluctance to publish, and the resulting dispute with Leibniz, damaged both. The Principia showed that the same mathematics governs the heavens and the earth, and transformed science's ambitions.",
+      "principles": "Newton showed that a single mathematics, rates of change and their sums, describes falling apples and orbiting moons. The union of calculus with the laws of motion made prediction the model of science.",
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "leibniz",
+      "picture": "The man who gave calculus its symbols: ∫ and dx.",
+      "mechanism": "Gottfried Wilhelm Leibniz (1646–1716) developed calculus in Paris in 1675–76, working with differentials dx and dy as infinitely small differences, and integrals as sums of them (the ∫ is a long S, from summa). He published first, in 1684 for differentiation and 1686 for integration. His notation made the rules almost mechanical.",
+      "detail": "The symbols dy/dx, ∫ f dx, and d(uv) = u dv + v du make the chain rule look like cancelling fractions and substitution like renaming, which is why his notation survives, and why English mathematics, which stuck with Newton's dots, fell behind for a century.\n\nLeibniz was a polymath: he built a calculating machine that could multiply, described the binary number system in its modern form in 1703 and linked it to the I Ching, developed symbolic logic and dreamed of a calculus of reasoning, argued philosophically that this is the best of all possible worlds (mocked by Voltaire in Candide), and proposed the principle of sufficient reason. He worked as a diplomat, librarian, and court adviser in Hanover. His feud with Newton over priority clouded his last years, and he died largely neglected.",
+      "principles": "Notation is a tool of thought. Leibniz's symbols made calculus something students could do by rule, which helped it spread; his broader hope, that reasoning itself could be turned into calculation, still animates logic and computing.",
+      "requires": [
+        "derivatives",
+        "integrals"
+      ]
+    },
+    {
+      "id": "priority-dispute",
+      "picture": "Two men invented the same mathematics, and each was accused of stealing it.",
+      "mechanism": "Newton developed his method in 1665–66 but published late; Leibniz developed his in 1675–76 and published first, in 1684. Leibniz had seen some of Newton's work in manuscript and letters during visits to London in 1673 and 1676. Later, supporters accused Leibniz of plagiarism, and in 1712 the Royal Society, with Newton secretly directing the inquiry, ruled in Newton's favor.",
+      "detail": "Most historians now conclude that both invented calculus independently, with different approaches: Newton's fluxions came from motion and limits, Leibniz's differentials from sums of infinitely small parts and better notation. The dispute became a matter of national pride: British mathematicians clung to Newton's notation and geometric style and for about a century fell behind the continental school of the Bernoullis, Euler, Lagrange, and Laplace, who used Leibniz's.\n\nOnly in the early 1800s, when the Analytical Society at Cambridge (Babbage, Herschel, and Peacock) campaigned to replace the dot-age with d-ism, did Britain catch up. Newton's conduct is criticized: he wrote the Royal Society's report himself, anonymously. The affair is the standard example of multiple discovery in science, as with oxygen, evolution by natural selection, and the telephone, and of how priority quarrels can harm progress and reputations.",
+      "principles": "Ideas ripen when the conditions are right, and several minds reach them at once. The dispute cost both men dearly and cost Britain a century of mathematics, a reminder that credit, and good notation, matter more than they should.",
+      "requires": [
+        "newton",
+        "leibniz"
+      ]
+    },
+    {
+      "id": "the-analyst",
+      "picture": "A bishop's attack on calculus: infinitesimals are ghosts of departed quantities.",
+      "mechanism": "In 1734 George Berkeley, bishop and philosopher, published The Analyst, addressed to an infidel mathematician, probably Edmond Halley. He argued that calculus's foundations were incoherent: in computing a derivative, the infinitesimal increment is first treated as nonzero, so you can divide by it, and then as zero, so you can drop it. Calculus works, he said, only because errors cancel.",
+      "detail": "Berkeley wrote partly to answer the charge that religion demands faith while mathematics does not: he showed that mathematics too rests on obscure notions, so mathematicians should not sneer at mysteries. He asked whether the vanishing increments, neither finite nor infinitely small nor nothing, might be called the ghosts of departed quantities. He was largely correct.\n\nThe replies were partial: Maclaurin's Treatise of Fluxions (1742), and d'Alembert's suggestion that the derivative is a limit. Lagrange tried to base calculus on power series in 1797, a fix with its own problems. Cauchy in 1821 defined the derivative as a limit, and Weierstrass's epsilon–delta arguments of the 1860s completed the removal of infinitesimals. So Berkeley's critique motivated the search for rigor, which took nearly 150 years, and in nonstandard analysis in 1960 infinitesimals were vindicated in a new form. Berkeley also argued for idealism, to be is to be perceived, and Berkeley, California, is named after him.",
+      "principles": "A good criticism can be right while the criticized method works. Berkeley saw a genuine gap, and by pointing at it he set mathematicians to work on the foundations, which took the better part of two centuries to complete.",
+      "requires": [
+        "infinitesimals"
+      ]
+    },
+    {
+      "id": "real-analysis",
+      "picture": "Rebuilding calculus so every step is justified.",
+      "mechanism": "Real analysis develops calculus rigorously from the real numbers: precise definitions of limit, continuity, derivative, and integral using epsilon and delta; the completeness of the reals (every bounded set has a least upper bound); and theorems proved from these foundations, such as the intermediate value theorem, the mean value theorem, and the fundamental theorem, and the convergence of sequences and series.",
+      "detail": "Bolzano in 1817 and Cauchy in 1821 started it; Weierstrass in the 1860s made it arithmetic, replacing gets close with inequalities; Dedekind and Cantor in the 1870s constructed the reals from the rationals, by cuts and Cauchy sequences; Riemann gave the integral in 1854; and Lebesgue's measure and integral of 1902 extended integration to wild functions and made limits and integrals interchange safely, the foundation of modern probability.\n\nThe subject revealed strange objects: continuous functions that are nowhere differentiable (Weierstrass, 1872), space-filling curves (Peano, 1890), and Cantor's uncountable set of measure zero. It distinguishes pointwise from uniform convergence, a source of errors in older work: Cauchy claimed that a convergent sum of continuous functions is continuous, which is false. It is the core of an undergraduate mathematics degree and the gateway to functional analysis, measure theory, and modern PDE theory. Its habit, insisting on the exact hypotheses of every theorem, carries over to careful reasoning in general.",
+      "principles": "Rigor is what lets you trust an argument you cannot picture. Real analysis gave calculus a floor to stand on, and by demanding precision exposed pathologies that intuition would never have guessed.",
+      "requires": [
+        "epsilon-delta",
+        "infinitesimals"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-crypto",
+  "group": "Tech",
+  "order": 4,
+  "title": "Cryptography & TLS",
+  "blurb": "Secrets, proofs, and the handshake behind the padlock.",
+  "orb": "weaving",
+  "entry": "cryptography",
+  "path": [
+    "cryptography",
+    "hashing",
+    "encryption",
+    "symmetric-encryption",
+    "public-key",
+    "key-exchange",
+    "digital-signatures",
+    "tls",
+    "certificates",
+    "https"
+  ]
+}

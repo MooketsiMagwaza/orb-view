@@ -1,0 +1,19 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "science-energy",
+  "group": "Science",
+  "order": 5,
+  "title": "Energy & Heat",
+  "blurb": "The one thing that's conserved, and why heat always spreads.",
+  "orb": "working",
+  "entry": "energy",
+  "path": [
+    "energy",
+    "heat",
+    "temperature",
+    "thermodynamics",
+    "efficiency",
+    "waste-heat",
+    "entropy"
+  ]
+}

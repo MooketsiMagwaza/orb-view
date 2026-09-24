@@ -1,0 +1,27 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "entropy",
+  "description": "The root lens and its six second-layer ideas, revealed by tapping Entropy a second time. The eight entrances are defined in their own clusters.",
+  "concepts": [
+    {"id":"entropy","title":"Entropy","voice":"restless","orb":"working","parents":[],"wiki":"Entropy","summary":"Energy spreads. Order is something the universe can make locally, but never maintain for free. Almost everything I find beautiful leans on that bargain: heat leaving, structure forming, time refusing to run backward."},
+    {"id":"arrow-of-time","title":"Arrow of Time","voice":"restless","orb":"composing","parents":["entropy"],"layer":2,"wiki":"Arrow of time","summary":"The small laws mostly run either way. Time gets its direction from large numbers: ice melts, coffee cools, memories pile up. The reverse isn't forbidden, only overwhelmingly improbable."},
+    {"id":"decay-renewal","title":"Decay & Renewal","voice":"restless","orb":"breathing","parents":["entropy"],"layer":2,"wiki":"Decomposition","summary":"Nothing holds its shape for free. Yet what falls apart becomes the ground for what comes next. Decay isn't the opposite of growth; it's the other half of the same cycle."},
+    {"id":"local-order","title":"Local Order","voice":"restless","orb":"solving","parents":["entropy"],"layer":2,"wiki":"Dissipative system","summary":"A crystal, a cell, a city. Order can grow wherever there's somewhere else to send the disorder. Every island of structure is paid for by warming the water around it."},
+    {"id":"information","title":"Information","voice":"restless","orb":"connecting","parents":["entropy"],"layer":2,"wiki":"Entropy (information theory)","summary":"Entropy also measures what you don't yet know. The more ways a system could be arranged, the more a single answer is worth. Uncertainty turns out to be something physical."},
+    {"id":"waste-heat","title":"Waste Heat","voice":"restless","orb":"working","parents":["entropy"],"layer":2,"wiki":"Waste heat","summary":"Useful motion always leaves some warmth behind. Engines, chips, bodies: each turns a little order into a little heat, then hands that heat back to the world."},
+    {"id":"emergence","title":"Emergence","voice":"restless","orb":"weaving","parents":["entropy"],"layer":2,"wiki":"Emergence","summary":"Complexity can still appear in a universe drifting toward spread-out. When energy flows through matter, patterns lock in: storms, cells, minds. Each one is a temporary answer to a steady push."}
+  ],
+  "links": [
+    ["entropy", "engines"], ["entropy", "life"], ["entropy", "thermodynamics"], ["entropy", "energy"], ["entropy", "scarcity"],
+    ["entropy", "impermanence"], ["entropy", "taoism"], ["arrow-of-time", "time"], ["arrow-of-time", "clocks"], ["arrow-of-time", "cycles"],
+    ["arrow-of-time", "memory"], ["arrow-of-time", "probability"], ["arrow-of-time", "death"], ["arrow-of-time", "causality"], ["decay-renewal", "cycles"],
+    ["decay-renewal", "death"], ["decay-renewal", "stone"], ["decay-renewal", "impermanence"], ["decay-renewal", "seasons"], ["decay-renewal", "fungi"],
+    ["decay-renewal", "regret"], ["local-order", "order"], ["local-order", "ecosystems"], ["local-order", "metabolism"], ["local-order", "cells"],
+    ["local-order", "refinement"], ["local-order", "crystal-ingot"], ["local-order", "cities"], ["local-order", "thermodynamics"], ["information", "ram"],
+    ["information", "memory-cell"], ["information", "language"], ["information", "probability"], ["information", "neural-networks"], ["information", "dna"],
+    ["information", "money"], ["information", "data"], ["information", "cryptography"], ["information", "binary"], ["waste-heat", "engines"],
+    ["waste-heat", "efficiency"], ["waste-heat", "metabolism"], ["waste-heat", "transistors"], ["waste-heat", "cpu"], ["waste-heat", "energy"],
+    ["emergence", "order"], ["emergence", "consciousness"], ["emergence", "ecosystems"], ["emergence", "chaos"], ["emergence", "neural-networks"],
+    ["emergence", "cooperation"], ["emergence", "patterns"], ["emergence", "evolution"], ["emergence", "cities"], ["emergence", "internet"]
+  ]
+}

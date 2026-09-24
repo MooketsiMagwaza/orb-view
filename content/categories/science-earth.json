@@ -1,0 +1,20 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "science-earth",
+  "group": "Science",
+  "order": 4,
+  "title": "Earth",
+  "blurb": "Plates, air, oceans, weather, and the climate they add up to.",
+  "orb": "breathing",
+  "entry": "earth",
+  "path": [
+    "earth",
+    "plate-tectonics",
+    "atmosphere",
+    "oceans",
+    "weather",
+    "water-cycle",
+    "carbon-cycle",
+    "climate"
+  ]
+}

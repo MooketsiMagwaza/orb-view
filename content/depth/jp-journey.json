@@ -1,0 +1,126 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "The journey of studying in Japan, start to finish, as a chain: deciding, choosing a path, the MEXT application, exams, placement, the visa, arrival, language preparation, enrollment, daily life, and what comes after. Each layer points to the dedicated #/study-japan guide for the detailed reference (categories, prerequisites, Botswana-specific notes).",
+  "depth": [
+    {
+      "id": "study-in-japan",
+      "picture": "The decision to study abroad in Japan, and the shape of the path that follows from it.",
+      "mechanism": "Everything downstream branches from a handful of early choices: scholarship or self-funded, a Japanese-taught or English-taught program, a short exchange or a full degree, undergraduate or graduate. Making that choice deliberately, rather than drifting into whichever option is loudest online, is what keeps the following year of paperwork pointed at the right target.",
+      "detail": "Roughly three kinds of people end up here: high school or university students planning years ahead, graduates or professionals aiming at a master's or research seat, and people drawn first by the language or culture who back into the logistics afterward. Each starts the journey from a different node in this chain, since a working professional skips straight to the scholarship categories built for them, while a first-year student has a longer runway of preparation ahead.\n\nThe honest first step is less \"how do I apply\" and more \"what would actually make this worth it,\" since the application itself takes the better part of a year and the commitment, once granted, runs from one to seven. A dedicated reference for everything that follows, MEXT's seven categories, the prerequisites, and country-specific notes including Botswana's, lives at the Studying in Japan guide linked from this concept's page.",
+      "principles": "A year-long application process is easiest to survive when the destination was chosen on purpose. The steps that follow are mostly mechanical once this one is settled, and mostly directionless when it isn't.",
+      "requires": [
+        "education"
+      ]
+    },
+    {
+      "id": "choosing-a-path",
+      "picture": "Fully funded, partly funded, or self-funded: the fork that decides everything after it.",
+      "mechanism": "MEXT (the Japanese government's own scholarship) is fully funded but the most competitive and slowest to confirm. JASSO and university-specific scholarships are smaller top-ups for students who get themselves admitted first, as privately-financed applicants, and are then nominated for extra funding. Fully self-funded study, often by way of a year or two at a Japanese language school while preparing for the EJU entrance exam, is the most common path overall and the one with the fewest gatekeepers.",
+      "detail": "The trade is speed against cost against certainty. MEXT asks for a nine-to-twelve-month application with a real chance of rejection at several stages, in exchange for tuition, a stipend, and a flight. Self-funded study skips that uncertainty entirely, at the cost of tuition and living expenses that fall on the student, sometimes offset later by JASSO's Honors Scholarship or a university waiver once already enrolled. English-taught degree programs, a fourth and newer option, remove the Japanese-language barrier at entry but narrow the list of universities and, often, the depth of cultural immersion.\n\nThere is no universally correct choice: a strong academic record and patience for a long, uncertain process favor MEXT; a fixed timeline or lower risk tolerance favors self-funding or an English-taught program.",
+      "principles": "Every path trades certainty for cost in a different place. Picking one isn't about which is objectively best, it's about which trade-off matches the time, money, and risk actually available.",
+      "requires": [
+        "study-in-japan"
+      ]
+    },
+    {
+      "id": "mext-scholarship",
+      "picture": "Japan's own government scholarship: tuition waived, a stipend, and a flight, across seven categories.",
+      "mechanism": "Undergraduate, Research Student, Japanese Studies, Teacher Training, the Young Leaders Program, College of Technology, and Specialized Training College each target a different stage of life, from a graduating high schooler to a working professional with a decade of experience. Each has its own age limit, stipend, duration, and application route.",
+      "detail": "Common to all seven: no tuition, no entrance-exam fees, a monthly stipend, and one round-trip economy flight. What differs is everything else, and matching the right category to an applicant's actual stage, still in high school, already holding a bachelor's, mid-career as a teacher, is the first real decision inside this path, made well before any document is submitted.\n\nThe full breakdown of all seven categories, their exact stipends, age limits, and which application route accepts which, is deliberately kept out of this chain and lives instead in the dedicated Studying in Japan guide, since it's reference material to check against, not a story with a single next step.",
+      "principles": "A scholarship with seven different shapes needs to be read as seven different offers, not one. Which one actually fits is worth confirming before writing a single word of the application.",
+      "requires": [
+        "choosing-a-path"
+      ]
+    },
+    {
+      "id": "embassy-application",
+      "picture": "Transcripts, recommendation letters, a research plan, a medical form: the paperwork stage.",
+      "mechanism": "An application packet assembled and submitted either to the Japanese embassy or consulate in the applicant's home country, or, on the faster university-recommendation route, directly to a partner university that screens candidates itself before forwarding a shortlist to MEXT.",
+      "detail": "The core documents are consistent across categories: academic transcripts and certificates, translated if not already in English or Japanese; two recommendation letters, usually from a teacher, professor, or employer; a medical certificate on a MEXT-provided form; and, for research-track applicants especially, a research plan or statement of purpose concrete enough to name an actual field and, ideally, a specific potential supervisor.\n\nThis is the stage where small errors cost the most: a missing signature, a transcript that arrives a day late, a research plan vague enough to read as generic. None of it is intellectually hard, all of it is unforgiving of carelessness, and the deadline, set independently by each embassy, is usually somewhere between April and June for an application the following spring.",
+      "principles": "Nothing about this stage tests ability; all of it tests attention. The applications that fail here rarely fail for being unqualified, they fail for being incomplete.",
+      "requires": [
+        "mext-scholarship"
+      ]
+    },
+    {
+      "id": "exams-and-interview",
+      "picture": "Written exams and a sit-down interview at the embassy: the first real filter.",
+      "mechanism": "Depending on category, written exams in Japanese, English, and sometimes mathematics or science, followed by an interview with embassy staff, usually conducted a few months after the paperwork deadline. The subjects tested are fixed by category, not chosen by the applicant.",
+      "detail": "Undergraduate and vocational-track applicants sit subject exams matched to their intended major alongside language tests; research and teacher-training applicants are tested mainly on Japanese and English proficiency, since their coursework depends less on entrance-level subject knowledge and more on functioning in the language once there. The interview tends to probe two things regardless of category: whether the stated plan is realistic, and whether the applicant's Japanese or English is actually good enough to survive the preparatory year that usually follows.\n\nThis is the stage most applicants who make it this far are eliminated at, since the paperwork stage screens for completeness while this one screens for actual readiness.",
+      "principles": "Documents can be perfected with enough time; performance under a real exam and a real interview can't be faked the same way. This is where preparation, not just organization, starts to matter.",
+      "requires": [
+        "embassy-application"
+      ]
+    },
+    {
+      "id": "mext-placement",
+      "picture": "Months of waiting, ending in a shortlist, a final decision, and a university match.",
+      "mechanism": "The embassy recommends its strongest candidates to MEXT; MEXT reviews recommendations from every embassy and finalizes that year's full list of grantees; MEXT and JASSO then match each grantee to a host university and, for research students, a supervisor. Successful candidates receive a Certificate of Eligibility, the document a visa application will need.",
+      "detail": "Nothing is asked of the applicant during this stretch beyond patience: the process runs almost entirely on Japan's own administrative timeline, typically from around August through February. It is also the stage where category matters most for wait length, since university-recommendation candidates, screened directly by a single institution, usually hear back faster than embassy-route candidates waiting on a multi-stage national process.\n\nA rejection at this stage, after clearing the exam and interview, is not a comment on ability so much as the reality of limited seats; the acceptance rate for MEXT overall runs in the low double digits most years.",
+      "principles": "The hardest part of this stage is that it asks for nothing, which is its own kind of difficulty. There is no more work to do, only a result to wait for.",
+      "requires": [
+        "exams-and-interview"
+      ]
+    },
+    {
+      "id": "student-visa-japan",
+      "picture": "With a Certificate of Eligibility already earned, the visa itself is almost a formality.",
+      "mechanism": "Submit the Certificate of Eligibility, a passport, and a visa application form to a Japanese consulate in the home country; a student (\"ryugaku\") visa is typically issued within days to a couple of weeks, since the substantive vetting already happened during the scholarship selection itself.",
+      "detail": "This is deliberately the shortest and least stressful step in the whole chain, a contrast most applicants notice after the year that preceded it: no interview, no exam, no essay, just a document that was hard to earn handed over to be stamped. The visa is tied to the specific university and program named on the Certificate of Eligibility, and changing either afterward means adjusting the visa status to match.",
+      "principles": "Not every step in a long process is meant to be hard. This one is a reward for the ones before it, not a new test.",
+      "requires": [
+        "mext-placement"
+      ]
+    },
+    {
+      "id": "arrival-in-japan",
+      "picture": "Landing, a residence card, an address registered at the local ward office, a bank account.",
+      "mechanism": "On arrival, a foreign national staying more than 90 days receives a residence card (zairyū kādo) at the airport; within 14 days, the address where they'll actually live has to be registered at the local municipal ward office, which also triggers enrollment in Japan's national health insurance and, usually, the paperwork for a bank account and phone line.",
+      "detail": "None of this is optional or especially difficult, but all of it has to happen in a short window, often in a language still being learned, which is why many programs schedule an orientation specifically to walk new arrivals through it. The residence card itself becomes the single most-used piece of identification for the rest of the stay, required for everything from a gym membership to a library card.\n\nIt's a deliberately unglamorous first week: less \"starting a new life\" and more \"completing a checklist,\" and getting through the checklist is what makes the rest of the chapter possible.",
+      "principles": "Bureaucracy that feels tedious on arrival is what makes everything after it work smoothly. Getting it done quickly, rather than resentfully, is mostly a matter of expecting it.",
+      "requires": [
+        "student-visa-japan"
+      ]
+    },
+    {
+      "id": "japanese-prep-course",
+      "picture": "Six months to a year of intensive language study before the actual coursework starts.",
+      "mechanism": "Most MEXT undergraduate and research scholars begin not with their degree program but with a preparatory Japanese course, since the degree itself is frequently taught in Japanese and the scholarship assumes incoming students need to reach that level rather than already have it.",
+      "detail": "This is often the most disorienting stretch of the whole journey: full days of language instruction, a cohort of other international students in the same position, and a felt sense of not yet doing the thing that was actually applied for. It is also, in hindsight, usually the single highest-leverage stretch, since the difference between arriving at N4 and leaving at N2 or higher decides how much of the following years is spent understanding versus guessing.\n\nNot every category includes this step: Japanese Studies scholars already study the language at home before arriving, and some English-taught programs skip it entirely, for better or worse.",
+      "principles": "Progress here is slow to feel and fast to measure only in hindsight. The frustration of not yet being fluent is, for most scholars, the actual price of eventually being fluent.",
+      "requires": [
+        "arrival-in-japan"
+      ]
+    },
+    {
+      "id": "university-enrollment-jp",
+      "picture": "Orientation, a class schedule, a lab or seminar: the part the whole year of paperwork was for.",
+      "mechanism": "Formal enrollment at the host university, assignment to a department, lab, or seminar, and the start of actual coursework or research, now conducted largely in the language the preparatory course spent months building toward.",
+      "detail": "The adjustment here is less bureaucratic than the arrival stage and more academic and social: different expectations around classroom participation, different norms for approaching a professor or advisor, and, for research students particularly, the sometimes slow process of finding an actual footing in a lab's existing group and rhythm. International-student offices at most universities run onboarding specifically for this, since the gap between finishing language school and actually functioning inside a Japanese academic environment is a well-known one, not a personal failing.",
+      "principles": "Everything before this point was preparation for a single moment: actually starting. What felt, for months, like an endless sequence of forms and waiting turns out to have been getting ready for exactly this.",
+      "requires": [
+        "japanese-prep-course"
+      ]
+    },
+    {
+      "id": "daily-life-in-japan",
+      "picture": "Budgeting a stipend, finding housing, a part-time job, and the slower work of actually settling in.",
+      "mechanism": "Ongoing, unglamorous logistics: making a monthly stipend cover rent, food, and transport; finding housing, often through the university or a shared dormitory at first; and, if needed, a part-time job kept within the legal limit of 28 hours a week during term, which requires its own separate work permit.",
+      "detail": "This is where the journey stops being a sequence of discrete steps and becomes simply a life: friendships that form slowly across a language gap, homesickness that shows up unpredictably months in rather than in the first difficult week, and a growing, unremarkable competence at things that felt impossible on arrival, reading a utility bill, making a doctor's appointment, navigating a train transfer without checking a map.\n\nIt is also, often quietly, the part with the least external structure and the most personal cost: no application deadline to hit, no exam to pass, just the daily work of staying connected to people and purpose in an unfamiliar place.",
+      "principles": "The formal process has an end point; settling in doesn't, not really. This is the stretch where the outcome of the whole journey is actually decided, and it's decided slowly, not on a single test day.",
+      "requires": [
+        "university-enrollment-jp"
+      ]
+    },
+    {
+      "id": "after-graduation-jp",
+      "picture": "Stay and work, go home, or study further: the last branch point of the journey.",
+      "mechanism": "Graduates can apply to convert their student status to a work visa, most commonly through an employer sponsorship or, for those who qualify on Japan's points-based system, a Highly Skilled Professional status that shortens the path to permanent residency; return to their home country with the degree and the language; or continue on to further study.",
+      "detail": "None of these is a failure mode; each is a different answer to what the years were for. Staying requires finding an employer willing to sponsor a work visa, a real but navigable hurdle given Japan's aging workforce and active recruitment of skilled graduates in several fields; returning home often means becoming, almost by default, one of the few people in a given field or workplace who actually speaks Japanese and understands the culture firsthand, a distinct kind of value few other paths produce.\n\nFor MEXT scholars specifically, there is no formal obligation to stay in or return to the home country, unlike some other national scholarship programs, which leaves the choice genuinely open rather than pre-decided by the terms of the funding.",
+      "principles": "A journey this long is easy to justify only by its ending, but the ending isn't singular. Staying, returning, and continuing are three different successful outcomes, not one correct one and two consolation prizes.",
+      "requires": [
+        "daily-life-in-japan"
+      ]
+    }
+  ]
+}

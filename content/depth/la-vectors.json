@@ -1,0 +1,118 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Linear algebra, part one: the subject itself, vectors, the dot and cross products, norms, bases, independence, and orthogonality, each in four layers.",
+  "depth": [
+    {
+      "id": "linear-algebra",
+      "picture": "The mathematics of arrows, grids of numbers, and what they do to space.",
+      "mechanism": "Work with vectors (lists of numbers), matrices (grids), and the operations that respect linear structure: adding, scaling, multiplying. A linear map preserves straight lines and the origin; every one can be written as a matrix, so questions about geometry become questions about arithmetic on tables.",
+      "detail": "Its roots are in solving systems of equations (the Chinese Nine Chapters, around 200 BCE; Gauss in the 1800s), determinants (Leibniz, Cramer), Hamilton's and Grassmann's vectors and Cayley's matrices in the mid-1800s, and Peano's abstract vector spaces in 1888. It exploded in the twentieth century with quantum mechanics (states are vectors, observables are matrices), computing, statistics, and economics.\n\nToday it runs computer graphics (every 3-D transformation is a matrix product), search (PageRank is an eigenvector), machine learning (a neural network is mostly matrix multiplication, and GPUs exist for it), signal processing, robotics, and data science. Why linear? Nonlinear problems are usually solved by approximating them linearly, since derivatives are best linear approximations, and iterating. Two viewpoints, geometric (arrows, transformations) and algebraic (arrays, equations), are equivalent, and the power is in moving between them. Numerical linear algebra libraries are among the best-optimized software in existence, and their speed sets the speed of AI.",
+      "principles": "Linear algebra is what remains true when things are simple enough to add and scale. Because nearly everything is simple up close, it is the most widely used branch of mathematics, and increasingly the arithmetic of intelligence itself.",
+      "example": {
+        "label": "A matrix moves every point",
+        "code": "def apply(m, v):\n    return [sum(m[i][j] * v[j] for j in range(len(v))) for i in range(len(m))]\n\nsquare = [[0, 0], [1, 0], [1, 1], [0, 1]]\nrotate90 = [[0, -1], [1, 0]]\nstretch = [[2, 0], [0, 1]]\nprint([apply(rotate90, p) for p in square])       # the square turned a quarter turn\nprint([apply(stretch, p) for p in square])        # the square pulled twice as wide"
+      },
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "vectors",
+      "picture": "An arrow, or an ordered list of numbers: something with size and direction.",
+      "mechanism": "As an arrow, a vector has a length and a direction and does not care where it starts. As a list, (3, 4) is two numbers. The two views agree: add vectors tip to tail or entry by entry; scale by multiplying every entry. Any combination of scaling and adding is a linear combination.",
+      "detail": "Physics gave the idea: forces, velocities, and fields combine by vector addition, as in Stevin's parallelogram of forces of 1586. Hamilton and Grassmann developed the algebra in the 1840s, and Gibbs and Heaviside gave the modern notation. A vector in n dimensions is n numbers, so it can represent anything with n features: a pixel's color, a house (size, rooms, age), a word (hundreds of numbers in an embedding), a person's ratings of films. Geometry then carries over: nearby vectors mean similar things.\n\nOperations: addition, scalar multiplication, the dot product, the norm, and in three dimensions the cross product. A unit vector has length 1 and gives pure direction. Coordinates depend on a chosen basis; the vector itself does not. Vectors need not be arrows: functions, polynomials, and signals also form vector spaces. In programming, arrays and vectorized code on GPUs apply operations to whole vectors at once.",
+      "principles": "A vector packages many numbers into one thing with geometry. Once data is a vector, questions about similarity, change, and combination become questions about arrows, which we know how to answer.",
+      "example": {
+        "label": "Adding, scaling, and words as points",
+        "code": "import math\n\na, b = (3, 4), (1, -2)\nadd = tuple(x + y for x, y in zip(a, b))\nscaled = tuple(2.5 * x for x in a)\nlength = math.hypot(*a)\nunit = tuple(x / length for x in a)\nprint(add, scaled, length, unit)                # (4, 2) (7.5, 10.0) 5.0 (0.6, 0.8)\n\nwords = {\"king\": (0.9, 0.8), \"queen\": (0.9, 0.85), \"apple\": (0.1, 0.2)}\ndist = lambda p, q: math.dist(words[p], words[q])\nprint(round(dist(\"king\", \"queen\"), 3), round(dist(\"king\", \"apple\"), 3))       # nearby vectors mean similar things"
+      }
+    },
+    {
+      "id": "dot-product",
+      "picture": "How much two arrows point the same way.",
+      "mechanism": "a · b = a₁b₁ + a₂b₂ + …. Equivalently |a||b| cos θ, where θ is the angle between them. It is positive when they point roughly together, zero when perpendicular, and negative when they oppose. Dividing by both lengths gives the cosine similarity.",
+      "detail": "The projection of a onto b has length (a · b)/|b|, work is force dot displacement, and the angle between vectors is the arccosine of the normalized dot product. It is symmetric, linear in each argument, and a · a = |a|². The Cauchy–Schwarz inequality says |a · b| ≤ |a||b|.\n\nIn machine learning, the dot product measures similarity: recommendation scores, attention weights (queries dotted with keys), and each neuron's weighted sum are all dot products, and deep learning is dot products on GPUs. In graphics, lighting uses the dot of the surface normal and the light direction, Lambert's cosine law. It generalizes to functions, where it is the integral of the product, and to complex vectors, with conjugation. Orthogonality is defined by it. Computing it takes n multiplications and n − 1 additions, the fundamental operation of numerical linear algebra. Not to be confused with the cross product, which yields a vector.",
+      "principles": "One arithmetic operation that captures alignment. It turns geometry into multiplication and addition, which is why similarity, projection, and the workings of neural networks all reduce to it.",
+      "example": {
+        "label": "Angle and similarity",
+        "code": "import math\n\ndot = lambda a, b: sum(x * y for x, y in zip(a, b))\nnorm = lambda a: math.sqrt(dot(a, a))\n\na, b = (3, 4), (4, 3)\nangle = math.degrees(math.acos(dot(a, b) / (norm(a) * norm(b))))\nprint(dot(a, b), round(angle, 2))                          # 24 and about 16.26 degrees\nprint(dot((1, 0), (0, 1)), dot((1, 2), (-2, 1)))           # 0 0: perpendicular vectors\n\ndocs = {\"cats purr\": (1, 1, 0, 0), \"dogs bark\": (0, 0, 1, 1), \"cats and dogs\": (1, 0, 1, 0)}      # bags of words\ncos = lambda p, q: dot(p, q) / (norm(p) * norm(q))\nprint(round(cos(docs[\"cats purr\"], docs[\"cats and dogs\"]), 3), round(cos(docs[\"cats purr\"], docs[\"dogs bark\"]), 3))"
+      },
+      "requires": [
+        "vectors",
+        "trigonometric-functions"
+      ]
+    },
+    {
+      "id": "cross-product",
+      "picture": "An arrow perpendicular to two others, whose length is the area they span.",
+      "mechanism": "For a and b in space, a × b = (a₂b₃ − a₃b₂, a₃b₁ − a₁b₃, a₁b₂ − a₂b₁). It points perpendicular to both (direction by the right-hand rule), and its length is |a||b| sin θ, the area of the parallelogram they span. It is zero when the vectors are parallel.",
+      "detail": "Reverse the order and the sign flips, a × b = −(b × a), and it is not associative. Uses: the normal to a surface, essential in 3-D graphics for lighting; torque, r × F; angular momentum, r × p; the magnetic force on a moving charge, qv × B; and the direction of rotation. The triple product a · (b × c) is the volume of the parallelepiped they span and equals a 3 × 3 determinant.\n\nIt exists as a vector only in three dimensions, and, oddly, seven; in other dimensions the same idea is the wedge product of exterior algebra. In two dimensions the analogous scalar a₁b₂ − a₂b₁ is a signed area, used to test whether a turn is left or right, the core of convex-hull algorithms. Gibbs and Heaviside introduced it in the 1880s from Hamilton's quaternions. It is a pseudovector, changing behavior under mirror reflection.",
+      "principles": "A way of getting a direction that no ingredient contains: perpendicular to both. It captures rotation, torque, and surface orientation, and its handedness is a reminder that space has a right and a left.",
+      "example": {
+        "label": "Perpendicular, with the area as length",
+        "code": "def cross(a, b):\n    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])\n\nx, y = (1, 0, 0), (0, 1, 0)\nprint(cross(x, y), cross(y, x))                 # (0, 0, 1) (0, 0, -1): the z axis, and the order matters\n\na, b = (2, 1, 0), (1, 3, 0)\nc = cross(a, b)\nprint(c, sum(p * q for p, q in zip(c, a)), sum(p * q for p, q in zip(c, b)))   # (0, 0, 5) 0 0: perpendicular to both\nprint(\"parallelogram area:\", (c[0] ** 2 + c[1] ** 2 + c[2] ** 2) ** 0.5)       # 5.0\n\nturn = lambda p, q, r: (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])      # the 2-D version\nprint(turn((0, 0), (1, 0), (1, 1)), turn((0, 0), (1, 0), (1, -1)))                        # positive: left turn; negative: right"
+      },
+      "requires": [
+        "vectors",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "vector-norms",
+      "picture": "How to measure how big a vector is, and how far apart two points are.",
+      "mechanism": "The Euclidean norm (L2) is √(x₁² + x₂² + …), ordinary straight-line length. The Manhattan norm (L1) adds absolute values, like walking city blocks. The max norm takes the largest entry. The distance between two points is the norm of their difference.",
+      "detail": "A norm must be non-negative, zero only for the zero vector, scale properly, and obey the triangle inequality. The unit circle differs: a circle for L2, a diamond for L1, a square for the max norm, and the choice changes what is nearest. In machine learning, L2 regularization (ridge) shrinks all weights smoothly, while L1 (lasso) pushes many to exactly zero, producing sparse models, because the diamond has corners on the axes. Least squares minimizes the L2 norm of the errors; least absolute deviations, the L1 norm, resists outliers.\n\nIn high dimensions distances behave strangely: nearly all points are almost equally far apart, the curse of dimensionality, which weakens nearest-neighbor methods. Cosine distance compares directions and ignores length. Matrix norms measure matrices, and function norms, the integral of the square, measure functions and underlie Fourier analysis. Hamming and edit distances are distances on bit patterns and strings.",
+      "principles": "Distance is a choice, not a fact. Which norm you use decides what counts as close, and so what a fit, a search, or a regularizer will prefer.",
+      "example": {
+        "label": "Three norms, and high dimensions",
+        "code": "import math, random\n\nv = (3, -4, 12)\nl1 = sum(abs(x) for x in v); l2 = math.sqrt(sum(x * x for x in v)); linf = max(abs(x) for x in v)\nprint(l1, l2, linf)                                     # 19 13.0 12\n\na, b = (0, 0), (3, 4)\nprint(math.dist(a, b), abs(3) + abs(4), max(3, 4))       # 5.0 7 4: Euclidean, Manhattan, Chebyshev distances\n\nrandom.seed(81)                                          # in high dimensions everything is about equally far away\nfor d in (2, 20, 2000):\n    pts = [[random.random() for _ in range(d)] for _ in range(60)]\n    dists = [math.dist(p, q) for i, p in enumerate(pts) for q in pts[i + 1:]]\n    print(f\"{d:5d} dimensions: nearest / farthest = {min(dists) / max(dists):.2f}\")"
+      },
+      "requires": [
+        "vectors",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "basis",
+      "picture": "A set of arrows you can build every other arrow from, with none to spare.",
+      "mechanism": "A basis is a set of independent vectors whose combinations reach every vector in the space. The number of them is the dimension. Every vector has exactly one recipe: its coordinates in that basis. The standard basis for the plane is (1, 0) and (0, 1).",
+      "detail": "Span is what you can reach: all combinations of a set of vectors. Vectors that span the space but are redundant are not a basis; independent vectors that do not reach everything are not either. Changing basis redescribes the same vector with different coordinates: (3, 4) in the standard basis is (5, 0) in a basis whose first vector points along it.\n\nGood bases make problems easy: eigenvectors diagonalize a matrix, Fourier bases turn convolution into multiplication, wavelets localize in time and frequency, and principal components align with the data's spread. Orthonormal bases are best: coordinates are just dot products. Bases are not unique. Function spaces have infinite bases, such as Fourier's sines and cosines or Taylor's 1, x, x², …. In graphics, local coordinate frames for each object use basis changes; in image compression, JPEG represents pictures by a few cosine basis elements. Any two bases of the same space have the same size.",
+      "principles": "Coordinates are a choice of language for describing the same thing. A good basis makes a hard description simple, which is why so much of linear algebra, and of signal analysis, is the search for the right basis.",
+      "example": {
+        "label": "The same vector in three bases",
+        "code": "def solve2(b1, b2, v):                       # coordinates of v in the basis (b1, b2): solve  x*b1 + y*b2 = v\n    det = b1[0] * b2[1] - b1[1] * b2[0]\n    x = (v[0] * b2[1] - v[1] * b2[0]) / det\n    y = (b1[0] * v[1] - b1[1] * v[0]) / det\n    return x, y\n\nv = (3, 4)\nprint(solve2((1, 0), (0, 1), v))                         # (3.0, 4.0): the standard coordinates\nprint(solve2((1, 1), (-1, 1), v))                        # (3.5, 0.5): the same vector in a rotated basis\nprint(solve2((0.6, 0.8), (-0.8, 0.6), v))                # (5.0, 0.0): a basis aligned with v itself\n\nx, y = solve2((1, 1), (-1, 1), v)\nprint((x * 1 + y * -1, x * 1 + y * 1))                    # rebuild v from its coordinates: (3.0, 4.0)"
+      },
+      "requires": [
+        "linear-independence"
+      ]
+    },
+    {
+      "id": "linear-independence",
+      "picture": "Each vector adds a new direction; none is a combination of the others.",
+      "mechanism": "Vectors v₁, …, vₖ are independent if the only way to combine them to get zero is with all coefficients zero. If some nonzero combination gives zero, one of them is redundant: it can be built from the rest.",
+      "detail": "In the plane, two vectors are independent unless they lie along the same line, and three vectors are always dependent. In space, three vectors are independent unless they lie in one plane. To test, put them as columns of a matrix and row-reduce: the number of pivots is the number of independent vectors, the rank. Independence is what makes coordinates unique, and what makes a set of equations informative rather than repetitive: three dependent equations carry only two equations' worth of information.\n\nIn data, dependent, or collinear, features make regression unstable, because the model cannot tell their effects apart. The functions 1, x, x² are independent; sin x and cos x are independent; sin 2x and 2 sin x cos x are dependent. Dimension is the maximum number of independent vectors. Matroid theory abstracts independence to other structures, such as spanning forests in graphs.",
+      "principles": "Independence is the difference between information and repetition. Counting independent directions is how you know how many things a system really has, how many equations really constrain it, and how many features really matter.",
+      "example": {
+        "label": "Counting independent rows",
+        "code": "def rank(rows, tol=1e-9):\n    m = [list(map(float, r)) for r in rows]\n    r = 0\n    for c in range(len(m[0])):\n        if r == len(m):\n            break\n        pivot = max(range(r, len(m)), key=lambda i: abs(m[i][c]))\n        if abs(m[pivot][c]) < tol:\n            continue\n        m[r], m[pivot] = m[pivot], m[r]\n        for i in range(len(m)):\n            if i != r:\n                f = m[i][c] / m[r][c]\n                m[i] = [a - f * b for a, b in zip(m[i], m[r])]\n        r += 1\n    return r\n\nprint(rank([(1, 0, 0), (0, 1, 0), (0, 0, 1)]))          # 3: independent\nprint(rank([(1, 2, 3), (2, 4, 6), (0, 1, 1)]))          # 2: the second is twice the first\nprint(rank([(1, 2, 3), (4, 5, 6), (7, 8, 9)]))          # 2: the third is a combination of the first two"
+      },
+      "requires": [
+        "vectors"
+      ]
+    },
+    {
+      "id": "orthogonality",
+      "picture": "At right angles: neither says anything about the other.",
+      "mechanism": "Vectors are orthogonal when their dot product is zero. A set of orthogonal unit vectors is orthonormal. In an orthonormal basis, the coordinates of a vector are just its dot products with the basis vectors, and its squared length is the sum of the squares of its coordinates: Pythagoras in any dimension.",
+      "detail": "Orthogonality makes problems separate: components along perpendicular directions do not interfere, so each can be solved independently. The Gram–Schmidt process builds an orthonormal basis from any independent set, and underlies QR decomposition, the stable way of solving least squares. The least-squares residual is orthogonal to the fitted values; Fourier series work because sines and cosines of different frequencies are orthogonal over a period; principal components are orthogonal; orthogonal matrices, rotations and reflections, preserve lengths and angles and are numerically ideal, since their inverse is their transpose.\n\nIn function spaces two functions are orthogonal if the integral of their product is zero, as with Legendre polynomials and wavelets. In communication, orthogonal codes and subcarriers let many signals share a channel without crosstalk. Near-orthogonality is a resource in high dimensions: in 1,000 dimensions random vectors are almost perpendicular, so many nearly independent directions exist, a fact used in embeddings.",
+      "principles": "Perpendicular directions are independent in the strongest sense: what happens along one tells nothing about the others. Nearly every trick for making a hard problem easy, from Fourier to least squares, is a way of finding orthogonal directions.",
+      "example": {
+        "label": "Gram–Schmidt, and near-orthogonality in high dimensions",
+        "code": "import math, random\n\ndot = lambda a, b: sum(x * y for x, y in zip(a, b))\n\ndef gram_schmidt(vectors):\n    basis = []\n    for v in vectors:\n        w = list(v)\n        for u in basis:\n            proj = dot(w, u)\n            w = [wi - proj * ui for wi, ui in zip(w, u)]\n        norm = math.sqrt(dot(w, w))\n        basis.append([wi / norm for wi in w])\n    return basis\n\nq = gram_schmidt([(1, 1, 0), (1, 0, 1), (0, 1, 1)])\nprint([[round(x, 3) for x in row] for row in q])\nprint([round(dot(q[i], q[j]), 10) for i in range(3) for j in range(i + 1, 3)])          # all zero: perpendicular\nprint(round(dot(q[0], q[0]), 10))                                                        # 1: unit length\n\nrandom.seed(82)\na = [random.gauss(0, 1) for _ in range(2000)]; b = [random.gauss(0, 1) for _ in range(2000)]\nprint(round(dot(a, b) / math.sqrt(dot(a, a) * dot(b, b)), 3))                            # random vectors: nearly perpendicular"
+      },
+      "requires": [
+        "dot-product"
+      ]
+    }
+  ]
+}

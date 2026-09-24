@@ -1,0 +1,67 @@
+{
+  "$schema": "../library.schema.json",
+  "description": "The top of the library, organized like a university: faculties contain departments, and each department opens onto the concept decks beneath it. Below this level the structure comes from the concept tree itself: any concept with children is a deck.",
+  "faculties": [
+    {
+      "id": "me", "title": "Me", "blurb": "Beliefs, fascinations, and lessons, in my own words.", "orb": "working", "voice": "restless",
+      "departments": [
+        { "id": "entropy", "title": "Entropy", "blurb": "The idea I keep coming back to, and everything that hangs off it.", "entries": ["entropy"] },
+        { "id": "taoism-care", "title": "Taoism, Care & Letting Go", "blurb": "Helping without forcing, boundaries, and living with regret.", "entries": ["taoism", "care", "boundaries", "regret"] },
+        { "id": "study-in-japan", "title": "Studying in Japan", "blurb": "The whole journey as a chain, start to finish: choosing a path, the MEXT application, the visa, and settling in.", "entries": ["study-in-japan"] }
+      ]
+    },
+    {
+      "id": "engineering", "title": "Engineering & Technology", "blurb": "How people build things that work, from stone to software.", "orb": "connecting", "voice": "precise",
+      "departments": [
+        { "id": "computer-science", "title": "Computer Science", "blurb": "Software, data, and the machines that follow instructions.", "entries": ["computing", "software", "data"] },
+        { "id": "dsa", "title": "Data Structures & Algorithms", "blurb": "How data is shaped in memory, and the recipes that work on it: sorting, searching, graphs, and the limits of computation.", "entries": ["data-structures", "algorithms", "modular-arithmetic", "fft", "computational-geometry"] },
+        { "id": "networks", "title": "Networks & Communications", "blurb": "How machines talk: from copper and glass to the web.", "entries": ["networks", "web"] },
+        { "id": "security", "title": "Security", "blurb": "Cryptography, authentication, and the attacks and defenses around them.", "entries": ["security"] },
+        { "id": "systems", "title": "Systems & Infrastructure", "blurb": "Linux, servers, nginx, containers, and the cloud.", "entries": ["infrastructure"] },
+        { "id": "electronics", "title": "Electronics & Materials", "blurb": "Silicon, semiconductors, and electricity.", "entries": ["silicon", "electricity"] },
+        { "id": "mechanical", "title": "Machines & Mechanics", "blurb": "Engines, clocks, tools, and mechanisms.", "entries": ["machines"] },
+        { "id": "ai", "title": "Artificial Intelligence", "blurb": "Learning systems, neural networks, and language models.", "entries": ["intelligence"] }
+      ]
+    },
+    {
+      "id": "science", "title": "Science", "blurb": "What the world is made of and how it behaves.", "orb": "searching", "voice": "vast",
+      "departments": [
+        { "id": "cosmology", "title": "Cosmology & Astronomy", "blurb": "The universe, its stars, its black holes, and its future.", "entries": ["cosmos"] },
+        { "id": "physics", "title": "Physics", "blurb": "Energy, heat, waves, light, and the quantum.", "entries": ["energy", "thermodynamics", "waves", "light", "quantum-mechanics"] },
+        { "id": "life-sciences", "title": "Life Sciences", "blurb": "Cells, heredity, evolution, and metabolism.", "entries": ["life"] },
+        { "id": "earth", "title": "Earth & Environment", "blurb": "The planet, its cycles, and its ecosystems.", "entries": ["earth", "nature", "ecosystems"] }
+      ]
+    },
+    {
+      "id": "mathematics", "title": "Mathematics & Logic", "blurb": "Structure, proof, and chance.", "orb": "shaping", "voice": "lucid",
+      "departments": [
+        { "id": "pure-math", "title": "Pure Mathematics", "blurb": "Numbers, infinity, symmetry, and shape.", "entries": ["mathematics"] },
+        { "id": "calculus", "title": "Calculus & Analysis", "blurb": "Limits, derivatives, integrals, series, and the equations of change.", "entries": ["calculus"] },
+        { "id": "linear-algebra", "title": "Linear Algebra", "blurb": "Vectors, matrices, and the transformations between them: the geometry behind graphics, search, and machine learning.", "entries": ["linear-algebra"] },
+        { "id": "logic", "title": "Logic & Computation", "blurb": "Reasoning, sets, and the limits of proof.", "entries": ["logic", "set-theory"] },
+        { "id": "probability", "title": "Probability & Statistics", "blurb": "Reasoning under uncertainty, and chaos.", "entries": ["probability", "statistics"] }
+      ]
+    },
+    {
+      "id": "humanities", "title": "Humanities", "blurb": "How people make meaning: story, language, belief, and art.", "orb": "weaving", "voice": "layered",
+      "departments": [
+        { "id": "history", "title": "History", "blurb": "From cave walls to the information age.", "entries": ["history"] },
+        { "id": "languages", "title": "Languages & Writing", "blurb": "Speech, grammar, meaning, and the invention of writing.", "entries": ["language"] },
+        { "id": "music", "title": "Music", "blurb": "Rhythm, harmony, and music theory.", "entries": ["music"] },
+        { "id": "arts", "title": "Arts", "blurb": "Painting, architecture, dance, story, and film.", "entries": ["art"] },
+        { "id": "religion", "title": "Religion & Belief", "blurb": "Ritual, myth, and the sacred, described with care.", "entries": ["religion", "ritual"] },
+        { "id": "philosophy", "title": "Philosophy", "blurb": "Truth, knowledge, reality, and meaning.", "entries": ["truth", "meaning"] },
+        { "id": "reasoning", "title": "Reasoning & Debate", "blurb": "How to build and weigh an argument, and the fallacies that break one.", "entries": ["argument", "fallacies", "rhetoric", "debate"] }
+      ]
+    },
+    {
+      "id": "social", "title": "Social Sciences", "blurb": "How people think, feel, and live together.", "orb": "listening", "voice": "human",
+      "departments": [
+        { "id": "psychology", "title": "Psychology", "blurb": "Consciousness, perception, memory, and learning.", "entries": ["consciousness", "memory", "emotion", "cognitive-biases"] },
+        { "id": "relationships", "title": "Relationships", "blurb": "Love, friendship, family, and loss.", "entries": ["love", "friendship", "family"] },
+        { "id": "society", "title": "Society & Institutions", "blurb": "Cooperation, trust, law, and conflict.", "entries": ["cooperation", "institutions", "law"] },
+        { "id": "economics", "title": "Economics", "blurb": "Trade, money, markets, and scarcity.", "entries": ["trade"] }
+      ]
+    }
+  ]
+}

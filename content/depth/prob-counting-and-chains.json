@@ -1,0 +1,181 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Probability, part two: counting (permutations, combinations, the pigeonhole principle, the birthday paradox) and random processes (Markov chains, random walks, MCMC, hidden Markov models, Brownian motion), each in four layers.",
+  "depth": [
+    {
+      "id": "combinatorics",
+      "picture": "Counting how many ways, without listing them.",
+      "mechanism": "Two basic rules: the multiplication rule (if one choice can be made in m ways and a second in n ways, together there are m × n) and the addition rule (for either-or, add the counts of disjoint cases). Permutations count orderings, combinations count selections, and the binomial coefficients tie them together.",
+      "detail": "A license plate with 3 letters and 3 digits allows 26³ × 10³, about 17.6 million plates. A poker hand: C(52, 5) = 2,598,960, of which 4 are royal flushes, one in 649,740. Techniques: bijections, recursion (Pascal's triangle), generating functions, inclusion–exclusion, and the pigeonhole principle.\n\nThe subject has roots in ancient India (Pingala), Islamic mathematics, and Pascal and Fermat, whose probability work needed counting. Modern combinatorics includes graph theory, designs, Ramsey theory, enumeration, and extremal problems. In computer science it counts inputs to analyze an algorithm, the size of a search space, the number of possible keys in cryptography, and the number of distinct hash values. Combinatorial explosion means even simple rules produce astronomically many possibilities: 52! is about 8 × 10⁶⁷, so a well-shuffled deck is almost certainly in an order that has never existed before.",
+      "principles": "Counting is the first form of probability and the measure of every search. Knowing how many possibilities there are tells you whether a problem can be brute-forced, guessed, or must be attacked with cleverness.",
+      "example": {
+        "label": "Some counts",
+        "code": "import math\n\nprint(26 ** 3 * 10 ** 3, \"license plates\")\nprint(math.comb(52, 5), \"poker hands;\", round(math.comb(52, 5) / 4), \"hands per royal flush\")\nprint(f\"{math.factorial(52):.3e}\", \"ways to shuffle a deck\")\nprint(math.comb(60, 6), \"ways to pick 6 lottery numbers from 60\")"
+      },
+      "requires": [
+        "probability"
+      ]
+    },
+    {
+      "id": "permutations",
+      "picture": "The ways to line things up.",
+      "mechanism": "n distinct things can be ordered in n! = n × (n − 1) × … × 1 ways: n choices for the first place, n − 1 for the second, and so on. Choosing and ordering k of n gives n!/(n − k)! ways. With repeated items, divide by the factorials of the repeats.",
+      "detail": "Three books on a shelf: 6 orders. The letters of MISSISSIPPI: 11!/(4! 4! 2!) = 34,650 distinct arrangements. Circular arrangements of n people at a table: (n − 1)!. Derangements, permutations with no item in its original place, number about n!/e, so the chance that a random shuffle of hats returns nobody's own is about 1/e, roughly 37 percent, no matter how many people.\n\nPermutations form groups: composing rearrangements is the algebra of symmetry and of the Rubik's cube, with its 43 quintillion positions; parity divides them into even and odd. In computing, sorting is finding the right permutation, generating them is a classic backtracking exercise, random shuffling uses the Fisher–Yates algorithm, and ciphers apply permutations and substitutions. The traveling salesman problem asks for the best of (n − 1)!/2 orderings.",
+      "principles": "Order multiplies possibilities faster than anything else in everyday mathematics. Twenty items already have more orderings than seconds in the age of the universe, which is why arranging is hard and why chance shuffles are unique.",
+      "example": {
+        "label": "Orderings, MISSISSIPPI, and the hat problem",
+        "code": "import math, random\nfrom itertools import permutations\n\nprint(len(list(permutations(\"ABC\"))), list(permutations(\"ABC\"))[:3])\nprint(math.factorial(11) // (math.factorial(4) * math.factorial(4) * math.factorial(2)), \"arrangements of MISSISSIPPI\")\n\nrandom.seed(21)                        # derangements: nobody gets their own hat\ndef nobody_home(n):\n    hats = list(range(n)); random.shuffle(hats)\n    return all(h != i for i, h in enumerate(hats))\ntrials = 50_000\nprint(round(sum(nobody_home(10) for _ in range(trials)) / trials, 3), \"vs 1/e =\", round(1 / math.e, 3))"
+      },
+      "requires": [
+        "combinatorics",
+        "factorial"
+      ]
+    },
+    {
+      "id": "combinations",
+      "picture": "The ways to choose, when order does not matter.",
+      "mechanism": "C(n, k) = n! / (k!(n − k)!) counts the k-element subsets of n things: permutations of k out of n, divided by the k! orderings of each chosen group. Also written n choose k, or the binomial coefficient.",
+      "detail": "It is symmetric, C(n, k) = C(n, n − k), since choosing what to take is the same as choosing what to leave. Pascal's rule, C(n, k) = C(n − 1, k − 1) + C(n − 1, k), says either the first item is in or it is not, and builds Pascal's triangle, known in India, Persia, and China long before Pascal. The row sums are powers of 2: there are 2ⁿ subsets of an n-set. The binomial theorem expands (x + y)ⁿ with these coefficients.\n\nExamples: a 5-card poker hand, 2,598,960; a 6-from-49 lottery, 13,983,816; a committee of 3 from 10 people, 120. Combinations with repetition, stars and bars, count multisets: C(n + k − 1, k). They give the coefficients of the binomial distribution, the number of paths across a grid, and the sizes of search spaces.",
+      "principles": "Choosing is counting without regard to order, and dividing out the orderings is the whole idea. The same numbers turn up in expansions of powers, in probabilities of coin flips, and in the count of lattice paths: one structure with many faces.",
+      "example": {
+        "label": "Pascal's triangle and some choices",
+        "code": "import math\n\nfor n in range(7):\n    print(\" \" * (12 - 2 * n), \" \".join(f\"{math.comb(n, k):3d}\" for k in range(n + 1)))\n\nprint(math.comb(49, 6), \"lottery tickets; odds of the jackpot 1 in\", math.comb(49, 6))\nprint(math.comb(10, 3), \"committees of 3 from 10 people\")\nprint(sum(math.comb(10, k) for k in range(11)), \"subsets of a 10-element set = 2**10 =\", 2 ** 10)"
+      },
+      "requires": [
+        "permutations"
+      ]
+    },
+    {
+      "id": "factorial",
+      "picture": "n! = n × (n − 1) × … × 1, the number of ways to order n things.",
+      "mechanism": "Defined for whole numbers: 0! = 1 (one way to arrange nothing), 1! = 1, 2! = 2, 3! = 6, 4! = 24, 5! = 120. It satisfies n! = n · (n − 1)!, so it grows by a bigger factor each time: 10! = 3,628,800; 20! is about 2.4 × 10¹⁸; 52! about 8 × 10⁶⁷.",
+      "detail": "Growth is faster than exponential: any aⁿ is eventually smaller. Stirling's approximation n! ≈ √(2πn) (n/e)ⁿ is accurate to under 1 percent for n of 10 or more, and shows that log n! is about n log n, the reason comparison sorting needs n log n comparisons: there are n! orderings to tell apart. The gamma function extends factorials to non-integers: Γ(n + 1) = n!, and (1/2)! = √π/2.\n\nFactorials appear in Taylor series (the 1/n! coefficients of eˣ), permutations, binomial coefficients, and the Poisson distribution. The notation n! is due to Christian Kramp (1808). Algorithms with factorial running time are hopeless beyond n of about 12 to 15, as in the naive traveling salesman method: even at a billion checks a second, 25! would take about 490 million years. 21! exceeds a 64-bit integer, a classic reason to use arbitrary-precision numbers.",
+      "principles": "Factorials count orderings and grow faster than any exponential. That growth is the wall behind most try-everything algorithms, and behind the impossibility of ever repeating a shuffled deck.",
+      "example": {
+        "label": "Growth, Stirling, and the gamma function",
+        "code": "import math\n\nfor n in (0, 1, 5, 10, 20, 25):\n    print(f\"{n:2d}! = {math.factorial(n):,}\")\n\nn = 50                                                                # Stirling's approximation\nprint(f\"{math.factorial(n):.4e}\", f\"{math.sqrt(2 * math.pi * n) * (n / math.e) ** n:.4e}\")\nprint(round(math.gamma(0.5 + 1), 4), round(math.sqrt(math.pi) / 2, 4))                  # (1/2)! = sqrt(pi)/2\nprint(round(math.factorial(25) / 1e9 / 3600 / 24 / 365 / 1e6), \"million years to test 25! orderings at a billion per second\")"
+      },
+      "requires": [
+        "combinatorics"
+      ]
+    },
+    {
+      "id": "pigeonhole-principle",
+      "picture": "More pigeons than holes means some hole holds two.",
+      "mechanism": "If n + 1 objects are placed in n boxes, some box contains at least two. More generally, if more than kn objects go into n boxes, some box has more than k. The proof is a single sentence, but it finds things without constructing them.",
+      "detail": "Consequences: in any group of 13 people, two share a birth month; a city of more than a million people must contain two people with exactly the same number of head hairs, since no one has that many; among any 5 points in a unit square, two are within √2/2 of each other; every sequence of n² + 1 distinct numbers contains an increasing or decreasing subsequence of length n + 1 (Erdős–Szekeres).\n\nCompression: no lossless compressor can shrink every file, since there are fewer short files than long ones. Hash tables: with more keys than slots, collisions are certain. Dirichlet used it in number theory in 1834, so it is also called Dirichlet's box principle. Ramsey theory extends it: among any 6 people, either 3 are mutual acquaintances or 3 mutual strangers. It is non-constructive: it says something must exist without telling where.",
+      "principles": "A counting fact with teeth: when there are not enough slots, sharing is unavoidable. It proves that collisions, repeats, and patterns must exist, and no clever compression or hashing can get around it.",
+      "example": {
+        "label": "Repeats that must exist",
+        "code": "import random\n\nrandom.seed(22)\npeople = [random.randrange(12) for _ in range(13)]\nprint(\"13 people, birth months:\", sorted(people), \"-> some month repeats:\", len(set(people)) < 13)\n\nnums = random.sample(range(1000), 5)\nprint(nums, \"-> remainders mod 4:\", [n % 4 for n in nums])          # 5 numbers, 4 remainders: two must match\n\nprint(sum(2 ** k for k in range(8)), \"bit strings shorter than 8 bits, but\", 2 ** 8, \"of exactly 8 bits\")"
+      },
+      "requires": [
+        "combinatorics"
+      ]
+    },
+    {
+      "id": "birthday-paradox",
+      "picture": "In a room of 23 people, two probably share a birthday.",
+      "mechanism": "Compute the chance that everyone's birthday is different: 365/365 × 364/365 × 363/365 × …. After 23 people this falls below one half, so the chance of at least one match exceeds 50 percent. It is surprising because with 23 people there are 253 pairs, each with a chance of matching.",
+      "detail": "The number of pairs grows as n²/2 while the chance per pair is 1/365, so a match becomes likely when n²/2 is about 365; the exact 50 percent point is 23, and at 57 people it exceeds 99 percent. In general, with N possible values, the first collision is expected after about √(πN/2) draws. In computing a hash with 2⁶⁴ values has a 50 percent collision chance after about 5 billion items, and a 128-bit hash takes about 2⁶⁴ attempts to collide by brute force, the birthday attack, which is why cryptographic hashes need outputs twice as long as the security level.\n\nIt also explains unexpected coincidences: with enough people and enough traits, matches are expected. A different question, that someone shares your birthday, needs 253 people for 50 percent. It is not a true paradox, only counterintuitive, and is used to teach how intuition mishandles combinatorial growth.",
+      "principles": "Collisions arrive early because pairs multiply faster than people. The birthday paradox is the reason hash functions need long outputs, and a standing reminder that intuition about coincidences ignores how many chances there were.",
+      "example": {
+        "label": "The chance of a match, exact and simulated",
+        "code": "import math, random\n\ndef p_match(n, days=365):\n    p_all_different = 1.0\n    for i in range(n):\n        p_all_different *= (days - i) / days\n    return 1 - p_all_different\n\nfor n in (10, 23, 30, 50, 57, 70):\n    print(n, round(p_match(n), 4))\n\nrandom.seed(23)\ntrials = 20_000\nhits = sum(len({random.randrange(365) for _ in range(23)}) < 23 for _ in range(trials))\nprint(round(hits / trials, 3), \"simulated for 23 people\")\nprint(\"2^64-value hash: first collision expected after about\", round(math.sqrt(math.pi / 2 * 2 ** 64)), \"items\")"
+      },
+      "requires": [
+        "combinations",
+        "independence"
+      ]
+    },
+    {
+      "id": "inclusion-exclusion",
+      "picture": "To count things in overlapping groups: add, subtract the overlaps, add back what you over-subtracted.",
+      "mechanism": "For two sets, |A ∪ B| = |A| + |B| − |A ∩ B|. For three, |A ∪ B ∪ C| = |A| + |B| + |C| − |A∩B| − |A∩C| − |B∩C| + |A∩B∩C|. In general, alternate: add singles, subtract pairs, add triples, and so on.",
+      "detail": "Simply adding double-counts the overlaps; subtracting the pairs removes triple overlaps too many times, so they are added back, and so on. Among 100 students, 60 take maths, 50 take physics, and 30 take both: 60 + 50 − 30 = 80 take at least one. How many numbers up to 100 are divisible by 2, 3, or 5? 50 + 33 + 20 − 16 − 10 − 6 + 3 = 74.\n\nThe count of derangements, permutations with no fixed point, is n! Σ (−1)ᵏ/k!, from inclusion–exclusion applied to item k is fixed. It counts primes by the sieve of Eratosthenes (Legendre's formula) and gives probabilities of unions of events. Bonferroni inequalities give bounds when the alternating sum is truncated, useful in probability and in multiple comparisons. It is also used in database size estimation, the Möbius function of number theory, and counting tilings and colorings.",
+      "principles": "Adding overcounts, subtracting undercounts, and the alternating sum lands exactly. It is a systematic way to count at least one of these, and a template for correcting errors in successive rounds.",
+      "example": {
+        "label": "Multiples of 2, 3 or 5, and derangements",
+        "code": "from itertools import combinations\nfrom math import factorial\n\ndef union_size(sets):\n    total = 0\n    for r in range(1, len(sets) + 1):\n        sign = 1 if r % 2 else -1\n        for group in combinations(sets, r):\n            total += sign * len(set.intersection(*group))\n    return total\n\nA, B, C = set(range(2, 101, 2)), set(range(3, 101, 3)), set(range(5, 101, 5))\nprint(union_size([A, B, C]), len(A | B | C))                      # 74 74\n\nn = 8                                                               # derangements: n! * sum (-1)^k / k!\nprint(round(factorial(n) * sum((-1) ** k / factorial(k) for k in range(n + 1))))      # 14833"
+      },
+      "requires": [
+        "combinatorics",
+        "set-theory"
+      ]
+    },
+    {
+      "id": "markov-chains",
+      "picture": "A process that hops between states, where the next hop depends only on where you are now.",
+      "mechanism": "A set of states, and for each state the probabilities of moving to every other: the transition matrix P. The Markov property: the future depends on the present, not on how you got there. After k steps the probabilities are given by P raised to the k-th power.",
+      "detail": "Example: weather with two states. If sunny today, 80 percent sunny tomorrow; if rainy, 60 percent rainy tomorrow. Over the long run the chain settles into a stationary distribution π with πP = π: here two thirds sunny, whatever the start, for chains that are irreducible and aperiodic. Andrey Markov introduced them in 1906 and tested them on the sequence of vowels and consonants in Pushkin's Eugene Onegin.\n\nUses: Google's PageRank (a random surfer's chain), text generation (predict the next word from the previous few, the ancestor of language models), board games (Monopoly's landing frequencies), queueing, genetics, and Markov chain Monte Carlo. Absorbing chains model gambler's ruin. Analysis classifies states as recurrent or transient and measures the mixing time, how fast the chain forgets its start. Reinforcement learning is framed as Markov decision processes.",
+      "principles": "Forgetting the past is a powerful simplification. A system with the Markov property is described by a small table, and its long-run behavior falls out of linear algebra, which is why the idea shows up from web ranking to text generation.",
+      "example": {
+        "label": "Weather, and a chain of words",
+        "code": "import random\n\nP = {\"sunny\": {\"sunny\": 0.8, \"rainy\": 0.2}, \"rainy\": {\"sunny\": 0.4, \"rainy\": 0.6}}\nrandom.seed(24)\nstate, counts = \"sunny\", {\"sunny\": 0, \"rainy\": 0}\nfor _ in range(200_000):\n    state = random.choices(list(P[state]), weights=list(P[state].values()))[0]\n    counts[state] += 1\nprint({k: round(v / 200_000, 3) for k, v in counts.items()}, \"-> stationary: sunny 2/3, rainy 1/3\")\n\ntext = \"the cat sat on the mat the cat ate the rat\".split()             # a Markov chain of words\nnxt = {}\nfor a, b in zip(text, text[1:]):\n    nxt.setdefault(a, []).append(b)\nword, out = \"the\", [\"the\"]\nfor _ in range(8):\n    word = random.choice(nxt.get(word, text)); out.append(word)\nprint(\" \".join(out))"
+      },
+      "requires": [
+        "conditional-probability"
+      ]
+    },
+    {
+      "id": "random-walk",
+      "picture": "A path of random steps: the drunkard's stagger.",
+      "mechanism": "At each tick, move a random step: +1 or −1 with equal probability in one dimension, or in a random direction in higher ones. The position after n steps has mean 0 and standard deviation √n: distance grows only as the square root of time.",
+      "detail": "Simple random walks are recurrent in one and two dimensions, returning to the start with probability 1, but transient in three or more, as Pólya showed in 1921: a drunk man will find his way home, but a drunk bird may get lost forever, as Kakutani remarked. Gambler's ruin: a gambler with a fixed fortune playing a fair game against an infinitely rich opponent is eventually ruined with certainty, and against a house with an edge, ruin comes faster.\n\nDiffusion is a random walk of molecules: spread grows as √t, so the time to diffuse a distance d grows as d², which is why diffusion is fast across a cell but slow across a room. Random walks model stock prices (Bachelier, 1900), polymer shapes, animal foraging, and the paths of photons out of the Sun, which take on the order of 100,000 years to escape the core. Scaling the steps down and speeding them up gives Brownian motion.",
+      "principles": "Small random steps accumulate to a spread that grows only with the square root of time. That slowness is why diffusion works over microns and fails over meters, and it is the shape of noise in prices, molecules, and search.",
+      "example": {
+        "label": "Spread grows as the square root of the steps",
+        "code": "import random, math, statistics\n\nrandom.seed(25)\ndef walk(n):\n    return sum(random.choice((-1, 1)) for _ in range(n))\n\nfor n in (100, 400, 1600):\n    ends = [walk(n) for _ in range(2000)]\n    print(f\"{n:5d} steps: typical distance {statistics.pstdev(ends):6.1f}   sqrt(n) = {math.sqrt(n):5.1f}\")\n\ndef returns(n):                                             # does a 1-D walk revisit its start within n steps?\n    x = 0\n    for _ in range(n):\n        x += random.choice((-1, 1))\n        if x == 0:\n            return True\n    return False\nprint(sum(returns(2000) for _ in range(500)) / 500, \"of walks returned to the start within 2000 steps\")"
+      },
+      "requires": [
+        "markov-chains"
+      ]
+    },
+    {
+      "id": "mcmc",
+      "picture": "Explore a distribution by wandering through it, visiting places in proportion to how likely they are.",
+      "mechanism": "Build a Markov chain whose long-run distribution is the target. Metropolis–Hastings: from the current point, propose a random move; accept it with probability min(1, target(new)/target(old)); otherwise stay. After a burn-in, the visited points are correlated samples from the target, even if the target is only known up to a constant.",
+      "detail": "It was introduced by Metropolis and colleagues in 1953 at Los Alamos for simulating particles, generalized by Hastings in 1970, with Gibbs sampling as a special case. It solves the central problem of Bayesian inference: the posterior involves an intractable normalizing integral, but ratios of posterior values are easy, and ratios are all MCMC needs. Software such as Stan and PyMC made Bayesian modeling routine, and Hamiltonian Monte Carlo uses gradients to make efficient moves.\n\nPractical issues: choose the proposal step size (too small explores slowly, too large is mostly rejected), discard the burn-in, check convergence with multiple chains, and account for autocorrelation. Uses: parameter estimation, physics (the Ising model), phylogenetics, cryptanalysis, and image restoration. It was named among the top ten algorithms of the twentieth century by a 2000 survey in Computing in Science & Engineering.",
+      "principles": "When you cannot sample a distribution directly, a well-designed random walk can visit it faithfully. MCMC turned Bayesian inference from a formula into a practical tool, and it borrows its idea from statistical physics.",
+      "example": {
+        "label": "Sampling a two-bump distribution",
+        "code": "import math, random\n\nrandom.seed(26)\ndef target(x):                                    # unnormalized: a mixture of two bumps\n    return math.exp(-0.5 * (x + 2) ** 2) + 0.5 * math.exp(-0.5 * ((x - 3) / 0.7) ** 2)\n\nx, samples = 0.0, []\nfor step in range(200_000):\n    proposal = x + random.gauss(0, 1.5)\n    if random.random() < min(1, target(proposal) / target(x)):\n        x = proposal\n    if step > 5_000:\n        samples.append(x)\n\nprint(\"share of samples near the left bump:\", round(sum(s < 0.5 for s in samples) / len(samples), 3))\nprint(\"expected: about\", round(1 / 1.35, 3))"
+      },
+      "requires": [
+        "markov-chains",
+        "bayesian-inference",
+        "monte-carlo"
+      ]
+    },
+    {
+      "id": "hidden-markov-models",
+      "picture": "A hidden chain of states that you can only infer from the clues it emits.",
+      "mechanism": "A Markov chain over hidden states (weather, a word's part of speech, whether a stretch of DNA is a gene) plus, for each state, a distribution over observable outputs (activity, the word itself, the nucleotides). Given the observations, algorithms infer the hidden sequence: the forward algorithm (likelihood), Viterbi (most likely state sequence), and Baum–Welch (learning the parameters).",
+      "detail": "Classic example: you cannot see the weather, but you see whether a friend carries an umbrella; from a sequence of umbrellas, infer the sequence of weather. Viterbi's dynamic-programming algorithm finds the best hidden path in time proportional to the number of steps times the square of the number of states.\n\nHMMs were the workhorse of speech recognition from the 1970s to the 2010s, with hidden states as phonemes and observations as acoustic features, and of part-of-speech tagging, gene finding, protein profile models, and handwriting recognition. Andrew Viterbi invented his algorithm in 1967 for decoding convolutional codes, later used in mobile phones and satellite links. Limitations: the Markov assumption and independent emissions are restrictive, and neural sequence models now dominate speech and language, though HMM ideas persist in structured and interpretable models.",
+      "principles": "Often the thing you care about is hidden and you see only its traces. HMMs are the cleanest way to reason backwards from traces to causes, and Viterbi's dynamic program showed that the best story can be found without trying every story.",
+      "example": {
+        "label": "The most likely weather behind three activities",
+        "code": "states = (\"rainy\", \"sunny\")\nstart = {\"rainy\": 0.6, \"sunny\": 0.4}\ntrans = {\"rainy\": {\"rainy\": 0.7, \"sunny\": 0.3}, \"sunny\": {\"rainy\": 0.4, \"sunny\": 0.6}}\nemit = {\"rainy\": {\"walk\": 0.1, \"shop\": 0.4, \"clean\": 0.5}, \"sunny\": {\"walk\": 0.6, \"shop\": 0.3, \"clean\": 0.1}}\n\ndef viterbi(obs):\n    best = [{s: (start[s] * emit[s][obs[0]], [s]) for s in states}]\n    for o in obs[1:]:\n        best.append({s: max((best[-1][p][0] * trans[p][s] * emit[s][o], best[-1][p][1] + [s]) for p in states)\n                     for s in states})\n    return max(best[-1].values())\n\nprob, path = viterbi([\"walk\", \"shop\", \"clean\"])\nprint(path, round(prob, 5))"
+      },
+      "requires": [
+        "markov-chains",
+        "bayes-theorem"
+      ]
+    },
+    {
+      "id": "brownian-motion",
+      "picture": "The endless jitter of tiny particles in liquid, kicked about by molecules.",
+      "mechanism": "A pollen grain or dust speck in water zigzags randomly because unequal numbers of molecules hit it from different sides. Mathematically, Brownian motion, the Wiener process, is the limit of random walks with tiny steps: continuous paths, independent normally distributed increments, and variance growing in proportion to time.",
+      "detail": "Robert Brown described the motion of pollen in 1827; Louis Bachelier modeled stock prices with it in 1900; Einstein in 1905, and independently Smoluchowski, explained it from molecular collisions and predicted that the mean squared displacement grows linearly in time, with a constant tied to temperature, viscosity, and particle size. Jean Perrin's experiments confirmed it, gave a measurement of Avogadro's number, and ended the argument over whether atoms are real.\n\nNorbert Wiener made it rigorous in 1923: paths are continuous but nowhere differentiable. Related: diffusion and the heat equation (the density of Brownian particles satisfies it), stochastic calculus, the Black–Scholes model of option prices, and Langevin equations. It is also used to simulate clouds and terrain in graphics, and to model noise, polymers, and animal movement. In finance real prices have fatter tails and clustered volatility, so Brownian models are a starting point, not the truth.",
+      "principles": "Random kicks add up to a walk whose spread grows with the square root of time, and the visible jitter of a speck proves the invisible motion of molecules. It is a bridge between the atomic and the everyday, and the mathematical model of noise.",
+      "example": {
+        "label": "Variance grows in proportion to time",
+        "code": "import math, random, statistics\n\nrandom.seed(27)\ndt, steps, paths = 0.01, 400, 1500\nfinals = []\nfor _ in range(paths):\n    x = 0.0\n    for _ in range(steps):\n        x += random.gauss(0, math.sqrt(dt))          # independent normal increments with variance dt\n    finals.append(x)\nT = dt * steps\nprint(\"mean\", round(statistics.mean(finals), 3), \" variance\", round(statistics.pvariance(finals), 3), \"vs T =\", T)"
+      },
+      "requires": [
+        "random-walk",
+        "normal-distribution"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orb View category (learning path)",
+  "type": "object",
+  "required": ["id", "group", "title", "blurb", "orb", "entry", "path"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "group": { "type": "string", "description": "Me, Tech, People, Science, Culture, or Abstract." },
+    "order": { "type": "integer", "minimum": 1, "description": "Position within the group." },
+    "title": { "type": "string" },
+    "blurb": { "type": "string", "description": "One line on what the path covers." },
+    "orb": { "enum": ["working", "searching", "solving", "listening", "connecting", "weaving", "composing", "breathing", "shaping"] },
+    "entry": { "type": "string", "description": "The concept the network opens on; the first step of the path." },
+    "path": { "type": "array", "items": { "type": "string" }, "minItems": 3 },
+    "cover": {
+      "type": "object",
+      "required": ["wikipedia"],
+      "properties": { "wikipedia": { "type": "string" } },
+      "description": "Wikipedia article for the cover image. Defaults to the entry concept's article."
+    }
+  }
+}

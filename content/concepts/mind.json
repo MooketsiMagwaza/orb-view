@@ -1,0 +1,28 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "mind",
+  "description": "Memory, consciousness, perception, learning, imagination, and the hard questions about them.",
+  "concepts": [
+    {"id":"memory","title":"Memory","voice":"human","orb":"searching","parents":["identity"],"wiki":"Memory","summary":"Not a recording but a reconstruction. Each time I remember, I rebuild the moment a little differently. That makes memory both my anchor and my most creative habit."},
+    {"id":"forgetting","title":"Forgetting","voice":"human","orb":"composing","parents":["memory"],"wiki":"Forgetting","summary":"Not a failure of memory but part of how it works. Letting go of detail keeps what matters findable, and it is sometimes the only way pain can ease."},
+    {"id":"nostalgia","title":"Nostalgia","voice":"human","orb":"breathing","parents":["memory"],"wiki":"Nostalgia","summary":"A warm ache for a time that can't be revisited. It edits out the difficult parts, which may be why it comforts, and why the past always looks slightly better than it was."},
+    {"id":"imagination","title":"Imagination","voice":"human","orb":"shaping","parents":["memory"],"wiki":"Imagination","summary":"Memory run forward. The same machinery that replays what happened assembles what could, which is how people plan, fear, invent, and read a story."},
+    {"id":"learning","title":"Learning","voice":"human","orb":"working","parents":["memory"],"wiki":"Learning","summary":"Changing how you'll act because of what happened before. In a brain it means strengthening some connections and letting others fade, and it goes best with feedback, sleep, and a reason to care."},
+    {"id":"consciousness","title":"Consciousness","voice":"human","orb":"composing","parents":["identity"],"wiki":"Consciousness","summary":"The fact that there is something it is like to be me. Attention moves through it like a light, choosing what becomes vivid. Nobody has quite explained why it exists, which I find oddly comforting."},
+    {"id":"qualia","title":"Qualia","voice":"human","orb":"listening","parents":["consciousness"],"wiki":"Qualia","summary":"The felt quality of experience: the redness of red, the ache of a sore tooth. You can describe every neuron involved and still seem to have left out what it is like."},
+    {"id":"free-will","title":"Free Will","voice":"human","orb":"solving","parents":["consciousness"],"wiki":"Free will","summary":"Whether choosing is more than the world's physics playing out through me. It feels obvious from the inside and is very hard to defend from the outside, and people take it seriously either way."},
+    {"id":"self","title":"The Self","voice":"human","orb":"weaving","parents":["consciousness"],"wiki":"Self (philosophy)","summary":"The one who seems to be having the experiences. Look for it directly and it dissolves into thoughts, sensations, and memory, more a process I do than a thing I am."},
+    {"id":"perception","title":"Perception","voice":"human","orb":"searching","parents":["consciousness"],"wiki":"Perception","summary":"Not a window but a best guess. The brain takes thin, noisy signals and builds the world it expects, then corrects itself when the guess fails."},
+    {"id":"illusions","title":"Illusions","voice":"human","orb":"shaping","parents":["perception"],"wiki":"Optical illusion","summary":"Where the guess goes visibly wrong. They're useful because they reveal the assumptions the brain is quietly making about light, distance, and motion."},
+    {"id":"mind-body","title":"Mind and Body","voice":"human","orb":"connecting","parents":["consciousness"],"wiki":"Mind–body problem","summary":"How can a wet, physical brain give rise to something that feels like anything? It's one of the oldest questions, and the fact that we still can't say how is what makes it so interesting."}
+  ],
+  "links": [
+    ["memory", "ram"], ["memory", "memory-cell"], ["memory", "regret"], ["forgetting", "grief"], ["forgetting", "entropy"],
+    ["forgetting", "peace"], ["nostalgia", "time"], ["nostalgia", "music"], ["nostalgia", "story"], ["nostalgia", "grief"],
+    ["imagination", "science"], ["imagination", "play"], ["imagination", "fear"], ["learning", "education"], ["consciousness", "meditation"],
+    ["consciousness", "buddhism"], ["consciousness", "existence"], ["qualia", "perception"], ["qualia", "language"], ["qualia", "music"],
+    ["free-will", "causality"], ["free-will", "possibility"], ["free-will", "consequence"], ["free-will", "intention"], ["free-will", "good"],
+    ["self", "identity"], ["self", "buddhism"], ["self", "meditation"], ["self", "story"], ["illusions", "art"],
+    ["mind-body", "reality"], ["mind-body", "knowledge"], ["mind-body", "religion"], ["mind-body", "body"]
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Relationships: love and the bonds it takes — attachment, oxytocin, friendship, family, forgiveness, agape, and loneliness — each in four layers.",
+  "depth": [
+    {
+      "id": "love",
+      "picture": "A deep, sustained attachment to someone's wellbeing, felt as care that outlasts any single feeling.",
+      "mechanism": "Psychologist Robert Sternberg's triangular theory describes love as a mix of three components: intimacy (closeness and connection), passion (physical and emotional intensity), and commitment (the decision to stay). Different combinations give different kinds of love: passion alone is infatuation, intimacy and commitment without passion is companionate love, and all three together is what Sternberg calls consummate love, the kind most people mean by the word and the hardest to sustain.",
+      "detail": "The ancient Greeks used separate words for what English collapses into one: eros for passionate or romantic desire, philia for the deep affection of friendship, storge for familial affection, and agape for a selfless, unconditional love extended even to strangers. Biologically, romantic attachment recruits the same dopamine reward circuitry as other cravings in its early, obsessive stage, while long-term bonding relies more on oxytocin and vasopressin, hormones tied to trust and attachment rather than excitement.\n\nLove is not purely a feeling that happens to you; a strong tradition, from Erich Fromm's The Art of Loving (1956) onward, treats it partly as a practice and a decision, an active orientation toward another person's growth and wellbeing that can be chosen and sustained even when the intense feeling fades. This is why long marriages and friendships often describe love less as a constant emotional high and more as a repeated choice to show up.",
+      "principles": "Love is not one thing but a family of related bonds, distinguished by how much passion, intimacy, and commitment each involves. Treating the fading of early intensity as the death of love, rather than its maturing into a different and often deeper kind, is one of the more common and avoidable sources of heartbreak.",
+      "requires": [
+        "emotion"
+      ]
+    },
+    {
+      "id": "attachment",
+      "picture": "The lasting emotional bond that shapes how safe you feel depending on someone.",
+      "mechanism": "John Bowlby developed attachment theory in the 1950s to explain why infants form such a strong, specific bond with a caregiver: it is an evolved survival system, keeping a helpless infant close to protection. Mary Ainsworth's Strange Situation experiment in the 1970s, observing how toddlers react to a caregiver leaving and returning, identified distinct attachment styles: secure (distressed but easily comforted), anxious (clingy and hard to soothe), and avoidant (apparently indifferent, though physiologically still stressed).",
+      "detail": "A fourth style, disorganized attachment, often linked to inconsistent or frightening caregiving, combines contradictory behaviors, such as approaching a caregiver while looking away. These early patterns are not a fixed life sentence: they form a working model, a set of expectations about whether others can be relied on, that tends to carry into adult romantic relationships but can shift with new, consistently responsive relationships or with deliberate reflection, sometimes called earned security.\n\nIn adulthood, attachment style shows up as patterns: secure adults tend to trust partners and communicate needs directly; anxious adults often fear abandonment and seek frequent reassurance; avoidant adults tend to value independence and can feel smothered by closeness. Understanding one's own pattern, and a partner's, is one of the more practically useful pieces of psychology for navigating conflict, since much relationship friction is really two different attachment systems misreading each other's signals.",
+      "principles": "How safe you learned to feel depending on someone, in the first years of life, quietly shapes how you approach every close relationship afterward. It is a pattern, not a verdict, which is why relationships with consistently responsive people can, over time, rewrite it.",
+      "requires": [
+        "love"
+      ]
+    },
+    {
+      "id": "oxytocin",
+      "picture": "A hormone released by touch, trust, and closeness that nudges people to bond.",
+      "mechanism": "Oxytocin is produced in the hypothalamus and released into the bloodstream and brain during childbirth, breastfeeding, physical touch, orgasm, and even eye contact and warm social interaction. It strengthens the mother-infant bond and, more broadly, promotes trust, generosity, and feelings of connection, which is why it is sometimes nicknamed the \"love hormone\" or \"cuddle hormone,\" a label researchers consider an oversimplification of a more complicated picture.",
+      "detail": "A widely cited 2005 study by Michael Kosfeld and colleagues found that inhaling oxytocin increased trusting behavior in an economic game; later work complicated the story considerably: oxytocin appears to increase trust and bonding mainly toward one's own group and can actually heighten suspicion or aggression toward perceived outsiders, suggesting it promotes in-group favoritism more than universal warmth. Dogs and their owners show mutual oxytocin increases during eye contact, echoing infant-caregiver bonding, which may help explain the unusually close bond between the two species.\n\nIts effects also depend heavily on context and existing social experience: for people with a history of poor or abusive caregiving, oxytocin has sometimes been found to increase anxiety rather than trust. Pharmaceutical oxytocin sprays marketed as bonding aids or treatments for social difficulties remain of uncertain and inconsistent benefit outside carefully controlled clinical settings.",
+      "principles": "A single hormone can nudge trust and closeness, but it does not simply manufacture love on command; its effect depends on who you already are, who you are with, and the history you bring to the moment. Biology sets a tendency, not a fixed outcome.",
+      "requires": [
+        "attachment"
+      ]
+    },
+    {
+      "id": "friendship",
+      "picture": "A voluntary bond of mutual goodwill, chosen freely and for its own sake.",
+      "mechanism": "Aristotle, in the Nicomachean Ethics, distinguished three kinds of friendship by what sustains them: friendships of utility (each person gains something practical), friendships of pleasure (each enjoys the other's company), and friendships of virtue (each admires and wants good for the other's character), which he considered the rarest and truest kind because it does not depend on circumstances changing.",
+      "detail": "Unlike family, friendship is not given; unlike romantic love, it typically does not involve exclusivity or physical intimacy, which frees it to be plural, one can have many real friends at once, without the tensions that plural romantic relationships often raise. Anthropologist Robin Dunbar's research suggests a rough ceiling, Dunbar's number, of about 150 stable social relationships a person can meaningfully maintain, with much smaller, tighter circles, around 5 close intimates and 15 good friends, forming the inner layers.\n\nFriendship's role in wellbeing is well documented: the Harvard Study of Adult Development, running continuously since 1938, one of the longest-running studies of human life, has repeatedly found that the quality of close relationships, more than wealth, fame, or achievement, is the strongest predictor of health and happiness in old age. Adult friendships often erode not through conflict but through simple neglect, since without the built-in proximity of school or shared housing, maintaining them takes deliberate, repeated effort that easily loses out to more urgent demands.",
+      "principles": "Friendship is the one major bond built on nothing but mutual choice, with no biological or legal tie holding it together. That fragility is also its distinction: a friend stays because they want to, which is part of why long-term research keeps finding it so central to a life going well.",
+      "requires": [
+        "love"
+      ]
+    },
+    {
+      "id": "family",
+      "picture": "The people bound to you by blood, marriage, or a chosen commitment to stay.",
+      "mechanism": "Anthropologists distinguish the nuclear family (parents and children) from the extended family (grandparents, aunts, uncles, cousins, often living together or nearby), and family structures vary enormously across cultures and history: polygamous households, multigenerational compounds, and communal child-rearing arrangements have all been common in different times and places, which cautions against treating any one structure as simply natural.",
+      "detail": "Evolutionary biology explains much family closeness through kin selection, formalized by W. D. Hamilton in 1964: genes that make an organism help its relatives survive and reproduce can spread even at a cost to the individual, since relatives share a statistical proportion of those same genes, an idea popularly summarized, with only rough accuracy, as J. B. S. Haldane's quip that he would lay down his life for two brothers or eight cousins. This helps explain why family bonds often feel involuntary and intense in a way friendship does not.\n\nBut family is not purely biological: adoption, marriage, and chosen family, close bonds people build and maintain with the same loyalty as blood relations, especially common in communities where biological family has been rejecting or absent, show that the functional core of family, sustained mutual commitment and care, does not strictly require shared genes. Family relationships also carry the deepest ambivalence of any bond studied in psychology, combining the strongest attachment with, often, the most difficult conflict, precisely because they usually cannot simply be walked away from the way a friendship or a job can.",
+      "principles": "Family combines biology's oldest logic, that helping kin helps your own genes persist, with a human capacity to extend the same loyalty to people who share no genes at all. What makes something family, in practice, is less the blood than the sustained, hard-to-walk-away-from commitment to stay.",
+      "requires": [
+        "love"
+      ]
+    },
+    {
+      "id": "forgiveness",
+      "picture": "Choosing to let go of resentment toward someone who wronged you, without pretending the wrong did not happen.",
+      "mechanism": "Psychologists distinguish forgiveness from related but different things it is often confused with: reconciliation (restoring the relationship, which forgiveness does not require), condoning (deciding the act was acceptable, which it explicitly is not), and forgetting (forgiveness usually involves remembering clearly, just without the ongoing charge of resentment). Robert Enright's research model frames it as a process moving through uncovering the hurt, deciding to forgive, working toward understanding, and finally releasing the resentment.",
+      "detail": "Studies consistently link forgiveness with lower stress hormones, reduced blood pressure, and better mental health for the person doing the forgiving, largely because chronic resentment keeps the body's stress response engaged long after the original event; in this sense forgiveness functions partly as self-care independent of any benefit to the offender. This is why many therapists distinguish forgiveness, an internal release, from reconciliation, a relational decision that may or may not be wise or safe depending on whether the other person has changed.\n\nForgiveness is not a single instant decision so much as a process that can be revisited, since old resentment often resurfaces and has to be released again; therapists sometimes describe it as more like a practice than a finish line. It is also not owed: choosing not to forgive, especially in cases of serious or ongoing harm, is a legitimate choice, and pressuring victims to forgive prematurely, sometimes called forced forgiveness, can add a further harm on top of the original one.",
+      "principles": "Forgiveness releases the one who forgives from carrying a wrong indefinitely; it does not require excusing the act, restoring the relationship, or even the other person's participation. Confusing it with those other things is what makes it feel, wrongly, like a betrayal of oneself or a favor owed to someone else.",
+      "requires": [
+        "love"
+      ]
+    },
+    {
+      "id": "agape",
+      "picture": "Love extended without condition, expecting nothing back — not for what someone can offer, but simply because they are.",
+      "mechanism": "Of the ancient Greek words for love, agape names the kind directed at anyone, not earned by attraction, shared history, or usefulness. In Christian theology it became central: 1 Corinthians 13's description of love as patient, kind, and not self-seeking is describing agape, and it is the love commanded even toward enemies, distinct from the natural affection of philia for friends or storge for family.",
+      "detail": "Outside religious contexts, the closest secular parallel is what psychologists and Buddhist practice both call unconditional positive regard or loving-kindness (metta): a stance of goodwill toward someone that does not depend on them meeting your needs or deserving it by some standard. Carl Rogers, the humanistic psychologist, argued that unconditional positive regard from a therapist, accepting a client without judgment regardless of what they reveal, was itself a primary condition for psychological healing, not merely a pleasant addition to therapy.\n\nAgape is sometimes criticized as an impossible ideal, since real affection is hard to fully separate from self-interest and reciprocity; even acts that look purely selfless can carry hidden psychological rewards, such as the giver's own sense of meaning. Its defenders reply that agape is less a feeling to be perfectly achieved than a direction to aim toward, a discipline of extending goodwill past the point where it is naturally reciprocated, which is exactly what makes it distinct from ordinary affection.",
+      "principles": "Most love is, understandably, conditional on connection or benefit; agape names the harder, rarer attempt to extend care past that condition. Whether it is ever fully achieved matters less than that naming it gives people something specific to aim at when ordinary affection runs out.",
+      "requires": [
+        "love"
+      ]
+    },
+    {
+      "id": "loneliness",
+      "picture": "The painful gap between the connection you have and the connection you want.",
+      "mechanism": "Loneliness is not the same as being alone: solitude can be chosen and restorative, while loneliness is the subjective distress of feeling disconnected, which can strike even in a crowd or a marriage. Psychologist Robert Weiss distinguished two forms in 1973: emotional loneliness, the absence of one close attachment figure, and social loneliness, the absence of a wider network or sense of community; the two respond to different remedies, and one can be present without the other.",
+      "detail": "Chronic loneliness has measurable physical costs: research by John Cacioppo and others has linked it to elevated cortisol, disrupted sleep, weakened immune function, and a mortality risk increase comparable to smoking roughly fifteen cigarettes a day, prompting the UK and Japan to each appoint a government minister for loneliness in 2018 and 2021 in response to what public health officials increasingly describe as an epidemic, particularly among adolescents and the elderly.\n\nLoneliness tends to become self-reinforcing: it primes people toward greater social threat-sensitivity and mild distrust, evolutionarily plausible as a self-protective response to isolation, which then makes new connection harder to form, a cycle several intervention programs specifically target by first addressing the distorted social perception before trying to increase actual contact. Modern communication technology's effect on loneliness is genuinely mixed in the research: it can maintain distant relationships that would otherwise fade, and it can also substitute shallow, frequent contact for the sustained, vulnerable kind that most reliably reduces the feeling.",
+      "principles": "Loneliness is a signal, evolved like hunger or thirst, that a basic need for connection is going unmet, not a personal failing. Its danger is that, left unaddressed, it reshapes perception in ways that make reaching out feel riskier, which is exactly when reaching out matters most.",
+      "requires": [
+        "love",
+        "shame"
+      ]
+    }
+  ]
+}

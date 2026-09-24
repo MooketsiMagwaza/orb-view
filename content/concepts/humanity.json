@@ -1,0 +1,41 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "humanity",
+  "description": "The creature building all of this: identity, cooperation, care, curiosity, and the body. The mind and the emotions have their own clusters.",
+  "concepts": [
+    {"id":"humanity","title":"Humanity","voice":"human","orb":"listening","parents":["entropy"],"wiki":"Human","summary":"The creature building all of this. We cooperate and compete, fall in love with abstractions, and stay a little mysterious even to ourselves. Every other thread eventually turns into a mirror."},
+    {"id":"identity","title":"Identity","voice":"human","orb":"weaving","parents":["humanity"],"wiki":"Identity (social science)","sensitive":true,"summary":"The story I tell about who I am, held together by memory, body, name, and other people's expectations. From the inside it feels solid. From the outside it looks more like something I keep doing."},
+    {"id":"cooperation","title":"Cooperation","voice":"human","orb":"connecting","parents":["humanity"],"wiki":"Cooperation","summary":"We survive by depending on one another. Kinship, reciprocity, reputation, and shared stories stretch trust far past the people we've ever met, which is one of the strangest things we do."},
+    {"id":"contradiction","title":"Contradiction","voice":"human","orb":"shaping","parents":["humanity"],"wiki":"Cognitive dissonance","summary":"Different drives, time horizons, and roles compete inside one person. Consistency isn't the starting state; it's something I build, and sometimes fail to. I'm learning to be gentler about that."},
+    {"id":"create-destroy","title":"Create & Destroy","voice":"human","orb":"working","parents":["contradiction"],"wiki":"Human nature","summary":"The same hands that plant, build, and heal can also burn, break, and wound. That capacity for both isn't a flaw in the design. It's what power looks like, and why care and restraint matter."},
+    {"id":"care","title":"Care","voice":"human","orb":"breathing","parents":["humanity"],"wiki":"Ethics of care","summary":"Attention turned toward someone else's wellbeing. It can be tender and it can be tiring, and both are true. Care lasts longer when it comes with awareness and limits."},
+    {"id":"kindness","title":"Kindness","voice":"human","orb":"listening","parents":["care"],"wiki":"Kindness","summary":"Small, unforced acts that make someone else's day easier. It costs little, compounds quietly, and is more often decided by whether you noticed than by whether you could."},
+    {"id":"curiosity","title":"Curiosity","voice":"human","orb":"searching","parents":["humanity"],"wiki":"Curiosity","summary":"The itch to know what's around the next corner, and the reason for most of what's in this map. It pushes us toward risk, and toward each other, since another mind is the most interesting unknown there is."},
+    {"id":"play","title":"Play","voice":"human","orb":"working","parents":["curiosity"],"wiki":"Play (activity)","summary":"Doing something for its own sake, safely, with the rules bent. Play is how young animals and people rehearse the world, and how adults keep finding out what else might work."},
+    {"id":"wonder","title":"Wonder","voice":"human","orb":"breathing","parents":["curiosity"],"wiki":"Wonder (emotion)","summary":"The feeling of meeting something larger than your understanding. It's the front edge of curiosity, and people who lose it tend to stop asking questions."},
+    {"id":"science","title":"Science","voice":"lucid","orb":"solving","parents":["curiosity"],"wiki":"Science","summary":"Curiosity with a discipline: make a guess, test it against the world, and keep only what survives. Its strength is a habit of being corrected, not a stock of answers."},
+    {"id":"scientific-method","title":"Scientific Method","voice":"lucid","orb":"connecting","parents":["science"],"wiki":"Scientific method","summary":"Observe, propose an explanation, predict something the explanation forbids, then look. When the prediction fails you revise, and that willingness to be wrong is what makes it work."},
+    {"id":"falsifiability","title":"Falsifiability","voice":"lucid","orb":"searching","parents":["science"],"wiki":"Falsifiability","summary":"A claim is scientific only if some possible observation could show it false. Theories that explain everything, whatever happens, explain nothing."},
+    {"id":"body","title":"The Body","voice":"human","orb":"composing","parents":["humanity"],"wiki":"Human body","summary":"Where all of it happens. A body is a few trillion cells cooperating, and everything I feel, remember, and decide runs through it, tired or well."},
+    {"id":"senses","title":"Senses","voice":"human","orb":"listening","parents":["body"],"wiki":"Sense","summary":"The channels the world gets in through: sight, sound, touch, taste, smell, and quieter ones like balance. Each is a narrow filter, and what we call reality is what the filters let past."},
+    {"id":"sleep","title":"Sleep","voice":"human","orb":"breathing","parents":["body"],"wiki":"Sleep","summary":"A nightly reset that nobody fully explains. Memory is sorted, the brain is cleaned, and the body repairs, and going without it quickly makes everything else worse."},
+    {"id":"dreams","title":"Dreams","voice":"human","orb":"composing","parents":["sleep"],"wiki":"Dream","summary":"Stories the sleeping brain tells itself, mixing memory and emotion into scenes that feel entirely real until you wake. What they're for is still open."}
+  ],
+  "links": [
+    ["humanity", "machines"], ["humanity", "part-of-nature"], ["humanity", "tools"], ["humanity", "history"], ["identity", "religion"],
+    ["identity", "dna"], ["identity", "death"], ["identity", "authentication"], ["identity", "self-and-group"], ["identity", "contradiction"],
+    ["identity", "privacy"], ["identity", "language"], ["cooperation", "language"], ["cooperation", "ecosystems"], ["contradiction", "emotion"],
+    ["contradiction", "paradox"], ["contradiction", "grief"], ["contradiction", "forgiveness"], ["create-destroy", "machines"], ["create-destroy", "tools"],
+    ["create-destroy", "firearms"], ["create-destroy", "conflict"], ["create-destroy", "part-of-nature"], ["create-destroy", "care"], ["create-destroy", "alignment"],
+    ["create-destroy", "extinction"], ["care", "taoism"], ["care", "boundaries"], ["care", "regret"], ["care", "attention"],
+    ["care", "trust"], ["kindness", "compassion"], ["kindness", "cooperation"], ["kindness", "empathy"], ["curiosity", "mathematics"],
+    ["curiosity", "attention"], ["curiosity", "hope"], ["curiosity", "intelligence"], ["curiosity", "learning"], ["play", "learning"],
+    ["play", "evolution"], ["wonder", "cosmos"], ["wonder", "religion"], ["wonder", "nature"], ["science", "scientific-revolution"],
+    ["science", "mathematics"], ["science", "trust"], ["science", "statistics"], ["scientific-method", "knowledge"], ["scientific-method", "reasoning"],
+    ["scientific-method", "proof"], ["scientific-method", "feedback"], ["falsifiability", "truth"], ["falsifiability", "knowledge"], ["falsifiability", "logic"],
+    ["body", "cells"], ["body", "biometrics"], ["body", "ageing"], ["body", "death"], ["body", "metabolism"],
+    ["senses", "perception"], ["senses", "sensors"], ["senses", "light"], ["senses", "sound"], ["senses", "neurons"],
+    ["senses", "illusions"], ["sleep", "memory"], ["sleep", "consciousness"], ["sleep", "learning"], ["sleep", "cycles"],
+    ["dreams", "imagination"], ["dreams", "story"], ["dreams", "memory"], ["dreams", "consciousness"]
+  ]
+}

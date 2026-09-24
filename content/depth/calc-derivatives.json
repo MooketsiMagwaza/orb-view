@@ -1,0 +1,284 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part three: derivatives, from rates of change and tangent lines through the differentiation rules to optimization, curvature, and Newton's method, each in four layers.",
+  "depth": [
+    {
+      "id": "derivatives",
+      "picture": "How fast something is changing at this very instant.",
+      "mechanism": "The derivative of f at x is the limit of the difference quotient (f(x + h) − f(x)) / h as h → 0: the slope of secant lines squeezed into the slope of the tangent. It is written f′(x), df/dx, or Df, and it is itself a function giving the rate of change at every point.",
+      "detail": "Geometrically it is the slope of the tangent line; physically, speed is the derivative of position and acceleration the derivative of speed; economically, marginal cost is the derivative of total cost. A function is differentiable where this limit exists, which requires continuity and no corners or vertical tangents.\n\nNotation: Leibniz's dy/dx shows the ratio of tiny changes, Lagrange's f′ is compact, and Newton's dot (ẋ) is common in physics for time derivatives. Rules (power, product, quotient, chain) let you differentiate without limits. Derivatives find maxima and minima (where f′ = 0), describe curvature, drive linear approximation, and define differential equations. The sign of f′ tells whether f is increasing or decreasing.",
+      "principles": "A derivative freezes motion into a single number: the rate right now. It converts questions about change into questions about slope, and slope, unlike change itself, can be read off a graph, a formula, or a machine.",
+      "example": {
+        "label": "Numerical slope against the exact rule",
+        "code": "def derivative(f, x, h=1e-6):\n    return (f(x + h) - f(x - h)) / (2 * h)       # symmetric difference quotient\n\nf = lambda x: x ** 3\nfor x in (1, 2, 3):\n    print(x, round(derivative(f, x), 4), 3 * x ** 2)   # numerical slope against the exact 3x^2"
+      },
+      "requires": [
+        "limits",
+        "functions"
+      ]
+    },
+    {
+      "id": "rate-of-change",
+      "picture": "How much one thing changes for each unit change in another.",
+      "mechanism": "The average rate of change of f between x = a and x = b is (f(b) − f(a)) / (b − a): the slope of the secant line. Speed is distance divided by time; growth rate is population change divided by time. Shrink the interval to zero and the average rate becomes an instantaneous rate: the derivative.",
+      "detail": "Units carry the meaning: miles per hour, dollars per unit, degrees per meter, births per year. The sign gives the direction (increasing or decreasing), the size says how steep. A constant rate gives a straight-line graph; a rate that itself changes gives curves.\n\nAverage and instantaneous rates can differ a lot: your average speed over a trip says little about how fast you were going at each moment. Relative rates, growth per year as a fraction of size, give exponentials when constant. A speedometer measures an instantaneous rate and a trip computer an average. Zeno's paradox of the arrow, which at each instant does not move, dissolves once speed is defined as a limit over shrinking intervals.",
+      "principles": "Every question about how fast begins with a ratio of changes. The derivative is what that ratio becomes when you look at smaller and smaller stretches: a single number that describes change at a moment.",
+      "example": {
+        "label": "Average speed over shrinking intervals",
+        "code": "position = lambda t: 5 * t ** 2          # meters fallen, approximately, from rest\n\nfor dt in (1, 0.1, 0.01, 0.001):\n    avg = (position(2 + dt) - position(2)) / dt\n    print(f\"average speed from t=2 to t={2 + dt}: {avg:.4f} m/s\")     # approaches 20 m/s"
+      },
+      "requires": [
+        "functions"
+      ]
+    },
+    {
+      "id": "tangent-line",
+      "picture": "The straight line that just touches a curve at a point, pointing the same way the curve does.",
+      "mechanism": "The tangent at (a, f(a)) has slope f′(a): y = f(a) + f′(a)(x − a). It is the limit of secant lines through (a, f(a)) and a nearby point as that point slides toward it.",
+      "detail": "Zoomed in enough, a smooth curve looks like its tangent line, which is the whole idea of differentiability: locally, the function is almost linear. The tangent is the best linear approximation to the function near the point. The normal line is perpendicular to it, with slope −1/f′(a).\n\nTangent lines can cross the curve elsewhere: a tangent to a circle touches once, but a cubic's can meet it again. At a corner, like |x| at 0, no tangent exists; at a vertical tangent the slope is infinite. The tangent to a circle has been studied since Euclid and Apollonius; Fermat and Descartes found methods for general curves, and the derivative made it computational. Applications: linearization, Newton's method, optics (angles of reflection are measured from the normal), and the direction of motion, since velocity is tangent to the path.",
+      "principles": "Up close, everything smooth is straight. The tangent line is the reason calculus works: it lets you replace a curve by a line locally, and lines are easy.",
+      "example": {
+        "label": "A tangent line and the curve it touches",
+        "code": "f = lambda x: x ** 3 - 2 * x\ndf = lambda x: 3 * x ** 2 - 2\n\na = 2\nslope, y0 = df(a), f(a)\ntangent = lambda x: y0 + slope * (x - a)\nfor x in (1.9, 2.0, 2.1, 3.0):\n    print(x, round(f(x), 4), round(tangent(x), 4))    # nearly equal near a, drifting apart farther away"
+      },
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "motion",
+      "picture": "Position, speed, and acceleration: each is the rate of change of the one before.",
+      "mechanism": "If s(t) is position, then velocity v = ds/dt is its derivative and acceleration a = dv/dt = d²s/dt² is the derivative of velocity. Going the other way, velocity is the integral of acceleration and position the integral of velocity.",
+      "detail": "Velocity includes direction (a signed quantity in one dimension); speed is its magnitude. For constant acceleration a, integrating gives v = v₀ + at and s = s₀ + v₀t + ½at², the formulas of introductory physics. Falling near Earth's surface has a of about 9.8 m/s².\n\nNewton's second law F = ma makes acceleration the link between force and motion, so knowing forces and integrating twice predicts trajectories. Higher derivatives have names: jerk (the rate of change of acceleration), then snap, crackle, and pop; jerk matters for comfortable elevators and roller coasters. In two and three dimensions, position, velocity, and acceleration are vectors. Motion was the original motivation for calculus: Galileo described falling bodies, and Newton needed a mathematics of changing speed to explain planetary orbits.",
+      "principles": "Calculus was invented to describe motion. Position, velocity, and acceleration are one quantity seen through successive derivatives, and knowing the forces, the laws of motion let you run the chain backward to predict the future.",
+      "example": {
+        "label": "A falling stone",
+        "code": "g = 9.8\ns = lambda t: 0.5 * g * t ** 2          # distance fallen from rest\nv = lambda t: g * t                     # its derivative\na = lambda t: g                         # the derivative of v\n\nfor t in (0, 1, 2, 3):\n    print(f\"t={t}s  fallen={s(t):6.2f} m  speed={v(t):5.1f} m/s  acceleration={a(t)}\")"
+      },
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "differentiation-rules",
+      "picture": "Shortcuts so you never have to compute the limit by hand.",
+      "mechanism": "A small set of rules covers nearly every function: constants and sums (differentiate term by term), the power rule, the product rule, the quotient rule, and the chain rule, plus a table of derivatives of basic functions such as eˣ, ln x, sin x, and cos x. Complicated functions are differentiated by breaking them into these pieces.",
+      "detail": "Basic table: (xⁿ)′ = nxⁿ⁻¹; (eˣ)′ = eˣ; (aˣ)′ = aˣ ln a; (ln x)′ = 1/x; (sin x)′ = cos x; (cos x)′ = −sin x; (tan x)′ = sec² x; (arcsin x)′ = 1/√(1 − x²); (arctan x)′ = 1/(1 + x²). Linearity: (af + bg)′ = af′ + bg′.\n\nStrategy: identify the outermost operation (sum, product, quotient, composition), apply its rule, and recurse. Logarithmic differentiation handles variable exponents such as xˣ: take ln of both sides first. Computer algebra systems implement exactly these rules and, unlike integration, differentiation always succeeds for elementary functions and needs no cleverness, only care.",
+      "principles": "The limit definition proves the rules once; after that you use them like arithmetic. Differentiation is mechanical, which is why computers, and students, can do it reliably.",
+      "example": {
+        "label": "Rules against numerical slopes",
+        "code": "import math\n\ndef d(f, x, h=1e-6):\n    return (f(x + h) - f(x - h)) / (2 * h)\n\nchecks = {\n    \"x^5\":       (lambda x: x ** 5,        lambda x: 5 * x ** 4),\n    \"sin(x)e^x\": (lambda x: math.sin(x) * math.exp(x), lambda x: (math.cos(x) + math.sin(x)) * math.exp(x)),\n    \"ln(x^2+1)\": (lambda x: math.log(x * x + 1),       lambda x: 2 * x / (x * x + 1)),\n}\nfor name, (f, df) in checks.items():\n    print(f\"{name:10s} numeric={d(f, 1.3):.5f} rule={df(1.3):.5f}\")"
+      },
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "power-rule",
+      "picture": "Bring the power down in front, then lower the power by one.",
+      "mechanism": "d/dx xⁿ = n xⁿ⁻¹. So x³ becomes 3x², x becomes 1, and a constant becomes 0. It works for negative and fractional powers too: 1/x = x⁻¹ has derivative −x⁻², and √x = x^(1/2) has derivative ½ x^(−1/2).",
+      "detail": "Proof for whole n: expand (x + h)ⁿ by the binomial theorem; the first two terms are xⁿ + n xⁿ⁻¹ h, and everything else has h² or higher, vanishing in the limit. For general real n it follows from xⁿ = e^(n ln x) and the chain rule. Combined with linearity, it differentiates every polynomial at once: 4x³ − 5x + 7 has derivative 12x² − 5.\n\nIt fails for exponentials: 2ˣ is not x to a power, and its derivative is 2ˣ ln 2, a common confusion between variable base and variable exponent. The reverse, integrating, adds one to the power and divides by the new power, except for x⁻¹, whose integral is ln x.",
+      "principles": "The simplest rule does the most work. Because so many functions are built from powers, or well approximated by them, this one line handles a large share of everyday differentiation.",
+      "example": {
+        "label": "Whole, negative, and fractional powers",
+        "code": "def d(f, x, h=1e-6):\n    return (f(x + h) - f(x - h)) / (2 * h)\n\nfor n in (3, -1, 0.5):\n    x = 2.0\n    print(f\"x^{n}: numeric {d(lambda t: t ** n, x):.5f}   rule {n * x ** (n - 1):.5f}\")"
+      },
+      "requires": [
+        "differentiation-rules",
+        "polynomials"
+      ]
+    },
+    {
+      "id": "product-rule",
+      "picture": "When two changing quantities multiply, each contributes its own change while the other holds still.",
+      "mechanism": "(fg)′ = f′g + fg′. Think of a rectangle with width f and height g. If both change, the area changes by the strip added along one side plus the strip along the other; the tiny corner is too small to count.",
+      "detail": "Example: d/dx (x² sin x) = 2x sin x + x² cos x. Leibniz stated it in 1677 and recognized that it is not simply f′g′. For three factors, (fgh)′ = f′gh + fg′h + fgh′. The Leibniz rule for the n-th derivative of a product follows the binomial theorem.\n\nUses: differentiating expressions like x eˣ, and, read backward, integration by parts. A common error is (fg)′ = f′g′; check with f = g = x, where fg = x² has derivative 2x while f′g′ = 1. In physics, the product rule gives the derivative of momentum (mass times velocity) when both vary, and of power (force times velocity). It also applies to dot and cross products of vector functions.",
+      "principles": "Both parts change, so both contribute. The product rule is a bookkeeping statement about a rectangle whose sides are moving, and it becomes integration by parts when read in reverse.",
+      "example": {
+        "label": "f'g + fg' against a numerical slope",
+        "code": "import math\nd = lambda f, x, h=1e-6: (f(x + h) - f(x - h)) / (2 * h)\n\nf, g = (lambda x: x ** 2), (lambda x: math.sin(x))\nfg = lambda x: f(x) * g(x)\nx = 1.2\nrule = 2 * x * math.sin(x) + x ** 2 * math.cos(x)      # f'g + fg'\nprint(round(d(fg, x), 5), round(rule, 5))"
+      },
+      "requires": [
+        "differentiation-rules"
+      ]
+    },
+    {
+      "id": "quotient-rule",
+      "picture": "The derivative of a fraction: low d-high minus high d-low, over low squared.",
+      "mechanism": "(f/g)′ = (f′g − fg′) / g². It follows from the product rule applied to f · (1/g), with (1/g)′ = −g′/g².",
+      "detail": "Example: d/dx (sin x / x) = (x cos x − sin x)/x². The chant low d-high minus high d-low, over low squared helps with the order, since the minus sign makes it matter. Often it is easier to avoid the rule: rewrite f/g as f · g⁻¹ and use the product and chain rules, or divide first (x²/x = x).\n\nIt is needed for tan x = sin x / cos x, whose derivative sec² x results, and for rational functions. The reciprocal rule is the special case (1/g)′ = −g′/g². Common mistakes are reversing the order in the numerator and forgetting to square the denominator.",
+      "principles": "A quotient is a product with a reciprocal in it. The rule is just the product rule with the extra sign that comes from something in the denominator getting bigger and making the whole smaller.",
+      "example": {
+        "label": "Differentiating sin x / x",
+        "code": "import math\nd = lambda f, x, h=1e-6: (f(x + h) - f(x - h)) / (2 * h)\n\nx = 0.8\nrule = (math.cos(x) * x - math.sin(x) * 1) / x ** 2         # (f'g - fg') / g^2\nprint(round(d(lambda t: math.sin(t) / t, x), 5), round(rule, 5))"
+      },
+      "requires": [
+        "product-rule"
+      ]
+    },
+    {
+      "id": "chain-rule",
+      "picture": "For a function of a function, multiply the rates: outer times inner.",
+      "mechanism": "(f(g(x)))′ = f′(g(x)) · g′(x). In Leibniz notation, dy/dx = (dy/du)(du/dx): the ratios cancel like fractions. To use it, name the inner function, differentiate the outer with the inner left alone, then multiply by the derivative of the inner.",
+      "detail": "Examples: d/dx sin(x²) = cos(x²) · 2x; d/dx e^(3x) = 3e^(3x); d/dx (1 + x²)¹⁰ = 10(1 + x²)⁹ · 2x. Intuition: if a car goes twice as fast as a bicycle and the bicycle four times as fast as a walker, the car is eight times as fast as the walker. Longer chains multiply more factors.\n\nThe rule is the most used in calculus, since nearly everything is a composition. It underlies substitution in integration and implicit differentiation, gives derivatives of inverse functions, and generalizes to several variables as a product of Jacobian matrices. In machine learning, backpropagation applies the chain rule through the layers of a network, efficiently reusing intermediate results. The common error is forgetting the inner derivative.",
+      "principles": "Rates multiply along a chain of dependencies. That single principle lets you differentiate anything built by nesting functions, and it is the mathematical heart of how neural networks learn.",
+      "example": {
+        "label": "Outer times middle times inner",
+        "code": "import math\nd = lambda f, x, h=1e-6: (f(x + h) - f(x - h)) / (2 * h)\n\nx = 0.7\nf = lambda t: math.exp(math.sin(t ** 2))\nrule = math.exp(math.sin(x ** 2)) * math.cos(x ** 2) * 2 * x     # outer' * middle' * inner'\nprint(round(d(f, x), 5), round(rule, 5))"
+      },
+      "requires": [
+        "differentiation-rules",
+        "function-composition"
+      ]
+    },
+    {
+      "id": "automatic-differentiation",
+      "picture": "Getting exact derivatives from a program by applying the chain rule to every step it takes.",
+      "mechanism": "Every program is a composition of elementary operations (add, multiply, exp, sin). Track, alongside each value, its derivative, or record the operations and replay them backwards. The chain rule then gives exact derivatives, up to floating-point rounding, at a small multiple of the cost of running the program.",
+      "detail": "Forward mode carries a derivative with respect to one input along with each value; it costs one pass per input, so it suits few inputs and many outputs. Reverse mode records the computation, then propagates sensitivities from the output back to all inputs in a single pass; it costs one pass per output, so it suits many inputs and one output, the case of training a neural network with millions of parameters whose output is a single loss. Reverse mode applied to a network is backpropagation.\n\nIt differs from numerical differentiation (finite differences, with rounding and truncation errors) and from symbolic differentiation (which can produce enormous expressions). Frameworks such as PyTorch, TensorFlow, and JAX are built on it, and it lets programs with loops and branches be differentiated. The cost of reverse mode is the memory to store intermediate values.",
+      "principles": "Differentiation can be done by a program on a program. Automatic differentiation is the chain rule industrialized, and it is what made training very large models practical.",
+      "example": {
+        "label": "Forward mode with dual numbers",
+        "code": "import math\n\nclass Dual:                                   # a value together with its derivative\n    def __init__(self, val, der=0.0):\n        self.val, self.der = val, der\n    def __add__(self, o):\n        o = o if isinstance(o, Dual) else Dual(o)\n        return Dual(self.val + o.val, self.der + o.der)\n    __radd__ = __add__\n    def __mul__(self, o):\n        o = o if isinstance(o, Dual) else Dual(o)\n        return Dual(self.val * o.val, self.der * o.val + self.val * o.der)\n    __rmul__ = __mul__\n\ndef sin(x):\n    return Dual(math.sin(x.val), math.cos(x.val) * x.der)\n\nx = Dual(2.0, 1.0)                            # seed: dx/dx = 1\ny = x * x * sin(x) + 3 * x                    # f(x) = x^2 sin x + 3x\nprint(y.val, y.der)                           # f(2) and f'(2), computed together\nprint(2 * 2 * math.sin(2) + 4 * math.cos(2) + 3)      # f'(2) by the rules: 2x sin x + x^2 cos x + 3"
+      },
+      "requires": [
+        "chain-rule"
+      ]
+    },
+    {
+      "id": "implicit-differentiation",
+      "picture": "When x and y are tangled in one equation, differentiate both sides and solve for the slope.",
+      "mechanism": "Treat y as an unknown function of x. Differentiate every term with respect to x, using the chain rule on terms containing y (so y² becomes 2y · dy/dx). Then collect the dy/dx terms and solve for it.",
+      "detail": "Example: for the circle x² + y² = 25, differentiate to get 2x + 2y y′ = 0, so y′ = −x/y. At (3, 4) the slope is −3/4, found without solving for y first, which would give two branches, y = ±√(25 − x²). It is the tool for curves that are not graphs of functions: ellipses, the folium of Descartes, and any curve given by f(x, y) = 0. Vertical tangents occur where the denominator, here y, is zero.\n\nIt also produces derivatives of inverse functions: from y = arcsin x, sin y = x, so cos y · y′ = 1. The implicit function theorem says when an equation really defines y as a function of x locally: when the partial derivative with respect to y is nonzero. In several variables, the slope of a level curve is the ratio of partial derivatives.",
+      "principles": "You do not always need y by itself. Differentiating the relationship, and solving for the slope afterwards, shows how the change in one variable forces the change in the other.",
+      "example": {
+        "label": "The slope of a circle",
+        "code": "import math\n\nx, y = 3.0, 4.0\nprint(\"slope by implicit differentiation:\", -x / y)\n\nd = lambda f, x, h=1e-6: (f(x + h) - f(x - h)) / (2 * h)\nupper_half = lambda t: math.sqrt(25 - t * t)\nprint(\"slope by differentiating the explicit branch:\", round(d(upper_half, 3.0), 6))"
+      },
+      "requires": [
+        "chain-rule"
+      ]
+    },
+    {
+      "id": "related-rates",
+      "picture": "If several quantities are linked and changing, their rates of change are linked too.",
+      "mechanism": "Write an equation connecting the quantities, differentiate both sides with respect to time using the chain rule, and substitute the known values and rates to solve for the unknown rate. Draw a diagram, name the variables, and keep changing quantities as variables until after differentiating.",
+      "detail": "Classic: a 10 m ladder leans on a wall, its foot sliding away at 1 m/s. With x the foot's distance and y the height, x² + y² = 100, so 2x x′ + 2y y′ = 0, giving y′ = −x x′ / y. When x = 6, y = 8, so y′ = −0.75 m/s: the top slides down at 0.75 m/s, faster and faster as x approaches 10.\n\nOthers: a balloon inflating (V = (4/3)πr³, so V′ = 4πr² r′), the shadow of a walking person, water draining from a cone, two cars approaching an intersection, and an airplane's distance from a radar station. A common mistake is substituting numbers for changing quantities before differentiating, which turns them into constants. Related rates connect an unobservable rate to an observable one, as in radar speed guns.",
+      "principles": "When things are connected, their changes are connected. Differentiating the connection turns a fact about positions into a fact about speeds, which is how you can measure what you cannot watch directly.",
+      "example": {
+        "label": "A sliding ladder",
+        "code": "import math\n\nL, foot_speed = 10.0, 1.0\nfor x in (2, 6, 8, 9.9):\n    y = math.sqrt(L * L - x * x)\n    print(f\"foot at {x} m: top height {y:.2f} m, falling at {x * foot_speed / y:.2f} m/s\")"
+      },
+      "requires": [
+        "chain-rule",
+        "motion"
+      ]
+    },
+    {
+      "id": "optimization",
+      "picture": "Find the best value: the most profit, the least material, the shortest path.",
+      "mechanism": "Write the quantity to maximize or minimize as a function of one variable, using constraints to eliminate the others. Differentiate, find where the derivative is zero (critical points), and check the endpoints of the domain. The largest or smallest of those values is the answer.",
+      "detail": "Classic: with 100 m of fence, enclose the greatest rectangular area. With sides x and 50 − x, the area A = x(50 − x) has A′ = 50 − 2x = 0 at x = 25, a square. A can that holds a liter with the least metal has height equal to its diameter. Fermat's principle in optics, that light takes the path of least time, gives Snell's law by optimization. In economics, profit is maximized where marginal revenue equals marginal cost.\n\nSecond derivative test: f″ < 0 at a critical point means a maximum, f″ > 0 a minimum. On a closed interval the extreme value theorem guarantees a maximum and minimum exist. In several variables the gradient replaces the derivative, and constraints use Lagrange multipliers. Modern optimization, linear programming, convex optimization, and gradient descent, is the same idea at industrial scale.",
+      "principles": "Peaks and valleys are where the slope passes through zero. Turning the search for the best into the search for a flat spot is one of calculus's most practical gifts.",
+      "example": {
+        "label": "The biggest open box from a square sheet",
+        "code": "# Cut squares of side x from the corners of a 12 x 12 sheet and fold up the sides.\nvolume = lambda x: x * (12 - 2 * x) ** 2\nbest_x = max((i / 1000 for i in range(1, 6000)), key=volume)\nprint(best_x, round(volume(best_x), 3))        # x = 2, volume 128\n\n# Calculus: V'(x) = (12 - 2x)(12 - 6x) = 0 gives x = 2 (x = 6 leaves no box)."
+      },
+      "requires": [
+        "critical-points"
+      ]
+    },
+    {
+      "id": "critical-points",
+      "picture": "The flat spots and sharp corners where a function might peak or bottom out.",
+      "mechanism": "x = c is a critical point of f if f′(c) = 0 or f′(c) does not exist. Local maxima and minima can occur only at critical points (Fermat's theorem), though not every critical point is one: f(x) = x³ has f′(0) = 0 but keeps rising.",
+      "detail": "To classify a critical point, use the first derivative test (f′ changing from positive to negative means a local maximum, negative to positive a local minimum, no change neither) or the second derivative test (f″(c) > 0 a minimum, f″(c) < 0 a maximum, zero inconclusive). For the absolute maximum on a closed interval, compare the function values at all critical points and both endpoints.\n\nPoints where f′ does not exist include corners (|x| at 0) and cusps. Inflection points, where concavity changes, are different: they are where f″ changes sign. In several variables critical points have zero gradient and include saddle points, classified by the eigenvalues of the Hessian. In machine learning, saddle points, more than local minima, are what slows gradient descent in high dimensions.",
+      "principles": "Any extreme point on a smooth stretch must be flat, so the search for the best is a search among a short list of candidates. Critical points are that list.",
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "mean-value-theorem",
+      "picture": "Somewhere on the trip, your instantaneous speed equaled your average speed.",
+      "mechanism": "If f is continuous on [a, b] and differentiable on (a, b), then there is a point c in (a, b) with f′(c) = (f(b) − f(a)) / (b − a): at some point the tangent is parallel to the chord joining the endpoints.",
+      "detail": "Rolle's theorem is the special case f(a) = f(b), where c has f′(c) = 0. Consequences: if f′ = 0 everywhere on an interval, f is constant; if f′ > 0, f is increasing; two functions with the same derivative differ by a constant, which is why antiderivatives are unique up to +C. It underlies error bounds for Taylor polynomials, L'Hôpital's rule, and the proof of the fundamental theorem of calculus.\n\nReal-world reading: if a car travels 120 km in one hour, then at some moment its speedometer read exactly 120 km/h; speed cameras measuring average speed between two points rely on this. It is an existence theorem: it does not say where c is. It is attributed in essence to Lagrange (1797) and Cauchy, with the fifteenth-century Kerala mathematician Parameshvara stating a special case.",
+      "principles": "An average must be matched by the real thing at some point. The theorem is a bridge from what happens over a stretch to what happens at a moment, and much of calculus's rigor is built on it.",
+      "example": {
+        "label": "Finding the point where slope equals average slope",
+        "code": "f = lambda x: x ** 3 - x\na, b = 0.0, 2.0\navg = (f(b) - f(a)) / (b - a)               # average slope over [0, 2]\ndf = lambda x: 3 * x * x - 1\nc = min((a + i * (b - a) / 100000 for i in range(1, 100000)), key=lambda x: abs(df(x) - avg))\nprint(avg, round(c, 4), round(df(c), 4))     # c = sqrt(4/3), about 1.1547"
+      },
+      "requires": [
+        "derivatives",
+        "continuity"
+      ]
+    },
+    {
+      "id": "second-derivative",
+      "picture": "How the slope is changing: whether the curve is bending up or down.",
+      "mechanism": "f″ is the derivative of f′. If f″ > 0, the slope is increasing and the graph bends upward like a bowl; if f″ < 0, it bends downward like a cap. In motion, it is acceleration.",
+      "detail": "The second derivative measures curvature (for a graph, curvature is f″/(1 + f′²)^(3/2)) and tests whether critical points are peaks or valleys. In physics, force is proportional to acceleration: F = ma = m x″. In numerical methods a second difference approximates it: (f(x + h) − 2f(x) + f(x − h))/h².\n\nIt appears in the wave equation and the heat equation (the Laplacian is a second derivative in space). Higher derivatives continue: the third is jerk, and Taylor series use them all. In economics, f″ < 0 is diminishing returns. In image processing, a zero crossing of the second derivative marks the sharpest change, an edge. Smoothness classes: C² means twice continuously differentiable.",
+      "principles": "The second derivative is the curve's own curvature: it says whether the slope is growing or shrinking. It turns up wherever physics talks about forces, since forces change velocity, not position.",
+      "example": {
+        "label": "f'' = 6x for x³ − 3x",
+        "code": "f = lambda x: x ** 3 - 3 * x\nh = 1e-4\nsecond = lambda x: (f(x + h) - 2 * f(x) + f(x - h)) / h ** 2\nfor x in (-2, -1, 0, 1, 2):\n    s = second(x)\n    print(x, round(s, 3), \"bends\", \"up\" if s > 0.01 else \"down\" if s < -0.01 else \"neither\")"
+      },
+      "requires": [
+        "derivatives"
+      ]
+    },
+    {
+      "id": "concavity",
+      "picture": "Does the curve hold water (concave up) or spill it (concave down)?",
+      "mechanism": "A function is concave up on an interval if its graph lies above its tangent lines there (f″ > 0), and concave down if below (f″ < 0). Equivalently, a chord between two points lies above the graph for concave down and below for concave up.",
+      "detail": "Terminology varies: convex is used in optimization for concave up, a function whose chords lie above the graph, f″ ≥ 0. Concavity classifies critical points: a critical point on a concave-up stretch is a minimum. In economics, concave utility means diminishing marginal utility and risk aversion (Jensen's inequality: the utility of the average is at least the average of the utilities), and convex cost functions mean rising marginal costs.\n\nConvex optimization problems have no spurious local minima, so any local minimum is global, which is why they are tractable: least squares, support vector machines, linear programming. Jensen's inequality gives many other inequalities, including AM–GM. Graph sketching uses concavity along with increasing and decreasing intervals, intercepts, and asymptotes.",
+      "principles": "Bending up or down decides whether a flat spot is a valley or a peak. Convex shapes are the good case for optimization, since only one bottom exists and every downhill path finds it.",
+      "requires": [
+        "second-derivative"
+      ]
+    },
+    {
+      "id": "inflection-points",
+      "picture": "Where the curve changes from bending one way to bending the other.",
+      "mechanism": "A point where the concavity changes: f″ goes from positive to negative or the reverse, so typically f″ = 0 there, though f″ = 0 alone is not enough (x⁴ has f″ = 0 at 0 but no inflection). The tangent line crosses the curve at an inflection point.",
+      "detail": "For an S-shaped curve such as the logistic function, the inflection point marks the steepest growth: where a spreading epidemic's new cases per day peak, after which growth slows. The graph of x³ has an inflection at 0. In economics, the inflection point of a cost curve is where marginal cost stops falling and starts rising, and in product adoption curves, where growth stops accelerating.\n\nTo find them, solve f″ = 0 (or where f″ is undefined), then check that the sign of f″ really changes on either side. In a normal distribution's bell curve the inflection points are one standard deviation from the mean, which gives the standard deviation a visual meaning.",
+      "principles": "Where a curve changes the way it bends, growth changes its character: from speeding up to slowing down. Inflection points mark the turning of a trend, not its peak.",
+      "example": {
+        "label": "The steepest point of an S-curve",
+        "code": "import math\n\nP = lambda t: 1 / (1 + math.exp(-t))\nh = 1e-3\nslope = lambda t: (P(t + h) - P(t - h)) / (2 * h)\nsecond = lambda t: (P(t + h) - 2 * P(t) + P(t - h)) / h ** 2\nfor t in (-2, -1, 0, 1, 2):\n    print(t, round(slope(t), 4), round(second(t), 4))      # slope peaks at t = 0 where f'' changes sign"
+      },
+      "requires": [
+        "concavity"
+      ]
+    },
+    {
+      "id": "linear-approximation",
+      "picture": "Near a point, a curve is well approximated by its tangent line.",
+      "mechanism": "f(x) ≈ f(a) + f′(a)(x − a) for x near a. The error shrinks faster than the distance, roughly with its square, so the closer to a, the better. It replaces a hard function by a straight line.",
+      "detail": "Examples: √(1 + x) ≈ 1 + x/2, so √1.02 ≈ 1.01 (true value 1.00995); sin x ≈ x for small x, which linearizes the pendulum; (1 + x)ⁿ ≈ 1 + nx; eˣ ≈ 1 + x; ln(1 + x) ≈ x. The differential form dy = f′(x) dx estimates the change in y from a small change dx: how an error in measuring a sphere's radius affects its volume, dV = 4πr² dr.\n\nIn physics, small-angle and linear-response approximations underlie most first-order theory: Hooke's law linearizes the force on a stretched spring, and Ohm's law linearizes a conductor. Control engineering linearizes a system around an operating point. It is the first term of the Taylor series; adding more terms improves accuracy. It fails where the function is not differentiable or is too curved.",
+      "principles": "Linear is the one kind of function we can fully understand, and every smooth function is almost linear if you look closely enough. Much of applied mathematics is the choice of where to stand so that the approximation is good.",
+      "example": {
+        "label": "Estimating a square root by a line",
+        "code": "import math\n\nfor x in (0.5, 0.1, 0.01):\n    exact = math.sqrt(1 + x)\n    approx = 1 + x / 2\n    print(f\"sqrt(1+{x}): exact {exact:.6f}  linear {approx:.6f}  error {abs(exact - approx):.2e}\")"
+      },
+      "requires": [
+        "tangent-line"
+      ]
+    },
+    {
+      "id": "newtons-method",
+      "picture": "Find a root by riding tangent lines: guess, draw the tangent, jump to where it crosses zero.",
+      "mechanism": "To solve f(x) = 0, start with a guess x₀. Replace f by its tangent line at x₀ and find where that line crosses the axis: x₁ = x₀ − f(x₀)/f′(x₀). Repeat. Near a simple root, the number of correct digits roughly doubles each step.",
+      "detail": "For square roots, f(x) = x² − a gives x ← (x + a/x)/2, the Babylonian method, known about 4,000 years ago and used by calculators. Newton described the method around 1669 and Raphson simplified it in 1690, hence Newton–Raphson.\n\nWeaknesses: it needs f′ ≠ 0, so it fails at flat spots; a bad start can send it far away, into a cycle, or off to infinity; and it finds one root at a time. Fixes: combine it with bisection for safety, use a damped step, or use the secant method when f′ is unavailable. It extends to systems of equations, with the Jacobian in place of f′, and to optimization: applying it to f′ = 0 gives the second-order method that uses the Hessian. In the complex plane, coloring points by which root of z³ − 1 they converge to gives a famous fractal.",
+      "principles": "Replace the curve by its tangent, solve the easy problem, and repeat. Newton's method is the model for how calculus solves hard equations: not exactly, but by an approximation that improves faster and faster.",
+      "example": {
+        "label": "Square root of 2, digits doubling",
+        "code": "def newton(f, df, x, steps=6):\n    for i in range(steps):\n        x = x - f(x) / df(x)\n        print(i + 1, x)\n    return x\n\nnewton(lambda x: x * x - 2, lambda x: 2 * x, 1.0)"
+      },
+      "requires": [
+        "tangent-line",
+        "intermediate-value-theorem"
+      ]
+    }
+  ]
+}

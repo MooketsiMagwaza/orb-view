@@ -1,0 +1,11 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "me-study-in-japan",
+  "group": "Me",
+  "order": 6,
+  "title": "Studying in Japan",
+  "blurb": "The whole journey as a chain: deciding, the MEXT application, the visa, arrival, and settling in.",
+  "orb": "searching",
+  "entry": "study-in-japan",
+  "path": ["study-in-japan", "choosing-a-path", "mext-scholarship", "embassy-application", "exams-and-interview", "mext-placement", "student-visa-japan", "arrival-in-japan", "japanese-prep-course", "university-enrollment-jp", "daily-life-in-japan", "after-graduation-jp"]
+}

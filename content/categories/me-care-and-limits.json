@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "me-care-and-limits",
+  "group": "Me",
+  "order": 4,
+  "title": "Care & Its Limits",
+  "blurb": "What helping costs, where it ends, and how to keep giving without regret.",
+  "orb": "breathing",
+  "entry": "care",
+  "path": [
+    "care",
+    "compassion",
+    "boundaries",
+    "intention",
+    "consequence",
+    "regret",
+    "forgiveness",
+    "kindness",
+    "gratitude",
+    "peace"
+  ]
+}

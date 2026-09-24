@@ -1,0 +1,21 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-web",
+  "group": "Tech",
+  "order": 3,
+  "title": "The Web",
+  "blurb": "Pages, requests, browsers, and the conversation that runs the modern internet.",
+  "orb": "listening",
+  "entry": "web",
+  "path": [
+    "web",
+    "urls",
+    "http",
+    "html",
+    "browsers",
+    "websockets",
+    "json",
+    "apis",
+    "https"
+  ]
+}

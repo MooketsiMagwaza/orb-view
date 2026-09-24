@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-mathematics",
+  "group": "Abstract",
+  "order": 1,
+  "title": "Mathematics",
+  "blurb": "Numbers, infinity, proof, and the limits of what proof can do.",
+  "orb": "shaping",
+  "entry": "mathematics",
+  "path": [
+    "mathematics",
+    "numbers",
+    "zero",
+    "prime-numbers",
+    "infinity",
+    "set-theory",
+    "logic",
+    "proof",
+    "godel",
+    "probability",
+    "chaos",
+    "fractals"
+  ]
+}

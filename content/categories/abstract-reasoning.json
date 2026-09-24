@@ -1,0 +1,28 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-reasoning",
+  "group": "Abstract",
+  "order": 3,
+  "title": "Arguments & Debate",
+  "blurb": "How an argument is built, weighed, and won.",
+  "orb": "working",
+  "entry": "argument",
+  "path": [
+    "argument",
+    "deduction",
+    "syllogism",
+    "modus-ponens",
+    "validity",
+    "soundness",
+    "induction",
+    "abduction",
+    "evidence",
+    "burden-of-proof",
+    "occams-razor",
+    "steelmanning",
+    "principle-of-charity",
+    "rhetoric",
+    "socratic-method",
+    "debate"
+  ]
+}

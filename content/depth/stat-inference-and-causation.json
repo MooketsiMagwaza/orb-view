@@ -1,0 +1,241 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Statistics, part two: hypothesis tests and p-values, confidence intervals, error types, the multiple-comparisons problem and p-hacking, the replication crisis, experimental design and causal inference, and estimation, each in four layers.",
+  "depth": [
+    {
+      "id": "hypothesis-testing",
+      "picture": "Asking whether the data would be surprising if nothing were going on.",
+      "mechanism": "State a null hypothesis (no effect, no difference) and an alternative. Choose a test statistic summarizing the data. Compute how likely a result at least this extreme would be if the null were true, the p-value. If it is smaller than a chosen threshold α, often 0.05, reject the null; otherwise, fail to reject it.",
+      "detail": "Example: is a coin fair? Flip it 100 times and get 62 heads; under a fair coin, a result that far from 50 happens about 2 percent of the time, so we doubt fairness. Ronald Fisher popularized p-values in the 1920s; Neyman and Pearson added alternatives, error rates, and power, and the two frameworks were merged into the hybrid still taught, which both men would have disliked.\n\nCommon tests: z-tests and t-tests for means, chi-squared for counts and independence, ANOVA for several means, and nonparametric tests, such as permutation tests, that need fewer assumptions. Failing to reject is not proof of no effect: a small study may lack power. Statistical significance is not practical significance: with a large sample, a trivial effect can be significant. Complements include confidence intervals, effect sizes, and Bayesian methods. Pre-registering the hypothesis and analysis plan guards against changing the question after seeing the data.",
+      "principles": "A test asks whether the data could plausibly be luck. It does not measure how big or how important an effect is, or how likely the hypothesis is, only how surprising the data would be if nothing were going on.",
+      "example": {
+        "label": "An exact test, and a permutation test",
+        "code": "import math, random\n\ndef two_sided_binom_p(heads, n):\n    tail = sum(math.comb(n, k) for k in range(heads, n + 1)) / 2 ** n\n    return min(1.0, 2 * tail)\n\nprint(\"62 heads in 100 flips: p =\", round(two_sided_binom_p(62, 100), 4))         # 0.021\n\nrandom.seed(51)                                                                    # permutation test for a difference in means\na = [random.gauss(10.0, 2) for _ in range(30)]\nb = [random.gauss(12.0, 2) for _ in range(30)]        # a real difference of 2\nobserved = abs(sum(a) / 30 - sum(b) / 30)\npool, count = a + b, 0\nfor _ in range(10_000):\n    random.shuffle(pool)\n    count += abs(sum(pool[:30]) / 30 - sum(pool[30:]) / 30) >= observed\nprint(\"permutation test p =\", round(count / 10_000, 4))"
+      },
+      "requires": [
+        "sampling",
+        "normal-distribution"
+      ]
+    },
+    {
+      "id": "p-values",
+      "picture": "How surprising the data would be if nothing were going on.",
+      "mechanism": "The p-value is the probability, assuming the null hypothesis is true, of getting a result at least as extreme as the one observed. Small values mean the data would be rare under the null. By convention, p < 0.05 is called statistically significant.",
+      "detail": "What it is not: the probability that the null is true, the probability the result is due to chance, or the size or importance of the effect. These are the standard misreadings, and the American Statistical Association issued a formal statement in 2016 warning against them. A drug trial with p = 0.03 means that if the drug did nothing, data this extreme would appear 3 percent of the time; it does not mean a 97 percent chance the drug works. For that you need a prior: among many tested drugs most do nothing, so a significant result is often a false positive.\n\nP-values depend on sample size: a huge sample makes tiny effects significant, and a small one hides large effects. When the null is true they are uniformly distributed, so 1 in 20 true nulls will be significant at 0.05. The threshold came from Fisher's suggestion as a rule of thumb, not a law. Better reporting gives effect sizes with confidence intervals, exact p-values, and all analyses done.",
+      "principles": "A p-value is a statement about the data given the hypothesis, and people read it as a statement about the hypothesis given the data. Learning to read it correctly, and never to treat 0.05 as a switch from false to true, is the beginning of statistical literacy.",
+      "example": {
+        "label": "Nulls give p < 0.05 one time in twenty; tiny effects can still be significant",
+        "code": "import random, statistics\n\nrandom.seed(52)\ndef z_p(a, b):                                               # z-test on the difference in means\n    se = (statistics.variance(a) / len(a) + statistics.variance(b) / len(b)) ** 0.5\n    z = abs(statistics.mean(a) - statistics.mean(b)) / se\n    return 2 * (1 - statistics.NormalDist().cdf(z))\n\npvals = []\nfor _ in range(2000):                                        # 2,000 experiments where there is NO real effect\n    a = [random.gauss(0, 1) for _ in range(40)]\n    b = [random.gauss(0, 1) for _ in range(40)]\n    pvals.append(z_p(a, b))\nprint(\"fraction of null experiments with p < 0.05:\", round(sum(p < 0.05 for p in pvals) / len(pvals), 3))\n\nbig_a = [random.gauss(0.0, 1) for _ in range(200_000)]       # a tiny real effect (0.02 sd) with a huge sample\nbig_b = [random.gauss(0.02, 1) for _ in range(200_000)]\nprint(\"tiny effect, huge sample: p =\", f\"{z_p(big_a, big_b):.1e}\")"
+      },
+      "requires": [
+        "hypothesis-testing",
+        "conditional-probability"
+      ]
+    },
+    {
+      "id": "confidence-intervals",
+      "picture": "A range of plausible values, with the uncertainty on display.",
+      "mechanism": "A 95 percent confidence interval is built by a procedure that, across many repetitions of the study, contains the true value 95 percent of the time. For a mean: the estimate plus or minus about 1.96 standard errors, with larger multipliers for small samples from the t-distribution. Wider intervals mean more uncertainty.",
+      "detail": "Correct reading: the method, not this particular interval, has a 95 percent success rate; once computed, the interval either contains the truth or not. The everyday reading, we are 95 percent confident the truth is in here, is close enough for most purposes, though strict frequentists object. Bayesian credible intervals do give probabilities about the parameter.\n\nAn interval is more informative than a p-value: it shows the effect size and the precision. If a 95 percent interval for a difference excludes zero, the difference is significant at 0.05. Width shrinks as 1/√n. A poll of 1,000 with 52 percent has an interval of about 49 to 55. Intervals from a poorly designed study are precisely wrong: they cover only sampling error, not bias. Overlapping intervals for two groups do not necessarily mean no significant difference. Neyman introduced the concept in 1937, and the bootstrap gives intervals without formulas.",
+      "principles": "An estimate without its uncertainty is a claim without its evidence. The interval shows both what the data suggest and how firmly, which is why it is better to report than a bare significant or not.",
+      "example": {
+        "label": "Coverage of a 95 percent interval",
+        "code": "import random, statistics\n\nrandom.seed(53)\ntrue_mean, sd, n = 100, 15, 25\ndef interval(sample):\n    m = statistics.mean(sample)\n    half = 2.064 * statistics.stdev(sample) / len(sample) ** 0.5            # t multiplier for 24 degrees of freedom\n    return m - half, m + half\n\ncovered = sum(lo <= true_mean <= hi\n              for lo, hi in (interval([random.gauss(true_mean, sd) for _ in range(n)]) for _ in range(5000)))\nprint(round(covered / 5000, 3), \"of 5,000 intervals contained the true mean\")       # about 0.95\n\nlo, hi = interval([random.gauss(true_mean, sd) for _ in range(n)])\nprint(f\"one interval: {lo:.1f} to {hi:.1f}\")"
+      },
+      "requires": [
+        "hypothesis-testing",
+        "standard-deviation"
+      ]
+    },
+    {
+      "id": "type-errors",
+      "picture": "Two ways a test can be wrong: a false alarm, and a miss.",
+      "mechanism": "A type I error rejects a true null: a false positive, with probability α, the significance level, often 0.05. A type II error fails to reject a false null: a false negative, with probability β. Power is 1 − β: the chance of detecting a real effect of a given size. Reducing one error usually raises the other.",
+      "detail": "In a courtroom, convicting an innocent person is type I and acquitting a guilty one is type II; Blackstone's ratio, that it is better for ten guilty persons to escape than one innocent to suffer, sets the trade-off. In medicine, a screening test's false positives cause needless worry and treatment, and false negatives miss disease. The right balance depends on costs and prevalence: for a rare condition even a small false-positive rate produces mostly false alarms.\n\nPower depends on sample size, effect size, variability, and α; typical targets are 80 or 90 percent, and many studies are underpowered, which makes their significant findings inflated and unreliable. A power analysis before a study chooses the sample size. Related terms: sensitivity, specificity, precision, recall, and ROC curves, which trace the trade-off across thresholds. In security, alerts show the same trade-off: too sensitive and analysts drown in false alarms, too lax and attacks slip through.",
+      "principles": "Every decision under uncertainty risks two kinds of mistake, and shrinking one grows the other. Choosing the balance is a question of costs and stakes, not of mathematics, and it should be made before you see the data.",
+      "example": {
+        "label": "False alarms and power",
+        "code": "import random, statistics\n\nrandom.seed(54)\ndef significant(effect, n):\n    a = [random.gauss(0, 1) for _ in range(n)]\n    b = [random.gauss(effect, 1) for _ in range(n)]\n    se = (statistics.variance(a) / n + statistics.variance(b) / n) ** 0.5\n    return abs(statistics.mean(a) - statistics.mean(b)) / se > 1.96\n\ntrials = 4000\nprint(\"false-alarm rate with no effect:\", round(sum(significant(0, 30) for _ in range(trials)) / trials, 3))     # about 0.05\nfor n in (10, 30, 100, 300):\n    power = sum(significant(0.5, n) for _ in range(trials)) / trials\n    print(f\"n = {n:3d} per group: power to detect a half-sd effect = {power:.2f}\")"
+      },
+      "requires": [
+        "hypothesis-testing"
+      ]
+    },
+    {
+      "id": "multiple-comparisons",
+      "picture": "Test enough things and something will look significant by luck.",
+      "mechanism": "If you run m independent tests at the 5 percent level and there are no real effects, the chance of at least one false positive is 1 − 0.95ᵐ: 40 percent for 10 tests, 64 percent for 20, and 99.4 percent for 100. The more comparisons, the more spurious findings.",
+      "detail": "It arises when studies measure many outcomes, split into many subgroups, or scan many genes, brain regions, or stocks. In 2009 researchers put a dead salmon in an fMRI scanner, showed it photographs, and, without correcting for multiple comparisons, found brain activity: a demonstration of the problem that helped bring corrections into the field.\n\nCorrections: Bonferroni (divide α by the number of tests; simple and conservative), Holm's improvement, and false discovery rate control (Benjamini–Hochberg, 1995), which limits the fraction of false findings among the discoveries and is standard in genomics, where hundreds of thousands of tests are run. Alternatives: pre-registering a primary outcome, hierarchical models that shrink extremes, and holding out data for replication. Gelman's garden of forking paths notes that even one test can be affected if analysis choices depended on the data. In physics, the look-elsewhere effect is why discovery of a particle requires five sigma.",
+      "principles": "The chance of a fluke grows with the number of chances. A finding is only as impressive as the number of things that were looked at, which is why the honest count of comparisons belongs in the paper.",
+      "example": {
+        "label": "Twenty tests with no real effects",
+        "code": "import random\n\nrandom.seed(55)\ndef null_p_values(m):\n    return [random.random() for _ in range(m)]            # when the null is true, p-values are uniform\n\nprint([round(1 - 0.95 ** m, 3) for m in (1, 5, 10, 20, 100)], \"chance of at least one false positive\")\n\ntrials = 2000\nhits = sum(min(null_p_values(20)) < 0.05 for _ in range(trials))\nprint(\"simulated, 20 tests, no real effects:\", round(hits / trials, 3))\n\nhits_corrected = sum(min(null_p_values(20)) < 0.05 / 20 for _ in range(trials))          # Bonferroni\nprint(\"with Bonferroni correction:\", round(hits_corrected / trials, 3))"
+      },
+      "requires": [
+        "p-values",
+        "type-errors"
+      ]
+    },
+    {
+      "id": "p-hacking",
+      "picture": "Torturing the data until it confesses.",
+      "mechanism": "P-hacking, or data dredging, is trying many analyses, outcomes, subsets, or stopping points until one yields p < 0.05, then reporting only that one as if it were the plan. Each choice can be defended alone; together they inflate the false-positive rate far above 5 percent.",
+      "detail": "Techniques: measuring many outcomes and reporting the significant one; testing many subgroups; adding or dropping covariates; excluding outliers selectively; peeking at results and stopping when significant; trying different transformations. Simmons, Nelson, and Simonsohn showed in 2011 that with plausible flexibility the false-positive rate could exceed 60 percent, and demonstrated that listening to a song could make people younger.\n\nRelated: HARKing (hypothesizing after results are known), the garden of forking paths, and publication bias, where only significant results are published. Signs: p-values clustered just below 0.05, many outcomes but few reported, unexplained exclusions. Remedies: pre-registration, registered reports (peer review before results), reporting all analyses, correction for multiple tests, larger samples, replication, and open data and code. It is often not fraud but an honest failure to see how flexible analysis is. In business the same happens in A/B tests peeked at daily.",
+      "principles": "Analytic freedom is a form of multiple testing that leaves no record. Announcing the plan before seeing the data is the cheapest cure, because it turns a search into a test.",
+      "example": {
+        "label": "Ten outcomes, or peeking, with no real effect",
+        "code": "import random, statistics\n\nrandom.seed(56)\ndef one_study():\n    for _ in range(10):                          # no real effect anywhere: measure 10 outcomes, report any hit\n        a = [random.gauss(0, 1) for _ in range(30)]\n        b = [random.gauss(0, 1) for _ in range(30)]\n        se = (statistics.variance(a) / 30 + statistics.variance(b) / 30) ** 0.5\n        if abs(statistics.mean(a) - statistics.mean(b)) / se > 1.96:\n            return True\n    return False\n\ndef peeking_study():                             # add subjects one at a time, stop the moment it is significant\n    a, b = [random.gauss(0, 1) for _ in range(10)], [random.gauss(0, 1) for _ in range(10)]\n    for _ in range(90):\n        a.append(random.gauss(0, 1)); b.append(random.gauss(0, 1))\n        se = (statistics.variance(a) / len(a) + statistics.variance(b) / len(b)) ** 0.5\n        if abs(statistics.mean(a) - statistics.mean(b)) / se > 1.96:\n            return True\n    return False\n\nn = 500\nprint(\"10 outcomes, report the best:\", round(sum(one_study() for _ in range(n)) / n, 3), \"false positive rate\")\nprint(\"optional stopping:\", round(sum(peeking_study() for _ in range(n)) / n, 3), \"false positive rate (nominal 0.05)\")"
+      },
+      "requires": [
+        "multiple-comparisons"
+      ]
+    },
+    {
+      "id": "replication-crisis",
+      "picture": "Many published findings turned out not to be true.",
+      "mechanism": "Beginning in the 2010s, large replication efforts found that many published results, especially in psychology, some medicine, and economics, could not be reproduced. Causes include small underpowered studies, flexible analysis, publication bias toward significant results, incentives to publish novel findings, and occasional fraud.",
+      "detail": "In 2005 John Ioannidis argued in Why Most Published Research Findings Are False that with low prior probability, small samples, and flexible analysis, most significant results would be false. The Open Science Collaboration in 2015 tried to replicate 100 psychology studies: about 36 percent produced significant results again, and effect sizes were about half the original. Similar exercises found around 60 percent in experimental economics. Several high-profile findings fell, and fraud cases added to the alarm.\n\nResponses: pre-registration, registered reports, larger samples and power analysis, open data and code, replication journals, stricter thresholds, and emphasis on effect sizes and intervals. Crisis is contested: many findings hold up, some failures reflect differences in context, and the field is self-correcting. The lesson reaches beyond psychology: any field with small effects, noisy measures, and pressure to publish is at risk. A single study rarely settles anything; convergent evidence across methods does.",
+      "principles": "Science corrects itself, but only when someone checks. The replication crisis is the field checking, and finding that small samples, flexible analysis, and the wish to publish had produced more false discoveries than anyone assumed.",
+      "example": {
+        "label": "Why a significant result may not be real",
+        "code": "# A field where 10% of tested hypotheses are true, studies have 40% power, and alpha = 0.05\nn_studies, prior, power, alpha = 100_000, 0.10, 0.40, 0.05\ntrue_positive = n_studies * prior * power\nfalse_positive = n_studies * (1 - prior) * alpha\nprint(\"significant results that are real:\", round(100 * true_positive / (true_positive + false_positive)), \"%\")\n\nfalse_positive2 = n_studies * (1 - prior) * 0.20         # flexible analysis: an effective alpha of 0.20\nprint(\"with flexible analysis (alpha 0.20):\", round(100 * true_positive / (true_positive + false_positive2)), \"% of published findings are real\")"
+      },
+      "requires": [
+        "p-hacking"
+      ]
+    },
+    {
+      "id": "experimental-design",
+      "picture": "Planning a study so it can answer the question.",
+      "mechanism": "Decide the question, the outcome to measure, the comparison groups, how units are assigned (randomly if possible), how many are needed (a power calculation), and how the data will be analyzed, before collecting anything. Principles: randomization, replication, blocking (grouping similar units), control groups, and blinding.",
+      "detail": "Ronald Fisher developed the modern methods at the Rothamsted agricultural station in the 1920s: to compare fertilizers on fields differing in soil, randomly assign treatments within blocks. His lady-tasting-tea example, can she tell whether milk or tea was poured first?, shows the logic of randomization tests.\n\nElements: a control (comparison to no treatment, or a standard one), a placebo, blinding (participants unaware; double-blind, researchers too), randomization (breaks links between treatment and confounders), blocking (reduces noise), factorial designs (test several factors and their interactions efficiently), and crossover designs. Sample size comes from the effect to detect and the noise: a small effect needs many subjects. Observational studies cannot randomize and need adjustment for confounders; natural experiments help. Online, A/B testing is experimental design at scale, with pitfalls of peeking, interference between users, and novelty effects. Fisher's warning was that consulting a statistician after the experiment is like asking for a post-mortem.",
+      "principles": "Good design makes the analysis easy and the conclusion credible. Deciding beforehand what to compare, and letting chance decide who gets what, does more for the truth of a study than any technique applied afterwards.",
+      "example": {
+        "label": "Randomized versus treating the sickest",
+        "code": "import random, statistics\n\nrandom.seed(58)\npatients = [{\"severity\": random.gauss(5, 2)} for _ in range(400)]\n\ndef outcome(p, treated):                                    # true effect of treatment: +1.5 improvement\n    return 10 - p[\"severity\"] + (1.5 if treated else 0) + random.gauss(0, 1)\n\ndef estimate(assign):\n    t = [outcome(p, True) for p in patients if assign(p)]\n    c = [outcome(p, False) for p in patients if not assign(p)]\n    return statistics.mean(t) - statistics.mean(c)\n\ncoin = random.Random(1)\nrandomized = estimate(lambda p: coin.random() < 0.5)\nsickest_first = estimate(lambda p: p[\"severity\"] > 5)       # doctors treat the sickest: confounded\nprint(\"true effect 1.5\")\nprint(\"randomized assignment estimates:\", round(randomized, 2))\nprint(\"treating the sickest estimates: \", round(sickest_first, 2), \"(biased: treated patients were sicker)\")"
+      },
+      "requires": [
+        "statistics"
+      ]
+    },
+    {
+      "id": "randomized-controlled-trials",
+      "picture": "Flip a coin to decide who gets the treatment, then compare.",
+      "mechanism": "Participants are randomly assigned to receive the treatment or a control (placebo or standard care). Randomization makes the groups alike in everything except the treatment, including things nobody measured, so a difference in outcomes can be attributed to the treatment.",
+      "detail": "James Lind's 1747 scurvy trial on ships compared six treatments and found citrus effective, an early controlled experiment; the first modern randomized trial is usually cited as the 1948 streptomycin trial for tuberculosis, designed with Austin Bradford Hill. Features: allocation concealment, blinding, intention-to-treat analysis (analyze as randomized, even if people did not comply, to preserve the comparison), pre-registered outcomes, and stopping rules.\n\nPhases run from safety (I) and dosing (II) to large confirmatory trials (III) and post-marketing (IV); regulators require them for new drugs. Strengths: the strongest evidence for causal effects of an intervention. Limits: cost; ethics, since harmful exposures such as smoking cannot be randomized; artificial settings and narrow volunteers; short duration; and average effects that hide who benefits. Beyond medicine, Banerjee, Duflo, and Kremer won a Nobel Prize for using them in development economics, and tech companies run thousands of A/B tests. Systematic reviews and meta-analyses combine trials.",
+      "principles": "Randomization is the one tool that turns a comparison into a cause. It works by making the groups equal in every way you did not think of, which is why the coin flip is the gold standard of evidence.",
+      "example": {
+        "label": "Estimates tighten as the trial grows",
+        "code": "import random, statistics\n\ndef trial(n_per_arm, true_effect, seed):\n    rng = random.Random(seed)\n    control = [rng.gauss(0, 1) for _ in range(n_per_arm)]\n    treated = [rng.gauss(true_effect, 1) for _ in range(n_per_arm)]\n    diff = statistics.mean(treated) - statistics.mean(control)\n    se = (statistics.variance(control) / n_per_arm + statistics.variance(treated) / n_per_arm) ** 0.5\n    return diff, diff - 1.96 * se, diff + 1.96 * se\n\nfor n in (20, 100, 500):\n    d, lo, hi = trial(n, 0.3, n)\n    print(f\"n={n:3d} per arm: estimated effect {d:+.2f}, 95% CI [{lo:+.2f}, {hi:+.2f}]   (true effect 0.30)\")"
+      },
+      "requires": [
+        "experimental-design"
+      ]
+    },
+    {
+      "id": "confounding",
+      "picture": "A hidden third thing that makes two others look related.",
+      "mechanism": "A confounder influences both the supposed cause (the exposure) and the outcome, producing an association even if the exposure does nothing. To count as one, it must precede the exposure and not lie on the causal path between exposure and outcome.",
+      "detail": "Classic: coffee drinking correlates with lung cancer because coffee drinkers smoke more; the confounder is smoking. Ice cream and drowning share summer heat. Hormone replacement therapy looked protective for heart disease in observational studies because the women who took it were healthier and wealthier; randomized trials found no benefit. Confounding by indication: sicker patients receive more treatment, so treatments look harmful.\n\nHandling: randomize (the best), restrict, match, stratify, or adjust statistically in regression, propensity scores, and instrumental variables; but only measured confounders can be adjusted, and residual confounding remains. Causal diagrams, associated with Judea Pearl, make assumptions explicit: adjusting for a common effect of two variables, a collider, creates bias instead of removing it. Bradford Hill's criteria (strength, consistency, temporality, dose-response, plausibility, experiment) help judge when an association is likely causal, as in the case of smoking and lung cancer.",
+      "principles": "Two things can move together because a third moves both. Confounding is why observation alone cannot prove cause, and why the first question about any surprising association is what else differs between these groups?",
+      "example": {
+        "label": "Coffee looks harmful until you split by smoking",
+        "code": "import random\n\nrandom.seed(60)\nn = 50_000\nsmoking = [random.random() < 0.3 for _ in range(n)]\ncoffee = [random.random() < (0.7 if s else 0.4) for s in smoking]                 # smokers drink more coffee\ncancer = [random.random() < (0.10 if s else 0.01) for s in smoking]              # only smoking matters\n\ndef rate(flags, group):\n    sel = [c for c, g in zip(cancer, flags) if g == group]\n    return sum(sel) / len(sel)\n\nprint(\"cancer rate, coffee drinkers vs not:\", round(rate(coffee, True), 4), round(rate(coffee, False), 4))   # looks harmful\nfor s in (True, False):\n    grp = [(c, ca) for c, ca, sm in zip(coffee, cancer, smoking) if sm == s]\n    yes = [ca for c, ca in grp if c]; no = [ca for c, ca in grp if not c]\n    print(f\"  among smokers={s}: coffee {sum(yes) / len(yes):.4f} vs no coffee {sum(no) / len(no):.4f}\")"
+      },
+      "requires": [
+        "correlation",
+        "experimental-design"
+      ]
+    },
+    {
+      "id": "causal-inference",
+      "picture": "What would have happened otherwise?",
+      "mechanism": "The causal effect of a treatment on a person is the difference between the outcome with treatment and the outcome without, but only one of them is ever observed: the fundamental problem of causal inference. Methods estimate averages across groups by making the groups comparable, through randomization or by assumptions about how they differ.",
+      "detail": "Frameworks: the potential outcomes model of Neyman and Rubin, where each unit has an outcome under each treatment, and Pearl's causal diagrams, directed graphs of what causes what, from which one can read what to adjust for and what not to. Tools: randomized trials; natural experiments such as draft lotteries and policy cutoffs; difference-in-differences; regression discontinuity, where units just above and below a threshold are alike; instrumental variables; matching and propensity scores; and synthetic controls.\n\nPearl's ladder distinguishes seeing (association), doing (intervention), and imagining (counterfactuals). Angrist, Card, and Imbens shared the 2021 Nobel Prize in economics for natural-experiment methods. In machine learning, causal reasoning is needed for prediction under change: a model that finds correlations, such as asthma appearing protective in hospital pneumonia data because such patients got aggressive care, will fail if used to guide action.",
+      "principles": "Causation is about what would happen if things were different, and no dataset shows both worlds. Every causal claim rests on an assumption about what makes the groups comparable, and good practice is to state it.",
+      "example": {
+        "label": "Comparing outcomes when the sick get treated",
+        "code": "import math, random, statistics\n\nrandom.seed(61)\nn = 100_000\nhealth = [random.gauss(0, 1) for _ in range(n)]                          # higher is healthier\ntreated = [random.random() < 1 / (1 + math.exp(2.5 * h)) for h in health]     # the sick are treated far more often\noutcome = [h + (2 if t else 0) + random.gauss(0, 1) for h, t in zip(health, treated)]\n\nnaive = statistics.mean(o for o, t in zip(outcome, treated) if t) - statistics.mean(o for o, t in zip(outcome, treated) if not t)\nprint(\"naive comparison of outcomes:\", round(naive, 2), \"(true effect +2.00)\")\n\ndiffs = []                                                                # compare similar people, where both groups exist\nfor lo in [x / 10 for x in range(-15, 15)]:\n    t = [o for o, h, tr in zip(outcome, health, treated) if tr and lo <= h < lo + 0.1]\n    c = [o for o, h, tr in zip(outcome, health, treated) if not tr and lo <= h < lo + 0.1]\n    if len(t) > 50 and len(c) > 50:\n        diffs.append(statistics.mean(t) - statistics.mean(c))\nprint(\"adjusting for health, where treated and untreated overlap:\", round(statistics.mean(diffs), 2))"
+      },
+      "requires": [
+        "confounding",
+        "randomized-controlled-trials"
+      ]
+    },
+    {
+      "id": "simpsons-paradox",
+      "picture": "A trend in every group that reverses when the groups are combined.",
+      "mechanism": "A treatment can have a higher success rate than the alternative within each subgroup, yet a lower rate overall, if the subgroups differ in size and in baseline success and the treatments are given to them in different proportions. The reversal is arithmetic, not a trick.",
+      "detail": "Kidney stone study (1986): treatment A succeeded in 93 percent of small stones and 73 percent of large; B in 87 percent and 69 percent. A was better in both groups, yet overall A had 78 percent against B's 83 percent, because A was used mostly on the harder large stones. Berkeley admissions in 1973: women were admitted at a lower rate overall, but in most departments at a higher or equal rate, since women applied more to competitive departments.\n\nIt is named for Edward Simpson (1951), though Pearson and Yule noted it earlier. Whether to trust the combined or the split numbers depends on the causal story, not on the statistics: if the grouping variable is a cause of both treatment choice and outcome, adjust for it; if it is an effect of the treatment, splitting on it would be wrong. That is why the paradox is a lesson in causal reasoning. It appears in sports statistics, COVID fatality rates by age, and A/B tests with uneven traffic.",
+      "principles": "Aggregating can erase, or reverse, what is true of every part. Whether to trust the pieces or the whole depends on how the data came about, which is why statistics alone cannot settle it.",
+      "example": {
+        "label": "The kidney stone numbers",
+        "code": "data = {\"A\": {\"small\": (81, 87), \"large\": (192, 263)},\n        \"B\": {\"small\": (234, 270), \"large\": (55, 80)}}      # (successes, cases)\n\nfor t, groups in data.items():\n    for size, (s, n) in groups.items():\n        print(f\"treatment {t}, {size} stones: {100 * s / n:.0f}% success\")\n    total_s = sum(s for s, _ in groups.values()); total_n = sum(n for _, n in groups.values())\n    print(f\"treatment {t} overall: {100 * total_s / total_n:.0f}% success\")"
+      },
+      "requires": [
+        "confounding",
+        "conditional-probability"
+      ]
+    },
+    {
+      "id": "regression-to-the-mean",
+      "picture": "After an extreme result, the next one is usually less extreme, by chance alone.",
+      "mechanism": "Any measurement mixes a stable component and luck. Selecting extreme values selects those with extreme luck, which will not repeat. So the next measurement tends to move back toward the average, whether or not anything was done in between.",
+      "detail": "Galton found that tall parents had shorter children on average, and short parents taller: not because heights converge, since the spread stays the same, but because parents' heights are partly luck. Examples: the worst-performing schools improve and the best decline; the sophomore slump after a rookie-of-the-year season; patients treated at their worst improve anyway. Kahneman's flight-instructor story: praised pilots did worse next time and criticized ones better, so the instructors concluded punishment works, but it was regression to the mean.\n\nIt fools people into believing ineffective interventions work: some therapies, crackdowns after a peak in crime or accidents, and speed cameras placed where accidents spiked. A control group is the antidote: compare with similarly extreme cases that were not treated. It grows with the share of variation due to luck: for perfectly correlated measures there is none, and for uncorrelated ones the next value is simply average. It is a statistical artifact, not a force.",
+      "principles": "Extremes are partly luck, and luck does not repeat. Whenever something is picked because it was unusually good or bad, expect it to look more ordinary next time, and do not give the credit to whatever you did in between.",
+      "example": {
+        "label": "The top scorers score lower next time, with no change in skill",
+        "code": "import random, statistics\n\nrandom.seed(62)\nskill = [random.gauss(100, 10) for _ in range(20_000)]\ntest1 = [s + random.gauss(0, 10) for s in skill]                  # score = skill + luck\ntest2 = [s + random.gauss(0, 10) for s in skill]                  # same people, new luck\n\ntop = sorted(range(len(skill)), key=lambda i: test1[i], reverse=True)[:1000]     # the top 5% on the first test\nprint(\"top group, test 1:\", round(statistics.mean(test1[i] for i in top), 1))\nprint(\"top group, test 2:\", round(statistics.mean(test2[i] for i in top), 1))\nprint(\"everyone, both tests:\", round(statistics.mean(test1), 1), round(statistics.mean(test2), 1))"
+      },
+      "requires": [
+        "correlation",
+        "randomness"
+      ]
+    },
+    {
+      "id": "estimation",
+      "picture": "Guessing an unknown quantity from noisy data, as well as possible.",
+      "mechanism": "An estimator is a rule that turns data into a guess of a parameter such as a mean, proportion, or rate. Its quality is judged by bias (does it aim at the truth on average?), variance (how much does it jump between samples?), and mean squared error, bias squared plus variance. A point estimate is usually reported with an interval.",
+      "detail": "Good estimators can be biased: the sample variance dividing by n is biased low and dividing by n − 1 corrects it, but the James–Stein estimator, deliberately biased toward a common center, has lower total error than individual sample means when estimating three or more means (Stein's paradox, 1956). Properties: consistency (converges to the truth with more data), efficiency (smallest variance possible), and robustness to outliers or model errors.\n\nMethods: method of moments, maximum likelihood, least squares, Bayesian estimation, and shrinkage. The sample mean is best for normal data; for heavy-tailed data the median can be far better. In the German tank problem, Allied statisticians estimated German tank production from the serial numbers of captured tanks, more accurately than intelligence reports. Estimation theory also underlies signal processing, where Kalman filters track position from noisy sensors, and machine learning.",
+      "principles": "An estimate is a guess with a track record. Choosing how to guess is a choice between being right on average and being close each time, and the best rules often accept a little of one to gain a lot of the other.",
+      "example": {
+        "label": "The German tank problem",
+        "code": "import random, statistics\n\nrandom.seed(63)\nN, k, trials = 500, 10, 20_000\nnaive, corrected = [], []\nfor _ in range(trials):\n    seen = random.sample(range(1, N + 1), k)\n    m = max(seen)\n    naive.append(m)                              # \"the biggest I saw\": always too low\n    corrected.append(m + m / k - 1)              # the classic minimum-variance unbiased estimator\nprint(\"truth\", N)\nprint(\"max of the sample:  mean\", round(statistics.mean(naive), 1), \" sd\", round(statistics.stdev(naive), 1))\nprint(\"max + max/k - 1:    mean\", round(statistics.mean(corrected), 1), \" sd\", round(statistics.stdev(corrected), 1))"
+      },
+      "requires": [
+        "statistics",
+        "variance"
+      ]
+    },
+    {
+      "id": "maximum-likelihood",
+      "picture": "Pick the explanation that makes the data least surprising.",
+      "mechanism": "The likelihood of a parameter θ is the probability, or density, of the observed data if θ were true. The maximum likelihood estimate is the θ that maximizes it. In practice one maximizes the log-likelihood, which turns products into sums, using calculus or numerical optimization.",
+      "detail": "Example: 7 heads in 10 flips gives likelihood p⁷(1 − p)³ for the coin's bias, maximized at p = 0.7, the sample proportion. For a normal sample, the estimate of the mean is the sample mean, and least squares is the maximum likelihood estimate under Gaussian errors. Ronald Fisher developed the method between 1912 and 1922. For large samples it is consistent, asymptotically normal, and efficient; standard errors come from the curvature of the log-likelihood.\n\nIt is the foundation of logistic regression, generalized linear models, and survival analysis, and, in machine learning, training by minimizing cross-entropy or negative log-likelihood is exactly this. Limits: it can overfit with small samples or many parameters, is sensitive to model misspecification, and can fail to exist. Adding a prior gives maximum a posteriori estimation, equivalent to regularization, a bridge to Bayesian methods. Likelihood alone does not give probabilities of hypotheses; it only says which fits the data best.",
+      "principles": "Turn the question around: not how probable is this theory, but how probable is this data under each theory. Choosing the theory that makes the observed data most likely is simple, general, and the basis of most modern model fitting.",
+      "example": {
+        "label": "Finding a rate by maximizing the likelihood",
+        "code": "import math, random\n\nrandom.seed(64)\ndata = [random.expovariate(0.5) for _ in range(500)]                    # waiting times with true rate 0.5\n\ndef log_likelihood(rate):\n    return sum(math.log(rate) - rate * x for x in data)\n\nbest = max((r / 1000 for r in range(100, 2000)), key=log_likelihood)\nprint(\"maximum likelihood rate by search:\", round(best, 3))\nprint(\"closed form (1 / sample mean):    \", round(len(data) / sum(data), 3))\n\nheads, n = 7, 10                                                          # coin: likelihood p^7 (1-p)^3\nprint(max((p / 100 for p in range(1, 100)), key=lambda p: p ** heads * (1 - p) ** (n - heads)))"
+      },
+      "requires": [
+        "estimation",
+        "probability-distributions"
+      ]
+    },
+    {
+      "id": "bootstrap",
+      "picture": "Estimate uncertainty by resampling your own data.",
+      "mechanism": "Treat the sample as a stand-in for the population. Draw many new samples of the same size from it, with replacement; compute your statistic on each; the spread of those values approximates the uncertainty of the statistic. Percentiles of the results give confidence intervals.",
+      "detail": "Bradley Efron introduced it in 1979; the name comes from the tale of pulling oneself up by one's bootstraps. It works for statistics with no simple error formula, such as medians, correlations, ratios, and model performance metrics, and needs little theory, only computing. Each resample draws n items with replacement, so some items appear twice and others not at all; about 63 percent of the distinct items appear in each.\n\nVariants: percentile and bias-corrected intervals, the parametric bootstrap (simulate from a fitted model), and the block bootstrap for time series. Bagging, bootstrap aggregation, trains many models on resamples and averages them, the basis of random forests. Limits: it cannot fix a biased or unrepresentative sample, works poorly for extremes such as the maximum, and assumes the observations are independent. Related resampling ideas: the jackknife, permutation tests, and cross-validation.",
+      "principles": "Without a formula for the error, let the data supply its own. Resampling substitutes computation for theory and gives honest uncertainty for almost any statistic, on the condition that the sample itself is a fair miniature of what you care about.",
+      "example": {
+        "label": "Uncertainty of a median with no formula",
+        "code": "import random, statistics\n\nrandom.seed(65)\nsample = [random.lognormvariate(3, 0.8) for _ in range(60)]                 # a skewed sample; we want the median's uncertainty\nprint(\"sample median:\", round(statistics.median(sample), 2))\n\nmedians = sorted(statistics.median(random.choices(sample, k=len(sample))) for _ in range(10_000))\nlo, hi = medians[249], medians[9749]\nprint(f\"bootstrap 95% interval for the median: {lo:.2f} to {hi:.2f}\")\nprint(\"bootstrap standard error:\", round(statistics.stdev(medians), 2))\nprint(\"true median of the population:\", round(2.718281828 ** 3, 2))"
+      },
+      "requires": [
+        "estimation",
+        "sampling"
+      ]
+    }
+  ]
+}

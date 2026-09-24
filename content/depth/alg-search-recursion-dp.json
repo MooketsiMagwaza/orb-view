@@ -1,0 +1,256 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Algorithms, part two: searching, recursion and divide and conquer, and dynamic programming with its classic problems, each in four layers.",
+  "depth": [
+    {
+      "id": "searching",
+      "picture": "Finding an item in a collection, or discovering it is not there.",
+      "mechanism": "The method depends on what you know about the data. If nothing, check every item. If it is sorted, halve the range each time. With a hash table, compute where it must be. With a tree, follow the branches. The more structure, the fewer items you touch.",
+      "detail": "Costs: unsorted array O(n); sorted array with binary search O(log n); balanced search tree O(log n); hash table O(1) on average; trie O(length of the key). Sorting first costs O(n log n), so it pays off only if you will search many times.\n\nSearch also means more than finding an item: finding the closest match, all matches, the best according to a score (a search engine's ranking), or a path through a space of possibilities (graph search, game trees). In AI, search problems are framed as state spaces (states, moves between them, a start, and a goal) explored by breadth-first search, depth-first search, A*, and so on. Indexing is the general trick: build a structure in advance, at a cost, so that many later searches are cheap. Databases and web search engines are largely industrial-scale indexes.",
+      "principles": "Search is answered by structure. Every fast search method arranges data so that each look rules out a large part of it, and all of them make the same trade: spend effort ahead of time to save it later.",
+      "requires": [
+        "algorithms",
+        "arrays"
+      ]
+    },
+    {
+      "id": "linear-search",
+      "picture": "Look at each item in turn until you find it or run out.",
+      "mechanism": "Start at the first item and compare it with the target. If it matches, stop; otherwise move to the next. If you reach the end, the item is not there.",
+      "detail": "O(n) time in the worst case, about n/2 on average for an item that is present, and O(1) space. It needs no ordering and no preparation, and works on anything you can step through: arrays, linked lists, files, streams.\n\nFor small collections, a few dozen items, it often beats fancier methods, since it has no overhead and reads memory in order, which caches like. Tricks include a sentinel (put the target at the end so the loop needs no bounds check) and move-to-front (put found items at the front so common ones are found quickly). When you will search the same data repeatedly, sort or hash first; when you search once, it is optimal, since in the worst case you must look at everything.",
+      "principles": "When you know nothing about the data, you cannot skip anything. Linear search is the baseline every other method is measured against, and the honest answer for small or unstructured collections.",
+      "example": {
+        "label": "Scan until found",
+        "code": "def linear_search(items, target):\n    for i, x in enumerate(items):\n        if x == target:\n            return i\n    return -1\n\nprint(linear_search([7, 3, 9, 4], 9), linear_search([7, 3, 9, 4], 5))   # 2 -1"
+      },
+      "requires": [
+        "searching"
+      ]
+    },
+    {
+      "id": "binary-search",
+      "picture": "Guess the middle of a sorted list, and throw away the half that cannot contain the answer.",
+      "mechanism": "Keep a range with a low and a high end. Look at the middle item. If it equals the target, done. If the target is smaller, discard the upper half; if larger, discard the lower half. Repeat until found or the range is empty. Each step halves the range.",
+      "detail": "O(log n): a million items take about 20 steps, a billion about 30. It needs random access and a sorted list. The idea is old, and used by anyone with a dictionary, but famously easy to get wrong: Jon Bentley reported that about 90 percent of professional programmers he tested had bugs in their first attempt, and in 2006 Joshua Bloch showed that the binary search in Java's standard library had hidden an integer-overflow bug for years, from computing (lo + hi) / 2 on very large arrays. The safe form is lo + (hi − lo) / 2.\n\nVariants: finding the first or last of several duplicates, the insertion point for a missing item, and binary search on the answer, applying the idea to a monotonic yes-or-no question such as the smallest capacity that works. Git bisect uses it to find which commit introduced a bug.",
+      "principles": "Each question halves the possibilities, the most efficient way to use yes-or-no answers. Twenty questions can pick out one of a million, which is why a sorted list, a phone book, and a game of guess my number all work.",
+      "example": {
+        "label": "Halving a sorted list",
+        "code": "def binary_search(a, target):\n    lo, hi = 0, len(a) - 1\n    while lo <= hi:\n        mid = lo + (hi - lo) // 2      # avoids overflow in fixed-width integers\n        if a[mid] == target:\n            return mid\n        if a[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\ndata = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]\nprint(binary_search(data, 23), binary_search(data, 7))   # 5 -1"
+      },
+      "requires": [
+        "searching",
+        "arrays",
+        "logarithm"
+      ]
+    },
+    {
+      "id": "interpolation-search",
+      "picture": "Like finding a name in a phone book: open near the end for a name starting with W.",
+      "mechanism": "Instead of probing the middle, estimate the position by linear interpolation: if values are spread evenly, the target's value tells you roughly where it sits. Probe there, compare, and narrow the range as in binary search.",
+      "detail": "The probe position is lo + (target − a[lo]) × (hi − lo) / (a[hi] − a[lo]). On uniformly distributed data the expected time is O(log log n), far better than binary search's O(log n): for a billion items, about 5 probes instead of 30. But on skewed or clustered data it can degrade to O(n), since the estimate keeps landing badly.\n\nIt is practical mainly when comparisons are expensive, such as searching disk or remote data, and the distribution is known to be near uniform. Hybrids alternate interpolation with binary steps to guarantee O(log n) in the worst case. The idea recurs in learned indexes, models that predict where a key lies, and in the way people search dictionaries.",
+      "principles": "Using what you know about how the data is distributed can beat searching blind. It is the difference between an algorithm that assumes nothing and one that takes a good guess, at the price of being wrong when the guess is bad.",
+      "example": {
+        "label": "Guessing where the value should be",
+        "code": "def interpolation_search(a, target):\n    lo, hi = 0, len(a) - 1\n    while lo <= hi and a[lo] <= target <= a[hi]:\n        if a[hi] == a[lo]:\n            return lo if a[lo] == target else -1\n        pos = lo + (target - a[lo]) * (hi - lo) // (a[hi] - a[lo])\n        if a[pos] == target:\n            return pos\n        if a[pos] < target:\n            lo = pos + 1\n        else:\n            hi = pos - 1\n    return -1\n\ndata = list(range(0, 1000, 10))              # evenly spread\nprint(interpolation_search(data, 730))       # 73"
+      },
+      "requires": [
+        "binary-search"
+      ]
+    },
+    {
+      "id": "string-search",
+      "picture": "Find a short pattern inside a long text.",
+      "mechanism": "The naive method slides the pattern along the text and compares at every position, taking up to n × m steps for text of length n and pattern of length m. Better methods use what a failed match reveals so they never back up, or preprocess the pattern or the text.",
+      "detail": "Families: preprocess the pattern (Knuth–Morris–Pratt runs in O(n + m) and never re-reads text; Boyer–Moore compares from the pattern's end and often skips whole chunks, sublinear in practice and the basis of grep's speed); use hashing (Rabin–Karp compares rolling hash values of windows, good for many patterns at once); preprocess the text (suffix arrays and suffix trees answer any pattern query in O(m), and the Burrows–Wheeler transform makes this compact, powering DNA aligners); and search for many patterns at once (Aho–Corasick builds an automaton, used in virus scanners and intrusion detection).\n\nApproximate matching, allowing errors, uses edit distance. The problem appears in text editors, databases, bioinformatics, plagiarism detection, and network security.",
+      "principles": "A failed comparison is information. Every good string-search algorithm is a way of not throwing away what the last attempt learned, which turns a quadratic re-scan into a single pass.",
+      "requires": [
+        "searching",
+        "strings"
+      ]
+    },
+    {
+      "id": "kmp",
+      "picture": "When a match fails partway, use what you already matched to skip ahead.",
+      "mechanism": "Precompute, for each position in the pattern, the length of the longest proper prefix that is also a suffix of what has been matched so far (the failure table). On a mismatch, instead of restarting, use the table to slide the pattern forward by the right amount while the text pointer stays where it is.",
+      "detail": "It runs in O(n + m): the table takes O(m) and the scan O(n), since the text pointer never moves backward. Morris discovered it while writing a text editor, and Knuth and Pratt derived it from automata theory; they published together in 1977. It is equivalent to running the pattern through a finite automaton.\n\nExample: pattern ABABC in a text containing ABABAB. After matching ABAB and failing on the next letter, the table says the last two matched characters, AB, are also a prefix of the pattern, so matching resumes with AB already matched, without re-reading. Boyer–Moore is usually faster on ordinary text, but KMP's guarantee, and the fact that it reads each character once and in order, makes it useful for network data and hardware.",
+      "principles": "Remember what you have already matched. The table is the pattern's knowledge of itself, and using it turns an algorithm that keeps starting over into one that never looks back.",
+      "example": {
+        "label": "Failure table and search",
+        "code": "def build_table(p):\n    table, k = [0] * len(p), 0\n    for i in range(1, len(p)):\n        while k and p[i] != p[k]:\n            k = table[k - 1]\n        if p[i] == p[k]:\n            k += 1\n        table[i] = k\n    return table\n\ndef kmp_search(text, p):\n    table, k, hits = build_table(p), 0, []\n    for i, ch in enumerate(text):\n        while k and ch != p[k]:\n            k = table[k - 1]\n        if ch == p[k]:\n            k += 1\n        if k == len(p):\n            hits.append(i - k + 1)\n            k = table[k - 1]\n    return hits\n\nprint(build_table(\"ABABC\"))                 # [0, 0, 1, 2, 0]\nprint(kmp_search(\"ABABABCABABC\", \"ABABC\"))  # [2, 7]"
+      },
+      "requires": [
+        "string-search"
+      ]
+    },
+    {
+      "id": "regular-expressions",
+      "picture": "A compact notation for describing patterns of text.",
+      "mechanism": "Symbols stand for themselves, with operators for choice (a|b), repetition (a*, a+), grouping, and classes of characters ([0-9]). A pattern is compiled into a finite automaton, a state machine, that reads the text one character at a time and reports whether, or where, it matches.",
+      "detail": "The idea comes from Stephen Kleene's 1951 formalization of regular events, and Ken Thompson brought it into computing in 1968 with a construction that turns a pattern into a state machine, used in the editors QED and ed and in grep, whose name comes from the ed command g/re/p. A true regular expression matches in time linear in the text.\n\nBut popular engines (Perl, Python, Java, JavaScript) add backreferences and use backtracking, which can take exponential time on crafted patterns: catastrophic backtracking, exploited in denial-of-service attacks, and behind outages at Stack Overflow in 2016 and Cloudflare in 2019. Engines such as Google's RE2 and Rust's regex guarantee linear time by avoiding backtracking. Regular expressions cannot count or match nested brackets, since a finite automaton has no memory, which is why parsing HTML with them is a classic mistake.",
+      "principles": "A tiny language for describing patterns, and a direct link between text and machines: every regular expression is a state machine in disguise. Its power and its limits, no counting and no nesting, are exactly those of a machine with no memory.",
+      "example": {
+        "label": "Finding dates and checking an address",
+        "code": "import re\n\nlog = \"2026-03-07 ERROR disk full; 2026-03-08 WARN cpu hot; 2026-03-09 ERROR disk full\"\nprint(re.findall(r\"(\\d{4}-\\d{2}-\\d{2}) ERROR\", log))     # ['2026-03-07', '2026-03-09']\n\nemail = re.compile(r\"^[\\w.+-]+@[\\w-]+\\.[\\w.]+$\")\nprint(bool(email.match(\"ada@example.org\")), bool(email.match(\"not an email\")))   # True False"
+      },
+      "requires": [
+        "string-search",
+        "state-machines"
+      ]
+    },
+    {
+      "id": "recursion",
+      "picture": "Solving a problem by solving a smaller copy of it.",
+      "mechanism": "A recursive function calls itself on a smaller input. It needs a base case that stops the calling (the smallest problem, answered directly) and a recursive case that shrinks the problem toward it. Each call waits for its smaller call to return, then combines the answer.",
+      "detail": "Classic examples: factorial (n! = n × (n − 1)!), Fibonacci, the Towers of Hanoi, walking a tree (a directory is files plus smaller directories), and quicksort. Recursion suits self-similar structure: trees, nested data, fractals, grammars, and divide-and-conquer.\n\nIts correctness has the same shape as mathematical induction: if the base case works and each step works assuming the smaller case does, the whole works. Costs: each call uses stack space, so depth is limited, and naive recursion may redo work (Fibonacci is exponential without memoization). Every recursion can be rewritten as a loop with an explicit stack, and tail recursion can be turned into a loop automatically in some languages.",
+      "principles": "Recursion trusts that the smaller problem is solved and asks only for the one step in between. It is induction turned into a program, and the natural language of anything that contains smaller versions of itself.",
+      "example": {
+        "label": "Towers of Hanoi",
+        "code": "def hanoi(n, src=\"A\", dst=\"C\", spare=\"B\"):\n    if n == 0:                                     # base case\n        return 0\n    moves = hanoi(n - 1, src, spare, dst)          # get n-1 discs out of the way\n    print(f\"move disc {n}: {src} -> {dst}\")\n    return moves + 1 + hanoi(n - 1, spare, dst, src)\n\nprint(hanoi(3), \"moves\")                           # 7 moves, which is 2**3 - 1"
+      },
+      "requires": [
+        "induction"
+      ]
+    },
+    {
+      "id": "divide-and-conquer",
+      "picture": "Break a problem into smaller copies, solve each, and combine the answers.",
+      "mechanism": "Three steps: divide the problem into subproblems of the same kind, conquer them by solving recursively (directly when small enough), and combine the results. The gains come when dividing halves the work and combining is cheap.",
+      "detail": "Examples: merge sort (split, sort halves, merge), quicksort (partition, sort the sides), binary search (discard half), the fast Fourier transform (split into even and odd terms), Karatsuba multiplication (three multiplications of half-size numbers instead of four, giving O(n^1.585) instead of O(n²)), Strassen's matrix multiplication, and closest pair of points. MapReduce applies the same shape across machines.\n\nIts cost is analyzed with recurrences such as T(n) = 2T(n/2) + O(n), solved by the master theorem. It parallelizes naturally, since subproblems are independent. It is not always the answer: when subproblems overlap, as in Fibonacci, divide and conquer repeats work and dynamic programming is better.",
+      "principles": "Big problems often contain small versions of themselves. When you can cut a problem into independent pieces, the total cost is what it takes to split and combine, which is why so many of the fastest algorithms are built this way.",
+      "requires": [
+        "recursion"
+      ]
+    },
+    {
+      "id": "tail-call",
+      "picture": "A call that is the last thing a function does, so nothing is left waiting.",
+      "mechanism": "In an ordinary recursive call the caller must wait for the result and then do more work, such as multiplying, so its stack frame has to be kept. In a tail call the caller's result is exactly the callee's result, so the frame can be replaced instead of stacked, turning recursion into a loop.",
+      "detail": "Compare factorial written two ways: n * fact(n − 1) is not a tail call, since a multiplication remains, while fact_acc(n − 1, acc * n) with an accumulator is. With tail-call optimization the second uses constant stack however deep it goes.\n\nScheme requires it by specification, so loops in Scheme are simply tail recursion; Haskell, Erlang, and Scala (for self-calls) support it. Python and Java do not: Guido van Rossum has said he rejected it to keep tracebacks readable. JavaScript's specification requires it, but only Safari implements it. Where it is unsupported, rewrite as a loop or use a trampoline. It matters most for functional programming, where loops are recursion, and for state machines written as functions that call each other.",
+      "principles": "Recursion need not cost memory if the call is the final act. The idea marks the boundary between recursion as a way of thinking and recursion as a way of running, and languages differ in whether they let you have both.",
+      "example": {
+        "label": "Three forms of the same computation",
+        "code": "def fact(n):                       # not a tail call: multiply after the call returns\n    return 1 if n == 0 else n * fact(n - 1)\n\ndef fact_tail(n, acc=1):           # a tail call: nothing left to do after it\n    return acc if n == 0 else fact_tail(n - 1, acc * n)\n\ndef fact_loop(n):                  # what tail-call optimization turns it into\n    acc = 1\n    while n > 0:\n        acc, n = acc * n, n - 1\n    return acc\n\nprint(fact(10), fact_tail(10), fact_loop(10))    # 3628800 3628800 3628800"
+      },
+      "requires": [
+        "recursion",
+        "call-stack"
+      ]
+    },
+    {
+      "id": "recurrence-relations",
+      "picture": "An equation that defines each term using the terms before it.",
+      "mechanism": "A recurrence gives the base values and a rule: F(n) = F(n − 1) + F(n − 2), with F(0) = 0 and F(1) = 1. In algorithms, the running time T(n) of a recursive method satisfies a recurrence that mirrors the code: T(n) = 2T(n/2) + n for merge sort.",
+      "detail": "To solve one: guess and verify by induction; expand it repeatedly until a pattern appears; draw the recursion tree and add up the work per level; or use a formula. Linear recurrences with constant coefficients have a closed form from the characteristic equation: Fibonacci gives Binet's formula, involving the golden ratio. For divide-and-conquer recurrences, the master theorem covers the standard forms.\n\nExamples: T(n) = T(n/2) + 1 gives O(log n), binary search; T(n) = 2T(n/2) + n gives O(n log n), merge sort; T(n) = T(n − 1) + n gives O(n²); T(n) = 2T(n − 1) + 1 gives O(2ⁿ), the Towers of Hanoi. Recurrences also describe compound interest with deposits and difference equations, the discrete cousin of differential equations.",
+      "principles": "A recurrence turns the shape of a recursive method into arithmetic. Solving it answers how the cost grows without running anything, which is how you can know a design is good before you build it.",
+      "requires": [
+        "recursion",
+        "induction"
+      ]
+    },
+    {
+      "id": "master-theorem",
+      "picture": "A shortcut for the running time of divide-and-conquer recursions.",
+      "mechanism": "For T(n) = aT(n/b) + f(n), with a subproblems of size n/b and f(n) work to split and combine, compare f(n) with n^(log_b a), the total work at the leaves. Whichever is larger dominates; if they match, you get an extra log factor.",
+      "detail": "Three cases. If f(n) grows more slowly than n^(log_b a), the leaves dominate and T(n) = Θ(n^(log_b a)). If they grow at the same rate, every level contributes equally and T(n) = Θ(n^(log_b a) log n). If f(n) grows faster, and is regular, the top dominates and T(n) = Θ(f(n)).\n\nExamples: binary search has a = 1, b = 2, f = 1, so the middle case gives log n. Merge sort has a = 2, b = 2, f = n, so the middle case gives n log n. Karatsuba has a = 3, b = 2, f = n, so the leaves dominate: n^1.585. Strassen has a = 7, b = 2, f = n², giving n^2.807. It does not cover every recurrence, such as unequal splits like quicksort's worst case; the Akra–Bazzi method generalizes it.",
+      "principles": "Every divide-and-conquer algorithm is a contest between the work at the top and the work at the bottom of its recursion tree. The theorem says who wins, which tells you where to spend effort in making it faster.",
+      "requires": [
+        "recurrence-relations",
+        "time-complexity"
+      ]
+    },
+    {
+      "id": "fibonacci",
+      "picture": "1, 1, 2, 3, 5, 8, 13: each number is the sum of the two before.",
+      "mechanism": "F(n) = F(n − 1) + F(n − 2). The direct recursive program follows that formula literally, but it recomputes the same values again and again, so its running time is itself Fibonacci-like: exponential, about 1.618ⁿ.",
+      "detail": "Computing F(50) recursively takes billions of calls. The fixes: memoization (remember each result; O(n)), a bottom-up loop keeping just the last two values (O(n) time, O(1) space), fast doubling or matrix exponentiation (O(log n) arithmetic steps), or Binet's closed form F(n) ≈ φⁿ/√5, with φ the golden ratio, precise only until floating-point error creeps in.\n\nIndian mathematicians including Pingala and Virahanka described the sequence centuries before Fibonacci's Liber Abaci of 1202. It appears in the spirals of sunflowers and pinecones, though claims for it in nature are often exaggerated. Ratios of consecutive terms approach the golden ratio. It is the standard first example for teaching recursion, memoization, and dynamic programming.",
+      "principles": "The simplest recursion hides an explosion: the same subproblem is solved over and over. Noticing the repetition and remembering the answer is the central idea of dynamic programming.",
+      "example": {
+        "label": "Slow, cached, and looped",
+        "code": "from functools import lru_cache\nimport time\n\ndef fib_slow(n):\n    return n if n < 2 else fib_slow(n - 1) + fib_slow(n - 2)\n\n@lru_cache(maxsize=None)\ndef fib_memo(n):\n    return n if n < 2 else fib_memo(n - 1) + fib_memo(n - 2)\n\ndef fib_loop(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nstart = time.perf_counter(); print(fib_slow(27), round(time.perf_counter() - start, 2), \"s\")\nprint(fib_memo(90), fib_loop(90))     # 2880067194370816120 2880067194370816120"
+      },
+      "requires": [
+        "recursion"
+      ]
+    },
+    {
+      "id": "dynamic-programming",
+      "picture": "Solve each small piece once, remember the answer, and build up to the big one.",
+      "mechanism": "It applies when a problem has overlapping subproblems (the same small problems recur) and optimal substructure (the best answer is built from best answers to smaller ones). Store each subproblem's answer in a table, either top-down with memoization or bottom-up by filling the table in order.",
+      "detail": "Richard Bellman coined the name in the 1950s at RAND. \"Programming\" meant planning, not code, and he chose \"dynamic\" partly because it sounded impressive and could not be used pejoratively. The steps: define the subproblem, write the recurrence, identify the base cases and the order of evaluation, and read the answer off the table.\n\nTypical problems: knapsack, longest common subsequence, edit distance, shortest paths (Bellman–Ford, Floyd–Warshall), matrix-chain multiplication, coin change, and sequence alignment in bioinformatics. It turns exponential brute force into polynomial time, often O(n²) or O(n × W), and memory can often be cut by keeping only the last row. It differs from divide and conquer in that subproblems overlap, and from greedy methods in that it considers all choices, not just the locally best.",
+      "principles": "Do not solve the same problem twice. When a question keeps reappearing inside itself, a table of answers replaces a mountain of repeated work, and remembering is a habit of thought that applies far beyond code.",
+      "requires": [
+        "memoization",
+        "optimal-substructure"
+      ]
+    },
+    {
+      "id": "memoization",
+      "picture": "Write down the answer the first time, and look it up the next time.",
+      "mechanism": "Wrap a function so that it keeps a table from arguments to results. When called, it first checks the table; if the answer is there, it returns it; otherwise it computes, stores, and returns. It only works for pure functions, where the same inputs always give the same output.",
+      "detail": "It turns naive recursion with repeated subproblems into efficient code with a one-line change: Fibonacci goes from exponential to linear. Python provides functools.lru_cache, and many languages have libraries. Donald Michie coined the name in 1968, from memo.\n\nCosts are memory for the table (which can grow without limit, so caches may evict old entries) and the hashing of arguments. It is top-down, computing only what is needed, whereas tabulation is bottom-up, filling the whole table in order; memoization may use recursion depth, while tabulation avoids it. It is caching at the granularity of a function call, a special case of the principle behind CPU caches and CDNs. The danger: if a function has side effects or depends on changing state, cached answers go stale.",
+      "principles": "A cache at the smallest scale: a function that remembers. Trading a little memory for never repeating work is one of the most general ideas in computing, from CPU caches to web servers.",
+      "example": {
+        "label": "Counting grid routes",
+        "code": "from functools import lru_cache\n\ncalls = 0\n\n@lru_cache(maxsize=None)\ndef paths(r, c):                 # routes across a grid moving only right or down\n    global calls\n    calls += 1\n    if r == 0 or c == 0:\n        return 1\n    return paths(r - 1, c) + paths(r, c - 1)\n\nprint(paths(16, 16), \"routes,\", calls, \"calls\")   # 601080390 routes, 288 calls"
+      },
+      "requires": [
+        "recursion",
+        "associative-arrays"
+      ]
+    },
+    {
+      "id": "optimal-substructure",
+      "picture": "The best answer to the big problem is made of best answers to smaller ones.",
+      "mechanism": "A problem has optimal substructure if an optimal solution contains optimal solutions to its subproblems. If a shortest route from A to C passes through B, its A-to-B part must itself be a shortest route from A to B; otherwise you could swap in a shorter one.",
+      "detail": "It is the property that justifies dynamic programming and greedy algorithms: you can build the answer up from optimal pieces without missing a better combination. Shortest paths in graphs have it, as do the longest common subsequence, knapsack (with respect to capacity), and matrix-chain ordering.\n\nLongest simple paths do not: the longest route from A to C via B need not use the longest route from A to B, because the pieces can conflict by sharing vertices. Proving it uses a cut-and-paste argument: assume a subsolution is not optimal, substitute a better one, and show that improves the whole, a contradiction. Without it, the problem may still be solvable, but only by searching, with backtracking or branch and bound.",
+      "principles": "It says that local best is compatible with global best. Whether a problem has that property decides whether it can be attacked by building up from parts or must be searched whole, and spotting it is the first step in designing a dynamic-programming solution.",
+      "requires": [
+        "recursion"
+      ]
+    },
+    {
+      "id": "knapsack",
+      "picture": "A bag that holds only so much: choose what to pack to get the most value.",
+      "mechanism": "Each item has a weight and a value, and the bag has a weight limit. In the 0/1 version each item is taken whole or left. A table best[w] holds the best value at capacity w; for each item, the entry is the better of skipping the item or taking it and adding its value to the best at the reduced capacity.",
+      "detail": "Time is O(n × W) for n items and capacity W: polynomial in the value of W but exponential in the number of bits needed to write it down (pseudo-polynomial). The problem is NP-complete, which fits: no algorithm polynomial in the input length is known. Brute force tries 2ⁿ subsets.\n\nIf items can be split (fractional knapsack), a greedy choice by value per weight is optimal. A fully polynomial-time approximation scheme gets within any chosen percentage of optimal. Variants include unbounded (unlimited copies), multiple knapsacks, and bin packing. It models budgeting, cargo loading, portfolio selection, cutting stock, and choosing which ads to show. The Merkle–Hellman knapsack cryptosystem, an early public-key scheme, was later broken.",
+      "principles": "Limited room and competing wants make almost every real decision a knapsack problem. Its solution shows how a table over the capacity turns an exponential search into manageable arithmetic, and its NP-completeness shows the price when the numbers grow.",
+      "example": {
+        "label": "Best value within a weight limit",
+        "code": "def knapsack(items, capacity):\n    best = [0] * (capacity + 1)                 # best[w] = best value at capacity w\n    for weight, value in items:\n        for w in range(capacity, weight - 1, -1):\n            best[w] = max(best[w], best[w - weight] + value)\n    return best[capacity]\n\nitems = [(1, 1), (3, 4), (4, 5), (5, 7)]         # (weight, value)\nprint(knapsack(items, 7))                        # 9: take the weight-3 and weight-4 items"
+      },
+      "requires": [
+        "dynamic-programming"
+      ]
+    },
+    {
+      "id": "longest-common-subsequence",
+      "picture": "Find the longest run of items that two sequences share, in order, though not necessarily adjacent.",
+      "mechanism": "Fill a table where cell (i, j) holds the LCS length for the first i items of A and the first j of B. If A[i] equals B[j], take the diagonal value plus one; otherwise take the larger of the cell above and the cell to the left. Trace back to recover the sequence.",
+      "detail": "Time O(n × m), and space reducible to O(min(n, m)) if only the length is needed. Example: ABCBDAB and BDCABA share a subsequence of length 4, such as BCBA.\n\nIt underlies diff, the tool that shows the changes between two files: find the LCS of their lines and everything else is an addition or a deletion, which is the core of version control. In bioinformatics, comparing DNA or protein sequences is a relative, with the Needleman–Wunsch and Smith–Waterman algorithms adding scores for gaps and mismatches. It is also used in plagiarism detection and merging collaborative edits. Hunt–Szymanski and Myers's algorithm are faster when the sequences are similar, which is why Git's diff is fast on small changes.",
+      "principles": "Comparing two sequences reduces to a small table in which each cell depends only on its neighbors. It shows how an intuitive question, what do these have in common?, becomes an efficient algorithm once you see the subproblems.",
+      "example": {
+        "label": "The LCS table, built row by row",
+        "code": "def lcs(a, b):\n    table = [[\"\"] * (len(b) + 1) for _ in range(len(a) + 1)]\n    for i, x in enumerate(a):\n        for j, y in enumerate(b):\n            if x == y:\n                table[i + 1][j + 1] = table[i][j] + x\n            else:\n                table[i + 1][j + 1] = max(table[i][j + 1], table[i + 1][j], key=len)\n    return table[-1][-1]\n\nresult = lcs(\"ABCBDAB\", \"BDCABA\")\nprint(result, len(result))       # a common subsequence of length 4, such as BCBA"
+      },
+      "requires": [
+        "dynamic-programming",
+        "strings"
+      ]
+    },
+    {
+      "id": "edit-distance",
+      "picture": "How many single-letter changes turn one word into another?",
+      "mechanism": "Fill a table where cell (i, j) is the fewest insertions, deletions, and substitutions needed to turn the first i letters of word A into the first j of word B. Each cell is the minimum of three neighbors plus one, or plus zero if the letters match.",
+      "detail": "Also called Levenshtein distance, after Vladimir Levenshtein, who defined it in 1965. Kitten to sitting is 3: substitute k with s, substitute e with i, insert g. Time O(n × m).\n\nVariants: Damerau–Levenshtein adds transposition of neighboring letters, the commonest typing error; weighted versions make some changes cheaper, such as between keyboard neighbors; Hamming distance counts substitutions only, for equal-length strings. Uses: spell checkers and autocorrect, fuzzy search (did you mean), deduplicating records, DNA alignment, speech and handwriting recognition, and diffing. Speed-ups include bit-parallel algorithms, limiting to a maximum distance k, BK-trees for finding all dictionary words within distance k, and n-gram indexes.",
+      "principles": "Similarity can be measured as effort: the minimum work needed to turn one thing into another. That way of defining distance makes fuzzy matching computable, and it is why typing a wrong word can still find the right one.",
+      "example": {
+        "label": "Levenshtein distance",
+        "code": "def edit_distance(a, b):\n    prev = list(range(len(b) + 1))\n    for i, x in enumerate(a, 1):\n        cur = [i]\n        for j, y in enumerate(b, 1):\n            cur.append(min(prev[j] + 1,                 # delete\n                           cur[j - 1] + 1,              # insert\n                           prev[j - 1] + (x != y)))     # substitute, or keep if equal\n        prev = cur\n    return prev[-1]\n\nprint(edit_distance(\"kitten\", \"sitting\"))   # 3\nprint(edit_distance(\"flaw\", \"lawn\"))        # 2"
+      },
+      "requires": [
+        "dynamic-programming",
+        "strings"
+      ]
+    }
+  ]
+}

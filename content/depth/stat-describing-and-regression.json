@@ -1,0 +1,207 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Statistics, part one: describing data, samples and their biases, margins of error, correlation, regression, and overfitting, each in four layers.",
+  "depth": [
+    {
+      "id": "statistics",
+      "picture": "Learning from data despite noise.",
+      "mechanism": "Statistics collects, summarizes, and interprets data. Descriptive statistics summarize what was observed; inferential statistics use a sample to reason about a wider population, with a stated level of uncertainty. Probability is the engine underneath: it tells how far a sample can be from the truth.",
+      "detail": "The word comes from state: early statistics counted people and resources for governments. Modern statistics grew from astronomy (Gauss and Legendre's least squares), from Galton, Pearson, and Fisher's work on heredity, agriculture, and experiments, and from Gosset's t-test for small samples at Guinness.\n\nThere are two schools: frequentist, where probabilities describe long-run frequencies of procedures, and Bayesian, where they describe beliefs. Core tasks are describing, estimating, testing, predicting, and designing studies; data science and machine learning extend it to high dimensions and prediction. Most everyday statistical errors are not mathematical but about the data's origin: who was measured, how, and what is missing. Good practice: plot first, know the source, state uncertainty, separate exploration from confirmation, and be wary of causal claims from observational data.",
+      "principles": "Statistics is the discipline of being honest about what data can and cannot tell you. It replaces certainty with quantified uncertainty, which is the only kind of knowledge available about most of the world.",
+      "example": {
+        "label": "A sample estimates a population",
+        "code": "import random, statistics\n\nrandom.seed(31)\npopulation = [random.gauss(170, 10) for _ in range(1_000_000)]       # heights of a million people (cm)\nsample = random.sample(population, 100)\nmean, sd = statistics.mean(sample), statistics.stdev(sample)\nprint(\"true mean\", round(statistics.mean(population), 2), \" sample estimate\", round(mean, 2), \"+/-\", round(1.96 * sd / 100 ** 0.5, 2))"
+      },
+      "requires": [
+        "probability"
+      ]
+    },
+    {
+      "id": "descriptive-statistics",
+      "picture": "Summarizing a pile of data in a few numbers and pictures.",
+      "mechanism": "Measures of center (mean, median, mode), spread (range, variance, standard deviation, interquartile range), and shape (skewness, outliers); frequency tables; and graphs such as histograms, box plots, and scatter plots. The aim is to describe the data at hand without generalizing beyond it.",
+      "detail": "Different summaries suit different data: skewed data such as incomes calls for the median and percentiles; symmetric data for the mean and standard deviation. Anscombe's quartet of 1973 shows four datasets with identical means, variances, correlations, and regression lines but wildly different plots, so always plot the data. Categorical data is summarized by counts and proportions.\n\nGood graphs show data honestly: zero baselines for bars, proportional areas, and no decoration that carries no information. Misleading summaries: an average of 2.3 children per family is no family's number; averaging the averages of groups of different sizes gives wrong answers; a mean of a skewed distribution can be nowhere near a typical case. Exploratory data analysis, developed by Tukey in the 1970s, treats description as a way to discover questions worth asking.",
+      "principles": "Before any model, look at the data: its center, spread, shape, and oddities. A few well-chosen summaries and a plot often answer the question, and always tell you what question to ask.",
+      "example": {
+        "label": "One very rich person",
+        "code": "import statistics\n\nincomes = [28, 31, 33, 35, 36, 38, 40, 42, 45, 48, 52, 60, 75, 400]      # thousands\nprint(\"mean\", round(statistics.mean(incomes), 1), \" median\", statistics.median(incomes))\nq = statistics.quantiles(incomes, n=4)\nprint(\"quartiles\", q, \" IQR\", round(q[2] - q[0], 1), \" sd\", round(statistics.stdev(incomes), 1))\n\nfor lo in range(0, 420, 60):\n    print(f\"{lo:3d}-{lo + 59:3d} {'#' * sum(lo <= x < lo + 60 for x in incomes)}\")     # a histogram"
+      },
+      "requires": [
+        "statistics"
+      ]
+    },
+    {
+      "id": "mean-median-mode",
+      "picture": "Three ways to say what is typical.",
+      "mechanism": "The mean adds all values and divides by the count. The median is the middle value when sorted, so half are below and half above. The mode is the most common value. For a symmetric bell shape they agree; for skewed data they separate.",
+      "detail": "Income: a few billionaires drag the mean far above what most people earn, so the median is the better typical figure. The median is robust: it barely moves if the largest value doubles. The mean is sensitive but uses all the data and has good mathematical properties: sample means are approximately normal, the mean minimizes squared error, and the median minimizes absolute error. The mode suits categories, such as the most common shoe size.\n\nOther averages: the geometric mean for growth rates and ratios, the harmonic mean for rates such as average speed over equal distances, the trimmed mean, and weighted means. The average family having 2.4 children shows averages need not be attainable values. In the news, average can mean any of the three, so ask which.",
+      "principles": "A single number cannot describe a whole distribution, and which one you choose is an argument. Ask what the average was, of what, and how spread out, before believing any claim built on it.",
+      "example": {
+        "label": "Mean, median, and the other averages",
+        "code": "import statistics\n\nsalaries = [30, 32, 35, 36, 38, 40, 41, 45, 50, 1000]\nprint(\"mean\", statistics.mean(salaries), \" median\", statistics.median(salaries))       # 134.7 vs 39.0\n\ngrowth = [1.10, 1.50, 0.80]                                                            # +10%, +50%, -20%\nprint(\"arithmetic mean of growth\", round(statistics.mean(growth), 4), \" geometric mean\", round(statistics.geometric_mean(growth), 4))\nprint(\"average speed over equal distances at 30 and 60:\", statistics.harmonic_mean([30, 60]))   # 40, not 45"
+      },
+      "requires": [
+        "descriptive-statistics"
+      ]
+    },
+    {
+      "id": "standard-deviation",
+      "picture": "The typical distance of values from their average.",
+      "mechanism": "Square each value's difference from the mean, average those squares (the variance), and take the square root: σ = √(Σ(x − μ)²/N). For a sample, divide by n − 1 instead of n (Bessel's correction) to avoid underestimating the population's spread.",
+      "detail": "It is in the same units as the data, unlike variance. For bell-shaped data, about 68 percent of values lie within one standard deviation of the mean, 95 percent within two, and 99.7 percent within three; Chebyshev's inequality guarantees at least 1 − 1/k² within k standard deviations for any distribution, so 75 percent within two. The z-score (x − mean)/sd says how many standard deviations a value is from the average and allows comparing different scales. Karl Pearson introduced the term in 1894.\n\nThe standard error, σ/√n, is the standard deviation of a sample mean. Uses: quality control, finance (volatility), test norming, error bars (one sd describes the data; one standard error describes the uncertainty of the mean, a common confusion), and effect sizes such as Cohen's d. It is sensitive to outliers; robust alternatives include the median absolute deviation and the interquartile range.",
+      "principles": "One number for how much things vary, in the units you measure them in. With the mean it summarizes a bell-shaped world well, and the rule that two thirds lie within one and 95 percent within two is the working knowledge of every scientist.",
+      "example": {
+        "label": "Population and sample versions, and the 68-95-99.7 rule",
+        "code": "import math, statistics, random\n\ndata = [4, 8, 6, 5, 3, 7, 9, 5]\nmean = sum(data) / len(data)\npop_sd = math.sqrt(sum((x - mean) ** 2 for x in data) / len(data))\nsample_sd = math.sqrt(sum((x - mean) ** 2 for x in data) / (len(data) - 1))\nprint(round(mean, 2), round(pop_sd, 3), round(sample_sd, 3), \"| library:\", round(statistics.pstdev(data), 3), round(statistics.stdev(data), 3))\n\nrandom.seed(32)\nz = [random.gauss(100, 15) for _ in range(100_000)]                    # IQ-like scores\nfor k in (1, 2, 3):\n    print(f\"within {k} sd:\", round(sum(abs(v - 100) <= 15 * k for v in z) / len(z), 4))"
+      },
+      "requires": [
+        "variance",
+        "descriptive-statistics"
+      ]
+    },
+    {
+      "id": "percentiles",
+      "picture": "Where a value stands in the crowd.",
+      "mechanism": "The p-th percentile is the value below which p percent of the data falls. The 50th is the median; the 25th and 75th are the quartiles, and their difference is the interquartile range. To compute one, sort the data and read off the value at that fraction of the way through, with interpolation.",
+      "detail": "A percentile rank tells you the share of a group you outperform: scoring at the 90th percentile means 90 percent scored lower. Uses: standardized tests, children's growth charts, income distributions, and performance monitoring. Web services report p50, p95, and p99 latency because averages hide the slow tail: if 1 percent of requests are ten times slower the mean barely moves, but users notice, and a page that touches 100 backends hits a p99 delay in 63 percent of loads.\n\nBox plots show the median, quartiles, and whiskers. Percentiles are robust to outliers and independent of scale, but discard magnitude: the 90th percentile of income says nothing about how much more the top earns. They are not percentages: a percentile score of 80 is not 80 percent correct.",
+      "principles": "Ranks describe position without needing the scale. Percentiles are how you see the tail, the part of a distribution that an average smooths away and that users, patients, and insurers actually experience.",
+      "example": {
+        "label": "Latency percentiles, and why the tail matters",
+        "code": "import random, statistics\n\nrandom.seed(33)\nlatency_ms = [random.lognormvariate(3.5, 0.6) for _ in range(20_000)]        # right-skewed, like response times\ncuts = statistics.quantiles(latency_ms, n=100)\nprint(f\"mean {statistics.mean(latency_ms):.0f} ms  p50 {cuts[49]:.0f}  p90 {cuts[89]:.0f}  p99 {cuts[98]:.0f}\")\n\nscore, scores = 640, [random.gauss(500, 100) for _ in range(50_000)]\nprint(f\"a score of {score} beats {100 * sum(s < score for s in scores) / len(scores):.0f}% of test-takers\")\n\nprint(round(1 - 0.99 ** 100, 3), \"chance a page needing 100 backend calls hits at least one p99-slow call\")"
+      },
+      "requires": [
+        "descriptive-statistics"
+      ]
+    },
+    {
+      "id": "outliers",
+      "picture": "A point that lies far from the others.",
+      "mechanism": "An outlier is an observation unusually distant from the bulk of the data. Common rules of thumb: more than 1.5 times the IQR beyond the quartiles (the box plot rule), or more than 3 standard deviations from the mean. Whether it is an error, a rare truth, or a sign of a different process is a judgment, not a formula.",
+      "detail": "Causes: measurement or entry error (a height of 1,700 cm), a different population mixed in, genuine heavy-tailed variation, or a discovery. Handling: investigate before removing; report results with and without; use robust methods (median, trimmed means, rank-based tests, robust regression) that resist them. In regression, high-leverage points can dominate a fit even when not extreme in y; Cook's distance measures influence.\n\nFilters can hide discoveries: automatic removal of extreme readings has masked real phenomena, so record what was removed and why. Anomaly detection in fraud, security, and industrial monitoring is outlier hunting. Deleting inconvenient points to improve a fit is a form of p-hacking; deciding the rule before looking protects against it.",
+      "principles": "An extreme value is either noise, a mistake, or the most interesting thing in the dataset, and only investigation can tell which. Deleting outliers silently is a way to fool yourself; keeping them without thought is another.",
+      "example": {
+        "label": "Fences, and the median resisting",
+        "code": "import statistics\n\ndata = [12, 13, 12, 14, 15, 13, 14, 12, 13, 95]           # one entry looks wrong\nq1, _, q3 = statistics.quantiles(data, n=4)\niqr = q3 - q1\nfence = (q1 - 1.5 * iqr, q3 + 1.5 * iqr)\nprint(\"fences\", fence, \"outliers:\", [x for x in data if not fence[0] <= x <= fence[1]])\nprint(\"mean with\", round(statistics.mean(data), 2), \" without\", round(statistics.mean([x for x in data if x < 50]), 2))\nprint(\"median with\", statistics.median(data), \" without\", statistics.median([x for x in data if x < 50]))   # barely moves"
+      },
+      "requires": [
+        "standard-deviation"
+      ]
+    },
+    {
+      "id": "sampling",
+      "picture": "Learning about everyone by looking at some.",
+      "mechanism": "A sample is a subset of a population, chosen to represent it. In a simple random sample, every member has the same chance of selection, so on average the sample mirrors the population. Other designs: stratified (sample within groups), cluster (sample whole groups), systematic (every k-th), and convenience (whoever is easy to reach, usually biased).",
+      "detail": "The precision of an estimate depends on the sample size, with the standard error shrinking as 1/√n, not on the fraction of the population sampled: a random sample of 1,000 is about as accurate for a country of 300 million as for a city of 30,000. But no size rescues a bad method: the 1936 Literary Digest poll, with 2.4 million responses, predicted Landon would beat Roosevelt because its sample, drawn from car and phone owners and magazine subscribers, skewed wealthy, while Gallup, using far fewer quota-selected respondents, got it right.\n\nNonresponse matters: those who answer differ from those who do not. Sampling error is random and quantifiable; non-sampling error, from bias, wording, and measurement, is not. Capture–recapture estimates animal populations: mark some, release, sample again, and infer the size from the fraction marked. In data science, training data is a sample; if it differs from where the model is used, performance fails.",
+      "principles": "How you pick matters more than how many you pick. Randomness is what lets a small sample speak for a large population, and its absence is why enormous samples can be confidently wrong.",
+      "example": {
+        "label": "Error shrinks with n, but bias does not",
+        "code": "import random, statistics\n\nrandom.seed(34)\npopulation = [random.gauss(50, 15) for _ in range(100_000)]\ntrue_mean = statistics.mean(population)\nfor n in (10, 100, 1_000, 10_000):\n    errors = [abs(statistics.mean(random.sample(population, n)) - true_mean) for _ in range(200)]\n    print(f\"n={n:6d}: typical error {statistics.mean(errors):.3f}   (about 0.8 x 15/sqrt(n) = {0.8 * 15 / n ** 0.5:.3f})\")\n\nbiased = sorted(population)[len(population) // 2:]                # a \"convenience\" sample from the upper half only\nprint(\"a huge biased sample:\", round(statistics.mean(random.sample(biased, 10_000)), 2), \"vs true mean\", round(true_mean, 2))"
+      },
+      "requires": [
+        "statistics",
+        "law-of-large-numbers"
+      ]
+    },
+    {
+      "id": "sampling-bias",
+      "picture": "When the way you collected data favors some cases over others.",
+      "mechanism": "Selection bias arises when the process by which units enter the data depends on what you are measuring, so the sample differs systematically from the population. Forms: undercoverage (missing groups), self-selection (volunteers differ), nonresponse bias, survivorship bias, and the choice of which studies or cases get reported.",
+      "detail": "Online polls attract the engaged; hospital patients are sicker than the population; reviews come from extremes; studying successful companies ignores the failed; landline surveys miss the young. Berkson's paradox and collider bias appear when you condition on something caused by both things of interest: among hospitalized patients, two independent illnesses appear negatively correlated, and among admitted students, talent and wealth can look negatively related.\n\nRemedies: random sampling from a full frame, following up nonrespondents, weighting to known population figures, sensitivity analyses, and above all asking how did these data get here? Bias does not shrink with more data: it only makes the wrong answer more precise. Correcting it is possible only with knowledge or assumptions about the selection process, as in inverse-probability weighting.",
+      "principles": "Data do not arrive at random; something put them there. Whenever the route into your dataset is connected to what you are measuring, the sample can mislead in ways no amount of extra data will fix.",
+      "example": {
+        "label": "Admission creates a false negative correlation",
+        "code": "import random, statistics\n\nrandom.seed(35)\npeople = [(random.gauss(0, 1), random.gauss(0, 1)) for _ in range(200_000)]       # talent and wealth: independent\nprint(\"all people: correlation\", round(statistics.correlation([t for t, w in people], [w for t, w in people]), 3))\nadmitted = [(t, w) for t, w in people if t + w > 2]                               # admitted if the sum is high\nprint(\"admitted only: correlation\", round(statistics.correlation([t for t, w in admitted], [w for t, w in admitted]), 3))"
+      },
+      "requires": [
+        "sampling"
+      ]
+    },
+    {
+      "id": "margin-of-error",
+      "picture": "How far a poll might be off just by the luck of who was asked.",
+      "mechanism": "For a proportion p from a random sample of n, the standard error is √(p(1 − p)/n); the 95 percent margin of error is about 1.96 times that: at most ±1/√n, roughly ±3 points for n = 1,000, ±2 for 2,500, and ±1 for 10,000. It reflects random sampling variation only.",
+      "detail": "A poll saying 52 percent plus or minus 3 means that if the poll were repeated many times, about 95 percent of the intervals so constructed would contain the true value; the true share is plausibly between 49 and 55, which includes a tie. It is not a bound: 1 poll in 20 will miss by more. It applies to each figure separately: the margin on the lead of one candidate over another is about double. Subgroups have larger margins, since the sample within them is smaller.\n\nIt excludes bias: coverage, nonresponse, question wording, likely-voter modeling, and social-desirability effects. Real polling errors in elections often exceed the stated margin for those reasons. Halving the margin needs four times the sample, so national polls stop at about 1,000 to 2,000. It also applies to A/B tests: conversion rates differ only if their intervals separate.",
+      "principles": "A poll is a measurement with a built-in blur, and the margin of error is the width of the blur from chance alone. It is honest about luck and silent about bias, so it always understates how wrong a poll can be.",
+      "example": {
+        "label": "Margins by sample size, and coverage of the interval",
+        "code": "import math, random\n\ndef margin(p, n):\n    return 1.96 * math.sqrt(p * (1 - p) / n)\n\nfor n in (100, 400, 1000, 2500, 10000):\n    print(f\"n={n:6d}: +/-{100 * margin(0.5, n):.1f} points\")\n\nrandom.seed(36)                                                 # 1,000 polls of 1,000 people, true support 52%\ninside = 0\nfor _ in range(1000):\n    p_hat = sum(random.random() < 0.52 for _ in range(1000)) / 1000\n    inside += abs(p_hat - 0.52) <= margin(p_hat, 1000)\nprint(inside / 1000, \"of the polls' intervals contained the truth\")       # about 0.95"
+      },
+      "requires": [
+        "sampling",
+        "standard-deviation",
+        "central-limit-theorem"
+      ]
+    },
+    {
+      "id": "correlation",
+      "picture": "How closely two things move together.",
+      "mechanism": "Pearson's correlation coefficient r ranges from −1 (a perfect downward line) through 0 (no linear relationship) to +1 (a perfect upward line). It is the average product of the two variables' z-scores, so it is unit-free. r² is the share of one variable's variance accounted for by a linear fit on the other.",
+      "detail": "Francis Galton devised the idea in the 1880s studying heredity, the heights of parents and children, and Karl Pearson gave it its formula. It measures only linear association: a perfect U-shaped relationship can have r = 0. It is sensitive to outliers and to restriction of range: correlating test scores and college grades only among admitted students shrinks r. Spearman's rank correlation handles monotonic nonlinear relationships.\n\nCorrelation is symmetric, and it is not causation: ice cream sales and drownings correlate through summer heat, and searching many series turns up spurious correlations. A correlation of group averages, an ecological correlation, can differ from the correlation among individuals. Strength is context-dependent: r = 0.3 may matter for a health outcome and r = 0.9 may be weak for measurement agreement. Always plot.",
+      "principles": "Correlation is a summary of togetherness, and only a linear kind at that. It tells you where to look and what to predict, never why, and it can be zero when the relationship is as strong as it gets.",
+      "example": {
+        "label": "Linear, U-shaped, and rank correlation",
+        "code": "import random, statistics\n\nrandom.seed(37)\nx = [random.gauss(0, 1) for _ in range(2000)]\nlin = [2 * v + random.gauss(0, 1) for v in x]                  # a linear relationship with noise\ncurve = [v * v for v in x]                                    # a perfect but non-linear relationship\nprint(\"linear:\", round(statistics.correlation(x, lin), 3), \"  U-shaped:\", round(statistics.correlation(x, curve), 3))\nprint(\"Spearman on a monotone curve:\", round(statistics.correlation(x, [v ** 3 for v in x], method=\"ranked\"), 3))"
+      },
+      "requires": [
+        "standard-deviation"
+      ]
+    },
+    {
+      "id": "regression",
+      "picture": "Predicting one thing from others, and measuring how much each matters.",
+      "mechanism": "Model an outcome y as a function of predictors x: y ≈ f(x) plus noise, and fit f to data by minimizing error. The fit gives predictions, and the coefficients estimate how y changes when a predictor changes by one unit, holding the others fixed.",
+      "detail": "Galton named it regression in 1886 when he noticed that tall parents had children closer to average height. Types: linear regression (continuous outcome), logistic regression (binary outcome, predicting a probability), Poisson regression (counts), generalized linear models, non-parametric methods, and machine-learning regressors such as trees and neural networks.\n\nMultiple regression adjusts for other variables, but controlling for is only as good as the measured confounders: unmeasured ones still bias the coefficient. Inference needs standard errors and confidence intervals; diagnostics check residuals (patterns mean the model is wrong), influence, unequal spread, and correlated predictors, which make coefficients unstable. Traps: extrapolating beyond the data, reading coefficients as causal, ignoring interactions, and overfitting with too many predictors. Prediction and explanation are different goals needing different care.",
+      "principles": "Regression turns a scatter of points into a rule and a measured strength. It is the everyday tool for prediction and for asking how much a factor matters, and it is honest only as far as what it leaves out is not secretly driving both.",
+      "example": {
+        "label": "A predictor that stands in for another",
+        "code": "import random, statistics\n\nrandom.seed(38)\nn = 200\nsize = [random.uniform(50, 150) for _ in range(n)]\nrooms = [s / 40 + random.gauss(0, 0.7) for s in size]                                # correlated with size\nprice = [50 + 3 * s + 10 * r + random.gauss(0, 20) for s, r in zip(size, rooms)]     # thousands\nslope = statistics.correlation(size, price) * statistics.stdev(price) / statistics.stdev(size)\nprint(\"price change per square meter (ignoring rooms):\", round(slope, 2), \" true direct effect 3, plus part of the rooms effect\")"
+      },
+      "requires": [
+        "correlation"
+      ]
+    },
+    {
+      "id": "linear-regression",
+      "picture": "Draw the best straight line through the cloud.",
+      "mechanism": "Fit y = a + bx, or with many predictors y = a + b₁x₁ + b₂x₂ + …, by choosing the coefficients that minimize the sum of squared vertical distances from the points to the line. For one predictor, the slope is b = r · (s_y / s_x) and the line passes through the point of averages.",
+      "detail": "The slope says how much y is expected to change per unit of x; the intercept is the predicted y at x = 0, often not meaningful. R² is the share of variance explained. Assumptions for inference: linearity, independent errors, equal spread, and roughly normal residuals; violations show in residual plots. With many predictors the fit is found by solving the normal equations, or by gradient descent.\n\nExtensions: polynomial terms and splines for curves, regularization (ridge, lasso) for many predictors, and generalized linear models for other outcome types. Uses: forecasting, trend estimation, calibration, and adjusting comparisons. Regression to the mean is built in. Extrapolating a line beyond the data is risky, as in Mark Twain's joke about the Mississippi getting a mile shorter every century. Linear regression is the base case of machine learning: a single neuron with no activation, fit by least squares.",
+      "principles": "The straight line is the simplest model that says one thing changes with another. It is often good enough, and when it is not, the way it fails is informative.",
+      "example": {
+        "label": "Fitting a line by hand and by library",
+        "code": "import random, statistics\n\nrandom.seed(39)\nxs = [random.uniform(0, 10) for _ in range(100)]\nys = [2.5 + 1.8 * x + random.gauss(0, 2) for x in xs]                 # truth: intercept 2.5, slope 1.8\nmx, my = statistics.mean(xs), statistics.mean(ys)\nb = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)\na = my - b * mx\nresid = [y - (a + b * x) for x, y in zip(xs, ys)]\nr2 = 1 - sum(e * e for e in resid) / sum((y - my) ** 2 for y in ys)\nprint(f\"fitted: y = {a:.2f} + {b:.2f} x   R^2 = {r2:.3f}\")\nfit = statistics.linear_regression(xs, ys)\nprint(\"library:\", round(fit.intercept, 2), round(fit.slope, 2))"
+      },
+      "requires": [
+        "regression"
+      ]
+    },
+    {
+      "id": "least-squares",
+      "picture": "Choose the fit that makes the squared errors as small as possible.",
+      "mechanism": "Given a model with adjustable parameters, compute residuals (observed minus predicted), square them, sum them, and choose the parameters minimizing that sum. For linear models this has a closed-form solution; for others it is found iteratively, by Gauss–Newton or gradient descent.",
+      "detail": "Legendre published it in 1805 and Gauss claimed to have used it since 1795, to predict the orbit of the dwarf planet Ceres from a few observations, an early triumph. Gauss showed it is the most probable estimate if errors are normally distributed: least squares is maximum likelihood under Gaussian noise. The Gauss–Markov theorem says that among linear unbiased estimators it has the smallest variance, given uncorrelated errors of equal variance.\n\nWhy squares? They are smooth and easy to differentiate, they penalize big errors heavily, and they lead to linear equations. The downside is sensitivity to outliers, which robust alternatives such as least absolute deviations and Huber loss address. Geometrically, the fitted values are the orthogonal projection of the data vector onto the space spanned by the predictors. It is used everywhere: curve fitting, GPS position solving, image registration, signal processing, and the mean squared error in training neural networks.",
+      "principles": "Squaring the errors makes the best fit easy to find and gives every point a say in proportion to its distance. It is the workhorse of fitting because of its mathematics, and its weakness is that a single wild point can pull it astray.",
+      "example": {
+        "label": "One bad point pulls the line",
+        "code": "import random\n\nrandom.seed(40)\nxs = [i / 10 for i in range(50)]\nys = [3 - 0.5 * x + random.gauss(0, 0.3) for x in xs]\nys[25] += 8                                            # one bad measurement\n\ndef fit(xs, ys):\n    n = len(xs); mx, my = sum(xs) / n, sum(ys) / n\n    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)\n    return my - b * mx, b\n\nprint(\"with the outlier:    intercept %.2f slope %.2f\" % fit(xs, ys))\nclean = [(x, y) for i, (x, y) in enumerate(zip(xs, ys)) if i != 25]\nprint(\"without the outlier: intercept %.2f slope %.2f\" % fit(*zip(*clean)))\nprint(\"truth:               intercept 3.00 slope -0.50\")"
+      },
+      "requires": [
+        "linear-regression",
+        "optimization"
+      ]
+    },
+    {
+      "id": "overfitting",
+      "picture": "A model that memorized the noise.",
+      "mechanism": "A flexible model can match the training data almost perfectly by fitting its random quirks as well as its real pattern. On new data those quirks do not recur, so predictions are poor. The more parameters relative to data, the greater the risk: training error keeps falling while error on unseen data rises.",
+      "detail": "A degree-9 polynomial passes through 10 points exactly and swings wildly between them. The cure is to measure performance on data not used for fitting: a hold-out test set, or cross-validation, which repeatedly holds out folds. Then choose complexity to minimize held-out error: the bias–variance trade-off, where simple models have high bias, missing structure, and complex ones high variance, chasing noise.\n\nRegularization (ridge, lasso, weight decay, dropout), early stopping, more data, and simpler models reduce it. In science the same disease appears as overfitting hypotheses to a dataset: analysts try many models and report the one that fits, a source of irreproducible results. Von Neumann is credited with the remark that with four parameters he could fit an elephant, and with five make it wiggle its trunk. Signs: a big gap between training and test performance, unstable coefficients, and spectacular performance that vanishes in deployment. Data leakage, where test information sneaks into training, causes fake success.",
+      "principles": "Fitting the past perfectly is easy and usually wrong. The only honest test of a model is data it has not seen, and the discipline to keep it simple enough to generalize is what separates learning from memorizing.",
+      "example": {
+        "label": "Training error falls; error on new data rises",
+        "code": "import random\n\nrandom.seed(41)\ndef make(n):\n    xs = [random.uniform(-1, 1) for _ in range(n)]\n    return xs, [x ** 2 + random.gauss(0, 0.15) for x in xs]\n\ndef fit_poly(xs, ys, degree):                                   # least squares by solving the normal equations\n    m = degree + 1\n    A = [[sum(x ** (i + j) for x in xs) for j in range(m)] for i in range(m)]\n    b = [sum(y * x ** i for x, y in zip(xs, ys)) for i in range(m)]\n    for i in range(m):                                          # Gaussian elimination\n        p = max(range(i, m), key=lambda r: abs(A[r][i])); A[i], A[p] = A[p], A[i]; b[i], b[p] = b[p], b[i]\n        for r in range(i + 1, m):\n            f = A[r][i] / A[i][i]\n            A[r] = [a - f * c for a, c in zip(A[r], A[i])]; b[r] -= f * b[i]\n    coef = [0.0] * m\n    for i in reversed(range(m)):\n        coef[i] = (b[i] - sum(A[i][j] * coef[j] for j in range(i + 1, m))) / A[i][i]\n    return coef\n\npredict = lambda c, x: sum(ci * x ** i for i, ci in enumerate(c))\nmse = lambda c, xs, ys: sum((predict(c, x) - y) ** 2 for x, y in zip(xs, ys)) / len(xs)\ntrain_x, train_y = make(15)\ntest_x, test_y = make(500)\nfor degree in (1, 2, 5, 10):\n    c = fit_poly(train_x, train_y, degree)\n    print(f\"degree {degree:2d}: training error {mse(c, train_x, train_y):.4f}   error on new data {mse(c, test_x, test_y):.4f}\")"
+      },
+      "requires": [
+        "regression"
+      ]
+    }
+  ]
+}

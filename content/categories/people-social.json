@@ -1,0 +1,23 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "people-social",
+  "group": "People",
+  "order": 1,
+  "title": "Socialising",
+  "blurb": "Cooperation, language, trust, and how groups hold together and fall apart.",
+  "orb": "connecting",
+  "entry": "cooperation",
+  "path": [
+    "cooperation",
+    "language",
+    "trust",
+    "friendship",
+    "empathy",
+    "conflict",
+    "negotiation",
+    "institutions",
+    "law",
+    "justice",
+    "commons"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "culture-history",
+  "group": "Culture",
+  "order": 3,
+  "title": "History",
+  "blurb": "From cave walls to the information age, one era at a time.",
+  "orb": "composing",
+  "entry": "history",
+  "path": [
+    "history",
+    "prehistory",
+    "ancient-world",
+    "agriculture",
+    "cities",
+    "middle-ages",
+    "silk-road",
+    "islamic-golden-age",
+    "renaissance",
+    "enlightenment",
+    "industrial-revolution",
+    "information-age"
+  ]
+}

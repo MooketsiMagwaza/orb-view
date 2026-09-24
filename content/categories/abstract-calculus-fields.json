@@ -1,0 +1,26 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-calculus-fields",
+  "group": "Abstract",
+  "order": 8,
+  "title": "Calculus in Many Variables",
+  "blurb": "Gradients, fields, and the great theorems that trade a region for its boundary.",
+  "orb": "shaping",
+  "entry": "multivariable",
+  "path": [
+    "multivariable",
+    "partial-derivatives",
+    "gradient",
+    "gradient-descent",
+    "multiple-integrals",
+    "coordinate-systems",
+    "vector-fields",
+    "divergence",
+    "vector-curl",
+    "line-integrals",
+    "greens-theorem",
+    "stokes-theorem",
+    "divergence-theorem",
+    "lagrange-multipliers"
+  ]
+}

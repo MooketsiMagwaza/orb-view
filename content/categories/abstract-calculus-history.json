@@ -1,0 +1,20 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-calculus-history",
+  "group": "Abstract",
+  "order": 9,
+  "title": "How Calculus Was Made",
+  "blurb": "From Archimedes to Newton and Leibniz, and the long work of making it rigorous.",
+  "orb": "listening",
+  "entry": "calculus-history",
+  "path": [
+    "calculus-history",
+    "archimedes",
+    "newton",
+    "leibniz",
+    "priority-dispute",
+    "the-analyst",
+    "infinitesimals",
+    "real-analysis"
+  ]
+}

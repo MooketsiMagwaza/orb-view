@@ -1,0 +1,134 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Computing foundations: binary, memory, processes and the operating system, debugging, caching, data, servers, text encoding, and hashing, each in four layers.",
+  "depth": [
+    {
+      "id": "binary",
+      "picture": "Numbers written with just two symbols: 0 and 1.",
+      "mechanism": "Each position is a power of two: 1101 = 8 + 4 + 0 + 1 = 13. Counting goes 0, 1, 10, 11, 100, 101, and so on. Addition and multiplication work like decimal, with carries at 2 instead of 10. A group of 8 bits is a byte, holding 256 values.",
+      "detail": "Leibniz described modern binary in 1703 and linked it to the I Ching; Boole's algebra (1847) and Claude Shannon's 1937 thesis connected true-or-false logic to switching circuits, and Shannon's 1948 theory made the bit the unit of information. Binary suits hardware because a transistor is reliably either on or off, with wide noise margins.\n\nEverything is encoded in it: text, images, sound, and instructions. Negative integers use two's complement, in which the top bit carries negative weight: 11111111 is −1 in 8 bits. Fractions use binary floating point, which cannot represent 0.1 exactly. Hexadecimal groups four bits per digit for readability. Bitwise operations manipulate bits directly: shifting left doubles a number. A fixed number of bits wraps around on overflow (255 + 1 = 0 in 8 bits), the cause of real failures: the Ariane 5 rocket was lost in 1996 after a too-large number was converted to 16 bits. In information theory, n bits distinguish 2ⁿ possibilities, and one bit is the answer to a fair yes-or-no question.",
+      "principles": "Two symbols suffice for everything. Binary works because it trades expressive symbols for reliability: a circuit that only has to tell high from low can be made small, fast, and nearly free of error.",
+      "example": {
+        "label": "Bits, shifts, overflow, and two's complement",
+        "code": "n = 13\nprint(bin(n), int(\"1101\", 2), format(n, \"08b\"), hex(255))         # 0b1101 13 00001101 0xff\n\nprint(bin(200 & 0b00001111), bin(5 << 2), bin(0b1010 ^ 0b0110))   # and, shift left (times 4), xor\n\nprint((255 + 1) % 256)                                             # 8-bit overflow wraps to 0\nprint(format((-1) & 0xFF, \"08b\"))                                  # two's complement: -1 in 8 bits is 11111111\nprint(0.1 + 0.2, format(0.1, \".20f\"))                              # 0.1 has no exact binary form"
+      }
+    },
+    {
+      "id": "ram",
+      "picture": "Fast working memory that forgets when the power goes.",
+      "mechanism": "Random-access memory is a grid of cells, each storing a bit, addressed by number; any address can be read or written in about the same time. DRAM stores charge in a tiny capacitor, which leaks and must be refreshed thousands of times a second; SRAM uses flip-flops, faster and costlier, and is used for caches.",
+      "detail": "The memory hierarchy: registers (under 1 ns), L1 cache (about 1 ns), L2 and L3 (roughly 4 to 20 ns), DRAM (about 80 ns), SSD (about 100 µs), disk (about 10 ms). Each level is bigger and slower; programs run well when the data they need is in the fast levels, which is why locality of reference matters. Modern DRAM transfers tens of gigabytes per second, yet its latency has improved little, so the processor waits for memory: the memory wall.\n\nVirtual memory gives each process its own address space, mapped to physical RAM in pages, and swaps rarely used pages to disk. RAM loses its contents without power, though remnants can persist for seconds, the basis of cold-boot attacks. ECC RAM detects and corrects bit flips caused by cosmic rays and electrical noise. Rowhammer, shown in 2014, revealed that repeatedly reading one row of DRAM can flip bits in neighboring rows. Robert Dennard invented the one-transistor DRAM cell in 1966.",
+      "principles": "Everything a running program touches lives in RAM, and its speed sets how fast anything can happen. Because memory is slow relative to a processor, most of computer architecture is the art of hiding that gap.",
+      "requires": [
+        "binary"
+      ]
+    },
+    {
+      "id": "processes",
+      "picture": "A running program with its own memory and identity.",
+      "mechanism": "A process is a program in execution: its code, its own virtual address space, open files, and one or more threads of execution. The operating system's scheduler gives each a slice of processor time, a few milliseconds, switching so fast that they seem to run simultaneously, and the memory hardware enforces isolation.",
+      "detail": "Each has a process ID, a parent, an environment, and a state: running, ready, blocked waiting for input or output, or terminated. Context switching saves one process's registers and restores another's, costing microseconds. Isolation means a crash in one process does not corrupt another; processes communicate through pipes, sockets, shared memory, and signals. Threads share a process's memory and are lighter but riskier: races and deadlocks. On multi-core machines several processes truly run in parallel.\n\nKinds: foreground and background, daemons or services, zombies (finished but not yet collected by their parent), and orphans. Tools: ps, top, and Task Manager. Containers use kernel features, namespaces and cgroups, to give groups of processes their own isolated view of the system without a full virtual machine. Resource limits keep a runaway process from starving the system, and the OOM killer chooses a victim when memory runs out.",
+      "principles": "A process is the operating system's illusion that every program has the machine to itself. Isolation, and the cheap switching that creates the illusion, are what let a hundred programs coexist safely.",
+      "example": {
+        "label": "Process IDs, a child, and a worker",
+        "code": "import os, subprocess, sys, multiprocessing as mp\n\ndef work(q):\n    q.put(sum(range(1_000_000)))\n\nif __name__ == \"__main__\":\n    print(\"this process:\", os.getpid(), \" parent:\", os.getppid())\n    out = subprocess.run([sys.executable, \"-c\", \"import os; print('child', os.getpid(), 'parent', os.getppid())\"],\n                         capture_output=True, text=True)\n    print(out.stdout.strip())                              # a separate process, with its own ID\n\n    q = mp.Queue()\n    p = mp.Process(target=work, args=(q,)); p.start()\n    print(\"result from another process:\", q.get()); p.join()"
+      }
+    },
+    {
+      "id": "operating-systems",
+      "picture": "The referee that shares the machine among all the programs.",
+      "mechanism": "The kernel runs with full privilege and manages the hardware: it schedules processes onto processors, gives each a private virtual address space, manages files on disks, handles devices, and enforces permissions. Programs ask it for services through system calls, and the hardware traps into the kernel to serve them.",
+      "detail": "Core jobs: scheduling, memory management, file systems, device drivers and input and output, networking stacks, and security. Landmark systems: Unix, from Ken Thompson and Dennis Ritchie at Bell Labs in 1969, and its descendants Linux (Torvalds, 1991), BSD, macOS, iOS, and Android; and Windows. Monolithic kernels such as Linux keep most services in kernel mode for speed; microkernels such as Minix and seL4 keep the kernel small and move services to user space for robustness.\n\nPrivilege rings separate user mode from kernel mode, so a buggy program cannot overwrite the kernel or other programs. A hypervisor runs several operating systems on one machine, the basis of clouds. Real-time operating systems guarantee response deadlines for cars, aircraft, and medical devices. The boot process runs firmware, a bootloader, the kernel, and then init. Concurrency, and preventing the failures it invites, races, deadlocks, and starvation, is central to their design.",
+      "principles": "An operating system turns raw hardware into a shared, protected, convenient machine. Its central trick is an interface, the system call, that lets programs ask for resources without being able to seize them.",
+      "example": {
+        "label": "A system call, timed",
+        "code": "import os, platform, time\n\nprint(platform.system(), platform.release(), \" cpus:\", os.cpu_count())\nstart = time.perf_counter()\nfor _ in range(100_000):\n    os.getpid()                                   # a system call: a request to the kernel\nprint(round((time.perf_counter() - start) / 100_000 * 1e6, 2), \"microseconds per call, including Python overhead\")\n\nwith open(__file__, \"rb\") as f:                   # files, too, are a service the kernel provides\n    print(\"read\", len(f.read()), \"bytes of this script through the operating system\")"
+      },
+      "requires": [
+        "ram",
+        "processes"
+      ]
+    },
+    {
+      "id": "debugging",
+      "picture": "Finding out why a program does what it says rather than what was meant.",
+      "mechanism": "Reproduce the failure, isolate where it happens, form a hypothesis about the cause, test it, and fix it; then check that the fix works and that nothing else broke. It is the scientific method applied to code you wrote yourself.",
+      "detail": "Grace Hopper's team found an actual moth in a relay of the Harvard Mark II in 1947 and taped it into the logbook; engineers had used the word bug since Edison. Techniques: read the error message and stack trace; use print statements and logging; step through code in a debugger; add assertions that state what must be true; bisect, by binary search over code, versions (git bisect), or input to find the smallest failing case; explain the problem aloud to a rubber duck; and write a failing test first.\n\nCategories: syntax errors, logic errors, off-by-one errors, null pointers, race conditions that depend on timing, and heisenbugs that vanish when observed. Root-cause analysis asks why repeatedly to find the underlying issue rather than the symptom. Tools include profilers, memory checkers, and fuzzers that generate random inputs. Kernighan observed that debugging is twice as hard as writing the code, so if you write it as cleverly as you can, you are not smart enough to debug it. Blameless postmortems turn failures into lessons.",
+      "principles": "Bugs are found by observation and elimination, not inspiration. The habit that separates fast debuggers from slow ones is testing each guess against evidence and cutting the search space in half, again and again.",
+      "example": {
+        "label": "Bisecting to a bad entry",
+        "code": "def find_first_bad(data, ok):\n    lo, hi = 0, len(data)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if ok(data[:mid + 1]):\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo\n\nreadings = [3, 4, 5, 6, 7, 8, \"N/A\", 9, 10]                  # one bad entry hides in the data\nprint(find_first_bad(readings, lambda part: all(isinstance(x, (int, float)) for x in part)))   # index 6\n\ndef average(values):\n    return sum(values) / len(values)\n\ntry:\n    average([])\nexcept ZeroDivisionError as e:\n    print(\"failure reproduced:\", e, \"-> the bug is not handling empty input\")"
+      },
+      "requires": [
+        "call-stack"
+      ]
+    },
+    {
+      "id": "cache",
+      "picture": "Keep a copy of something expensive close by.",
+      "mechanism": "A cache is a small, fast store in front of a large, slow one. On a request, check the cache: a hit returns quickly; a miss goes to the slow source and usually saves the result. When full, an eviction policy (least recently used, least frequently used, random) chooses what to drop.",
+      "detail": "It works because of locality: data used recently, or near data used recently, is likely to be used again. Caches appear at every level: CPU caches, the operating system's page cache, database buffer pools, browser caches, CDNs, DNS resolvers, application caches such as Redis and Memcached, and memoization. The average access time is hit rate times fast time plus miss rate times slow time, so even a 95 percent hit rate leaves misses dominating the cost.\n\nThe hard problem is invalidation, knowing when the cached copy has gone stale; Phil Karlton's quip is that there are only two hard things in computer science, cache invalidation and naming things. Strategies: time-to-live expiry, write-through, write-back, and explicit invalidation on change. Failure modes: stampedes, when many misses hit the source at once after a popular item expires, cache poisoning, and stale reads. Side-channel attacks such as Spectre read what caches reveal about others' behavior. Belady's optimal policy evicts what will be needed farthest in the future, which no one can know, so LRU approximates it.",
+      "principles": "A cache is a bet that the future resembles the recent past. When the bet pays, a slow system feels fast; when it fails, it silently serves yesterday's answers, which is why knowing when to throw a copy away is the real problem.",
+      "example": {
+        "label": "A least-recently-used cache",
+        "code": "from collections import OrderedDict\n\nclass LRU:\n    def __init__(self, size):\n        self.size, self.items, self.hits, self.misses = size, OrderedDict(), 0, 0\n    def get(self, key, load):\n        if key in self.items:\n            self.items.move_to_end(key); self.hits += 1\n            return self.items[key]\n        self.misses += 1\n        self.items[key] = load(key)                       # the slow source\n        if len(self.items) > self.size:\n            self.items.popitem(last=False)               # evict the least recently used\n        return self.items[key]\n\ncache = LRU(3)\nfor key in \"ABABCADAEBA\":\n    cache.get(key, load=lambda k: k.lower())\nprint(\"hits\", cache.hits, \"misses\", cache.misses)"
+      },
+      "requires": [
+        "ram"
+      ]
+    },
+    {
+      "id": "data",
+      "picture": "Facts written down so a machine can store and move them.",
+      "mechanism": "Data is symbols representing observations or values: numbers, text, images, sounds, records. It becomes information when interpreted in context, and knowledge when understood and applied. It needs a structure, a schema, and a meaning, the units and definitions, to be useful.",
+      "detail": "Kinds: structured (tables with fixed columns), semi-structured (JSON, XML), and unstructured (text, images, audio). Types: numerical, categorical, ordinal, boolean, temporal, and geospatial. Quality dimensions: accuracy, completeness, consistency, timeliness, and provenance, where it came from. The lifecycle runs collect, store, clean, transform, analyze, share, archive, and delete.\n\nIssues: garbage in, garbage out; bias in what gets collected; privacy and consent; security; and the cost of moving and keeping it. Big data refers to volumes, velocities, and varieties that outgrow one machine, and the distributed systems built to handle them. Metadata is data about data. Data is not neutral: what is measured reflects choices, and the categories used shape what can be seen; by Goodhart's law, when a measure becomes a target it ceases to be a good measure. Machine-learning systems are trained on data, so their quality is bounded by it, and cleaning typically takes most of the time in a project.",
+      "principles": "Data is a record of what someone chose to measure, in a form a machine can keep. Its value depends on what it means, where it came from, and what it leaves out, none of which is in the bytes themselves.",
+      "example": {
+        "label": "The same facts in three forms",
+        "code": "import json, csv, io\n\nrecord = {\"name\": \"Ada\", \"born\": 1815, \"fields\": [\"mathematics\", \"computing\"]}\nas_json = json.dumps(record)\nprint(as_json, \"->\", json.loads(as_json)[\"fields\"])           # semi-structured\n\ntable = io.StringIO(\"name,born\\nAda,1815\\nAlan,1912\\nGrace,1906\\n\")\nrows = list(csv.DictReader(table))\nprint(rows[1], sum(int(r[\"born\"]) for r in rows) // len(rows))    # structured: a table of rows\n\nprint(repr(\"café\".encode(\"utf-8\")), len(\"café\"), len(\"café\".encode(\"utf-8\")))      # the same text, different representations"
+      }
+    },
+    {
+      "id": "servers",
+      "picture": "A machine, or a program, whose job is to answer requests.",
+      "mechanism": "A server listens on a network address and port, accepts requests from clients, does the work (read a file, query a database, run code), and sends a response. It handles many clients at once through threads, processes, or an event loop, and is expected to be available continuously.",
+      "detail": "Server names both the software (nginx, Apache, PostgreSQL) and the machine it runs on, often in a data center: rack-mounted computers with redundant power, ECC memory, and remote management. Types: web, application, database, file, mail, DNS, game, and proxy servers. Design concerns: concurrency (the C10K problem of handling ten thousand connections led to event-driven servers), statelessness so any server can handle any request, load balancing, caching, and graceful failure.\n\nReliability is measured in nines: 99.9 percent availability allows about 8.8 hours of downtime a year, and 99.99 percent about 53 minutes. Scaling is vertical (a bigger machine) or horizontal (more machines). Modern practice runs servers in virtual machines or containers, orchestrated by systems such as Kubernetes, often on cloud platforms; serverless functions hide the machine, though servers still exist. Operations covers monitoring, logging, patching, backups, and capacity planning, and the pets-versus-cattle mindset: hand-tended servers against replaceable ones.",
+      "principles": "A server is defined by its promise: to be there, at any hour, for whoever asks. Most of the engineering in serving is about keeping that promise while the hardware, software, and demand all change underneath it.",
+      "example": {
+        "label": "A tiny web server, and two requests",
+        "code": "import http.server, threading, urllib.request\n\nclass Hello(http.server.BaseHTTPRequestHandler):\n    def do_GET(self):\n        body = f\"hello from {self.path}\".encode()\n        self.send_response(200); self.send_header(\"Content-Length\", str(len(body))); self.end_headers()\n        self.wfile.write(body)\n    def log_message(self, *args): pass\n\nserver = http.server.ThreadingHTTPServer((\"127.0.0.1\", 0), Hello)      # port 0: let the OS pick a free port\nport = server.server_address[1]\nthreading.Thread(target=server.serve_forever, daemon=True).start()\n\nfor path in (\"/\", \"/library\"):\n    print(urllib.request.urlopen(f\"http://127.0.0.1:{port}{path}\").read().decode())\nserver.shutdown()"
+      },
+      "requires": [
+        "processes"
+      ]
+    },
+    {
+      "id": "encoding",
+      "picture": "Text stored as numbers, and an agreement about which number means which letter.",
+      "mechanism": "A character set assigns each character a number, a code point; an encoding turns those numbers into bytes. ASCII uses 7 bits for 128 characters. Unicode assigns code points to over 150,000 characters in about 160 scripts, and UTF-8 encodes them in 1 to 4 bytes, with ASCII unchanged.",
+      "detail": "Before Unicode, dozens of incompatible 8-bit code pages meant a file could turn to gibberish, mojibake, when read with the wrong one. Unicode (1991) unified them; UTF-8, designed by Ken Thompson and Rob Pike in 1992, became the web's dominant encoding, used by over 98 percent of pages. Code points are written U+0041 for A and U+1F600 for a grinning face; a character as a reader sees it may be several code points (é as e plus a combining accent; family emoji are sequences), so length and indexing are subtle, and normalization makes equivalent forms compare equal.\n\nUTF-16 uses 2 or 4 bytes and is used by Windows, Java, and JavaScript. Pitfalls: homograph attacks using look-alike characters in domain names, sorting and case-folding across languages (the Turkish dotted i), and databases with the wrong collation. Base64 is a different encoding: binary data as text. The rule: decide the encoding at the boundaries, use UTF-8 everywhere, and convert bytes to text once, on input.",
+      "principles": "Text is bytes plus an agreement. Most text bugs are disagreements about that agreement, and the cure is to be explicit: choose UTF-8, convert at the edges, and remember that a letter, a code point, and a byte are three different things.",
+      "example": {
+        "label": "Bytes, code points, and mojibake",
+        "code": "import unicodedata\n\ntext = \"naïve café ✓ 😀\"\nfor enc in (\"utf-8\", \"utf-16\", \"latin-1\"):\n    try:\n        print(enc, len(text.encode(enc)), \"bytes\")\n    except UnicodeEncodeError as e:\n        print(enc, \"cannot encode:\", ascii(e.object[e.start:e.end]))\n\nprint([hex(ord(c)) for c in \"é😀\"], \"é\".encode(\"utf-8\"), \"é\".encode(\"latin-1\"))\nprint(\"café\" == \"café\", unicodedata.normalize(\"NFC\", \"café\") == \"café\")     # two spellings of the same word\nprint(\"café\".encode(\"utf-8\").decode(\"latin-1\"))                                         # mojibake: the wrong decoding"
+      },
+      "requires": [
+        "binary"
+      ]
+    },
+    {
+      "id": "hashing",
+      "picture": "A fingerprint for data: short, fixed size, and impossible to reverse.",
+      "mechanism": "A cryptographic hash function maps any input to a fixed-size digest (256 bits for SHA-256). It is deterministic, fast, and designed so that you cannot recover the input from the digest (preimage resistance), cannot find a different input with the same digest (second-preimage resistance), and cannot find any two inputs that collide (collision resistance). A one-bit change scrambles about half the output.",
+      "detail": "Uses: integrity checks (download checksums, Git commit IDs), digital signatures (sign the hash, not the whole message), password storage (store a hash, not the password, with a per-user salt and a deliberately slow function such as bcrypt, scrypt, or Argon2), message authentication (HMAC), proof-of-work in blockchains, and content addressing. MD5 and SHA-1 are broken, with practical collisions shown in 2004 and 2017; SHA-2 is standard, SHA-3 has a different design, and BLAKE2 and BLAKE3 are fast alternatives. The birthday bound halves the strength: a 256-bit hash gives 128-bit collision security.\n\nOrdinary hash functions for hash tables are not cryptographic. A hash is not encryption: nothing is hidden by a key, and a weak input such as a common password can be found by trying guesses, dictionary attacks and rainbow tables. Merkle trees hash hashes so large data sets can be verified piecewise, as in Git, Bitcoin, and certificate transparency logs.",
+      "principles": "A hash lets you check that something is unchanged without keeping, or revealing, the thing itself. Its usefulness rests on three impossibilities, reversing it, colliding it, and predicting it, and on nobody yet finding a way around them.",
+      "example": {
+        "label": "Avalanche, salted password hashing, and HMAC",
+        "code": "import hashlib, hmac, os\n\nprint(hashlib.sha256(b\"hello world\").hexdigest())\nprint(hashlib.sha256(b\"hello worle\").hexdigest())         # one character changed: a completely different digest\n\nsalt = os.urandom(16)\nslow = hashlib.pbkdf2_hmac(\"sha256\", b\"correct horse battery staple\", salt, 200_000)\nprint(slow.hex()[:32], \"... (a slow, salted hash for passwords)\")\n\nmac = hmac.new(b\"shared-secret\", b\"transfer 100 to alice\", hashlib.sha256).hexdigest()\nprint(mac[:32], \"... (a keyed hash proves who sent it)\")"
+      },
+      "requires": [
+        "hash-functions"
+      ]
+    }
+  ]
+}

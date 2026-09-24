@@ -1,0 +1,79 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Philosophy: truth, knowledge, reality, existence, nothing, emptiness, and meaning — the deepest ideas the network reaches from every direction, each in four layers.",
+  "depth": [
+    {
+      "id": "truth",
+      "picture": "What a statement has when things really are the way it says.",
+      "mechanism": "The plainest account, correspondence theory, says a belief is true when it matches the way the world actually is: \"snow is white\" is true if and only if snow is white. Rival accounts ask what it would mean to check that match. Coherence theory says a belief is true if it fits consistently with everything else you believe. Pragmatist theory says a belief is true if acting on it works.",
+      "detail": "Aristotle gave an early statement of correspondence: to say of what is that it is, is true. Tarski in 1933 made it mathematically precise for formal languages with his T-schema: \"snow is white\" is true if and only if snow is white, a seemingly trivial biconditional that turns out to be exactly what a correspondence theory needs and no more.\n\nDeflationists go further and say truth adds nothing to a claim beyond that schema: calling a statement true is just an economical way of asserting it, not naming some further property it has. This matters practically: journalism, science, and law all assume a difference between what is true and what is merely believed, argued, or convenient, and theories of truth are attempts to say what that difference consists in. Pilate's question, \"what is truth?\", has never had a single settled answer, but the correspondence idea, checkable in principle against the world, remains the default working assumption of most inquiry.",
+      "principles": "Truth is the standard inquiry aims at, whether or not it is ever fully reached. Having a working idea of what would make a claim true is what makes it possible to ask the next question: how would we know?",
+      "requires": [
+        "proof",
+        "logic"
+      ]
+    },
+    {
+      "id": "knowledge",
+      "picture": "Belief that is both true and properly earned.",
+      "mechanism": "The classical definition, from Plato's Theaetetus, is justified true belief: you know something if you believe it, it is true, and you have good grounds for believing it. Edmund Gettier's 1963 three-page paper broke this definition with cases where someone has a justified true belief by sheer luck, and most would not call that knowledge.",
+      "detail": "Gettier's cases, and the decades of proposed fixes that followed, are the central puzzle of epistemology. One repair adds a \"no false lemmas\" clause: the justification must not itself rest on a falsehood. Another, reliabilism, drops justification for a reliable process: a belief counts as knowledge if it was produced by a method that reliably tracks the truth, such as vision in good light rather than a stopped clock that happens to show the right time twice a day.\n\nSkepticism pushes harder: how do you know you are not dreaming, or a brain in a vat fed false experiences? Descartes used exactly this doubt to find a starting point he judged immune to it: cogito ergo I think, therefore I am. Practical epistemology asks less dramatic but more useful questions: what makes testimony, memory, and expert consensus trustworthy sources, and how much confidence a given kind of evidence should earn.",
+      "principles": "Knowing is more than being right. It requires being right for the right reasons, connected to the world in a way that was not just luck, which is why justification and evidence matter even when a guess happens to land on the truth.",
+      "requires": [
+        "truth",
+        "science"
+      ]
+    },
+    {
+      "id": "reality",
+      "picture": "Whatever is the case, independent of anyone thinking it.",
+      "mechanism": "Realism holds that the world, and facts about it, exist and have the properties they have whether or not any mind perceives or believes them. Anti-realist positions push back in different ways: idealism holds that reality is fundamentally mental; social constructionism holds that some things we take as given, such as money or race categories, exist because of collective agreement rather than mind-independent fact.",
+      "detail": "Berkeley's idealism argued that to be is to be perceived, and that talk of matter existing unperceived is incoherent; Samuel Johnson's famous reply was to kick a stone and declare \"I refute it thus,\" missing Berkeley's point but capturing the intuitive resistance most people feel to it. Kant split the difference: things as they are independent of us, the noumena, may be unknowable, while the phenomena, the world as it appears to a mind structured to experience space, time, and causation, is what science and ordinary life actually study.\n\nModern physics complicates naive realism further: quantum mechanics suggests that some properties may not have definite values until measured, which some interpretations read as evidence that observation is not merely passive. Distinguishing brute reality from human categories that carve it up matters practically: a law is a human construction even though the behavior it regulates is real, and a currency's value is constructed even though the paper is physical.",
+      "principles": "Whether something is real, constructed, or somewhere in between changes what kind of question you can ask about it. Confusing the two, treating a social agreement as an unchangeable law of nature, or a hard fact as a mere convention, is a common and consequential mistake.",
+      "requires": [
+        "knowledge"
+      ]
+    },
+    {
+      "id": "existence",
+      "picture": "Being, rather than not being, at all.",
+      "mechanism": "Existence is presupposed by every other question: before asking what a thing is like, there is the question of whether it is at all. Leibniz asked the sharpest form of it: why is there something rather than nothing? It is not obviously answerable by appeal to a further cause, since any cause would itself have to exist, and the question would simply repeat one level up.",
+      "detail": "Parmenides argued in the fifth century BCE that non-being cannot even be coherently thought or spoken of, since to speak of it is already to treat it as something, an early and startlingly modern point about the logic of negative existentials. Quine's 1948 essay On What There Is gave the modern logical treatment: to say something exists is to say a variable in a properly regimented sentence can be bound to it, summarized in his slogan \"to be is to be the value of a variable.\"\n\nThe question why is there something rather than nothing has drawn very different answers: that existence needs no explanation because nonexistence would be equally mysterious; that a necessary being exists whose nonexistence is impossible, a classical argument for God; that quantum vacuum fluctuations can produce something from what looks like nothing, though this presupposes physical laws and a vacuum, which are themselves something. No answer commands consensus, and some philosophers, including Wittgenstein at points, have suggested the question may not really be answerable, or even well formed.",
+      "principles": "Existence is the most basic fact any inquiry takes for granted, and precisely because it is so basic it resists the ordinary tools, cause and explanation, that work for questions about what already exists.",
+      "requires": [
+        "reality"
+      ]
+    },
+    {
+      "id": "nothing",
+      "picture": "The complete absence of anything at all.",
+      "mechanism": "Philosophically, nothing is not a very thin kind of something; it is the total absence of entities, properties, space, time, and laws. This makes it notoriously hard to think about consistently: the moment you describe \"nothing\" as having any feature, even \"being empty,\" you have smuggled in something for it to be empty of.",
+      "detail": "Physicists' \"nothing,\" a vacuum, is not philosophers' nothing: a vacuum still has spacetime, quantum fields, and the laws that govern how virtual particles can appear and vanish within it, so a universe beginning \"from nothing\" in physical cosmology usually means from a quantum vacuum, not from the philosopher's absolute absence. Lawrence Krauss's 2012 book A Universe from Nothing drew criticism on exactly this point from philosophers who felt the physical and philosophical senses of nothing had been conflated.\n\nMathematically, the empty set, the set with no members, gives a rigorous foothold: it is a something, a well-defined object, that contains nothing, and set theorists build the whole number system starting from it. In Buddhist and Taoist thought, an idea close to nothing, emptiness or the void, is treated not as a bleak absence but as the ground from which distinctions and things arise, a very different attitude from the horror vacui of much of Western thought.",
+      "principles": "\"Nothing\" turns out to be one of the hardest concepts to state without contradiction, because language and thought are built for describing what is there, and any careful attempt to describe its absence keeps needing something to hang the description on.",
+      "requires": [
+        "existence"
+      ]
+    },
+    {
+      "id": "emptiness",
+      "picture": "Not a bleak absence, but the lack of any fixed, independent self.",
+      "mechanism": "Śūnyatā, usually translated emptiness, is the central teaching of Mahayana Buddhism, developed above all by Nāgārjuna around the second century CE: that all phenomena are empty of svabhava, inherent, independent existence. A chariot has no chariot-essence apart from its wheels, axle, and frame arranged a certain way; a person has no fixed self apart from an ever-changing bundle of body, sensation, perception, and thought.",
+      "detail": "This is not nihilism, the claim that nothing exists at all, which Nāgārjuna explicitly rejected as another extreme to avoid. Things do exist, but only dependently, arising through causes and relations rather than standing on their own, the doctrine of pratītyasamutpāda, dependent origination. Emptiness is itself said to be empty, to avoid becoming one more fixed thing to cling to, the famous doctrine of the emptiness of emptiness.\n\nPractically, the teaching is meant to loosen the grip of craving and aversion, which Buddhist thought traces to mistaking impermanent, dependent things, including one's own self, for solid and permanent. The Heart Sutra's line \"form is emptiness, emptiness is form\" points at the same idea: things are fully, vividly present and also without any fixed essence underneath them, at once.",
+      "principles": "Emptiness reframes the question of nothing: rather than asking why anything exists at all, it asks whether anything exists independently, and answers that nothing does, everything arising only in relation to everything else.",
+      "requires": [
+        "nothing",
+        "buddhism"
+      ]
+    },
+    {
+      "id": "meaning",
+      "picture": "What a word, sentence, or a whole life is about, or is for.",
+      "mechanism": "In philosophy of language, meaning asks what makes a sentence say what it says: is it the mental images it triggers, the conditions under which it would be true, or the way it is actually used in a community of speakers? In existential philosophy, meaning asks a different question: what makes a life significant, worth living, or good, especially given that it will end.",
+      "detail": "Frege distinguished a term's sense, the mode of presentation, from its reference, the thing it picks out: \"the morning star\" and \"the evening star\" refer to the same planet, Venus, but differ in sense, which is how you can learn something by discovering they are the same. Wittgenstein's later work argued that meaning is not a private mental picture but public use: \"meaning is use,\" so understanding a word means knowing how to play the language-game it belongs to.\n\nOn life's meaning, existentialists such as Camus and Sartre denied any meaning is handed down from outside, from a cosmic order or a creator, and located it instead in how one chooses to live in the face of that lack, Camus using the image of Sisyphus, condemned to roll a boulder uphill forever, as an emblem of a meaningful life created through commitment rather than found ready-made. Empirical psychology has found that people who report a strong sense of meaning tend to describe it through purpose, coherence, and mattering to others, not through any single metaphysical answer.",
+      "principles": "Meaning is not one question but at least two: what makes symbols mean anything, and what makes a life worth living. Neither is answered by pointing to a fact the way a scientific question is; both are answered, if at all, by how we use words and how we choose to live.",
+      "requires": [
+        "semantics"
+      ]
+    }
+  ]
+}

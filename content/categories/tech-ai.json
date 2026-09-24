@@ -1,0 +1,21 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-ai",
+  "group": "Tech",
+  "order": 9,
+  "title": "Machine Intelligence",
+  "blurb": "Learning systems, neural networks, and language models, and what they can't yet do.",
+  "orb": "searching",
+  "entry": "intelligence",
+  "path": [
+    "intelligence",
+    "machine-learning",
+    "neural-networks",
+    "pattern-recognition",
+    "attention",
+    "language-models",
+    "reasoning",
+    "alignment",
+    "automation"
+  ]
+}

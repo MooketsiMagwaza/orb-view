@@ -1,0 +1,228 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Algorithms beyond the main branches: number theory (modular arithmetic, Euclid, sieves, fast exponentiation), the FFT, more string search, streaming and sketching algorithms, and computational geometry, each in four layers.",
+  "depth": [
+    {
+      "id": "modular-arithmetic",
+      "picture": "Arithmetic on a clock face: numbers wrap around after reaching a limit.",
+      "mechanism": "a mod n is the remainder when a is divided by n. Addition, subtraction, and multiplication all work the same way modulo n as with ordinary integers, then you take the remainder: (a + b) mod n = ((a mod n) + (b mod n)) mod n. Numbers that differ by a multiple of n are congruent, written a ≡ b (mod n).",
+      "detail": "Gauss systematized it in Disquisitiones Arithmeticae in 1801, though the Chinese remainder theorem is over 1,500 years older, solving several simultaneous congruences at once. A 12-hour clock is arithmetic mod 12; a week is mod 7; checksums on ISBNs, credit cards (the Luhn algorithm), and IBANs are modular arithmetic that catches common typos.\n\nIts power shows in cryptography: modular exponentiation with a huge modulus is easy to compute forward and, for a well-chosen modulus, believed hard to reverse, the basis of RSA and Diffie–Hellman. Modular inverses (a number b with ab ≡ 1) exist exactly when a and n share no common factor, found by the extended Euclidean algorithm, and are essential for decrypting RSA and for hashing. Hash tables reduce a key to a bucket index by taking it modulo the table size. Fermat's little theorem and Euler's theorem, generalizations about powers modulo n, underlie primality tests and RSA's correctness.",
+      "principles": "Wrapping numbers around turns a line into a loop, and much of number theory is exploring what survives the wrap. It is easy in one direction and, chosen carefully, immensely hard to reverse, which is exactly what a lock needs.",
+      "example": {
+        "label": "Wrap-around arithmetic, and a checksum",
+        "code": "print((17 + 8) % 12, \"o'clock\")                      # 1 o'clock: 5 hours after 8 pm on a 12-hour clock\nprint(pow(3, 4, 7), 3 ** 4 % 7)                       # modular power, the slow way and the same result\n\ndef luhn_check(number):                              # the checksum used on credit card numbers\n    digits = [int(d) for d in str(number)]\n    for i in range(len(digits) - 2, -1, -2):\n        digits[i] *= 2\n        if digits[i] > 9:\n            digits[i] -= 9\n    return sum(digits) % 10 == 0\n\nprint(luhn_check(4532015112830366), luhn_check(4532015112830367))    # True False"
+      },
+      "requires": [
+        "numbers"
+      ]
+    },
+    {
+      "id": "euclid",
+      "picture": "Find the greatest common divisor by repeatedly taking remainders.",
+      "mechanism": "To find gcd(a, b), replace the pair (a, b) with (b, a mod b) and repeat until the second number is zero; the first is the answer. It works because any common divisor of a and b also divides a mod b, so the problem shrinks without losing the answer.",
+      "detail": "Euclid described it in Elements around 300 BCE, and it is often called the oldest algorithm still in everyday use. It runs in O(log(min(a, b))) steps: the worst case, consecutive Fibonacci numbers, was analyzed by Gabriel Lamé in 1844 and connects the algorithm's speed to the golden ratio.\n\nThe extended version also finds integers x, y with ax + by = gcd(a, b) (Bézout's identity), which gives modular inverses: if gcd(a, n) = 1, that x is a's inverse mod n, essential for RSA key generation and for solving modular equations. The lcm of two numbers is their product divided by the gcd. It generalizes to polynomials (used in error-correcting codes) and to any Euclidean domain in abstract algebra. Continued fractions, best rational approximations, and the Stern–Brocot tree all grow from the same repeated-remainder idea.",
+      "principles": "A problem shrinks every time you take a remainder, and it never loses the answer. That is enough to make the oldest algorithm in continuous use also one of the fastest, still running invisibly whenever a computer generates a cryptographic key.",
+      "example": {
+        "label": "The oldest algorithm, and its extended form",
+        "code": "def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n\ndef extended_gcd(a, b):\n    if b == 0:\n        return a, 1, 0\n    g, x1, y1 = extended_gcd(b, a % b)\n    return g, y1, x1 - (a // b) * y1\n\nprint(gcd(1071, 462))                                    # 21\ng, x, y = extended_gcd(240, 46)\nprint(g, x, y, 240 * x + 46 * y)                          # 2 and coefficients that reconstruct it\n\nprint(pow(17, -1, 3120))                                  # a modular inverse, found the same way inside RSA"
+      },
+      "requires": [
+        "modular-arithmetic"
+      ]
+    },
+    {
+      "id": "sieve",
+      "picture": "Cross out the multiples, and what survives is prime.",
+      "mechanism": "Write out 2 to n. Take the smallest unmarked number, mark all its multiples as composite, and move to the next unmarked number. Repeat up to √n; everything still unmarked is prime.",
+      "detail": "Eratosthenes of Cyrene devised it around 240 BCE, and it remains the simplest fast way to list all primes up to n, in O(n log log n) time. Each number is crossed out once for each of its prime factors, and stopping at √n suffices, since any composite number has a factor at most that size. A segmented sieve processes a range at a time to save memory for very large n.\n\nVariants: the sieve of Sundaram and the sieve of Atkin, which is asymptotically faster; sieves also count coprimes (Euler's totient, by crossing out multiples of each prime factor) and factor numbers by remembering the smallest prime factor found at each cell. The idea of systematically eliminating cases by their causes recurs in inclusion–exclusion and in the sieve methods of analytic number theory, which bound the density of primes in more general sets.",
+      "principles": "Rather than testing each number for primality alone, cross out everything a small set of primes can reach, and what remains needs no test at all. Removing causes instead of checking effects is often the faster way to find what you want.",
+      "example": {
+        "label": "All primes up to 100 in one pass",
+        "code": "def sieve(n):\n    is_prime = [True] * (n + 1)\n    is_prime[0] = is_prime[1] = False\n    for p in range(2, int(n ** 0.5) + 1):\n        if is_prime[p]:\n            for multiple in range(p * p, n + 1, p):\n                is_prime[multiple] = False\n    return [p for p, prime in enumerate(is_prime) if prime]\n\nprimes = sieve(100)\nprint(primes)\nprint(len(primes), \"primes below 100\")"
+      },
+      "requires": [
+        "modular-arithmetic",
+        "prime-numbers"
+      ]
+    },
+    {
+      "id": "modular-exponentiation",
+      "picture": "Raise a huge number to a huge power without ever letting it get huge.",
+      "mechanism": "To compute aᵇ mod m, use repeated squaring: write b in binary, square a at each bit and multiply the running result by the current square whenever that bit is 1, reducing modulo m after every step. It takes about log₂ b multiplications instead of b − 1.",
+      "detail": "Computing a²⁰⁴⁸ mod m directly by multiplying a by itself 2,047 times is impossible in practice, since the intermediate numbers would have millions of digits; reducing modulo m at every squaring keeps the numbers bounded by m, and the count of squarings is only about 11 for a 2,048-bit exponent.\n\nIt is the operation RSA encryption, decryption, and Diffie–Hellman key exchange perform millions of times a second: to encrypt with RSA one computes messageᵉ mod n, and to decrypt, ciphertextᵈ mod n. Its speed, O(log b) multiplications of numbers with a bounded number of digits, is why public-key cryptography is fast enough for everyday use despite operating on numbers thousands of bits long. It also underlies Fermat and Miller–Rabin primality tests, which check whether aⁿ⁻¹ ≡ 1 (mod n) for several bases a.",
+      "principles": "Squaring doubles the exponent you have covered with each step, which turns a problem that looks linear in the size of the exponent into one that is logarithmic. That single trick is what makes public-key cryptography fast enough to use.",
+      "example": {
+        "label": "Fast exponentiation by squaring",
+        "code": "def mod_pow(a, b, m):\n    result = 1\n    a %= m\n    while b > 0:\n        if b & 1:\n            result = (result * a) % m\n        a = (a * a) % m\n        b >>= 1\n    return result\n\nprint(mod_pow(4, 13, 497))                        # matches Python's built-in\nprint(pow(4, 13, 497))\n\n# a 300-digit exponent, done in a fraction of a second: direct multiplication would be impossible\nprint(mod_pow(2, 10 ** 9 + 7, 1_000_000_007))"
+      },
+      "requires": [
+        "modular-arithmetic",
+        "divide-and-conquer"
+      ]
+    },
+    {
+      "id": "fft",
+      "picture": "Find the frequencies hiding in a signal, fast.",
+      "mechanism": "The discrete Fourier transform of n samples takes n² operations directly. The FFT splits the samples into even and odd positions, recursively transforms each half, and combines the results with simple twiddle factors, giving O(n log n) time.",
+      "detail": "Carl Friedrich Gauss used the idea in 1805 for interpolating astronomical orbits, unpublished in his lifetime; James Cooley and John Tukey rediscovered and popularized it in 1965, and Gilbert Strang called it the most important numerical algorithm of our lifetime. It requires n to be a power of two in its simplest form, with variants for other sizes.\n\nApplications: audio and image compression (MP3, JPEG use closely related transforms), digital filters and equalizers, spectrum analyzers, radar and medical imaging (MRI reconstructs images from frequency data), and, remarkably, fast multiplication of very large numbers and polynomials, since convolution becomes pointwise multiplication in the frequency domain. Multiplying two n-digit numbers directly is O(n²); via FFT it is O(n log n), the basis of the fastest known multiplication algorithms.",
+      "principles": "Splitting a transform in half and combining the results turns an n² problem into an n log n one, the same divide-and-conquer trick as merge sort. That speedup is what makes real-time audio, imaging, and fast arithmetic possible.",
+      "example": {
+        "label": "Finding a hidden frequency",
+        "code": "import cmath, math\n\ndef fft(x):\n    n = len(x)\n    if n == 1:\n        return x\n    even, odd = fft(x[0::2]), fft(x[1::2])\n    combined = [0] * n\n    for k in range(n // 2):\n        twiddle = cmath.exp(-2j * math.pi * k / n) * odd[k]\n        combined[k] = even[k] + twiddle\n        combined[k + n // 2] = even[k] - twiddle\n    return combined\n\nn = 64\nsignal = [math.sin(2 * math.pi * 5 * t / n) + 0.5 * math.sin(2 * math.pi * 12 * t / n) for t in range(n)]\nspectrum = fft(signal)\nstrongest = sorted(range(n // 2), key=lambda k: -abs(spectrum[k]))[:2]\nprint(sorted(strongest), \"-> the two frequencies (5 and 12) hidden in the mixed signal\")"
+      },
+      "requires": [
+        "fourier",
+        "divide-and-conquer"
+      ]
+    },
+    {
+      "id": "rabin-karp",
+      "picture": "Compare fingerprints of text instead of comparing letters.",
+      "mechanism": "Compute a hash of the pattern and a hash of the first window of the text of the same length. Slide the window across the text, updating its hash in constant time by removing the leaving character's contribution and adding the entering one, a rolling hash. Only when hashes match do you check the actual characters, to rule out a rare hash collision.",
+      "detail": "Michael Rabin and Richard Karp published it in 1987. Average time is O(n + m) for text length n and pattern length m, though a bad hash function can force O(nm) in the worst case; a good modulus and base keep collisions rare. Its strength is searching for many patterns at once: hash each of them and check the text's rolling hash against the whole set, which is how plagiarism detectors and some virus scanners work.\n\nThe rolling hash treats the window as digits in a base-b number and updates it with one multiplication, one subtraction, and one addition per shift, using modular arithmetic to keep numbers small. It underlies rsync and similar tools for finding matching chunks between file versions, and the same rolling-hash idea gives content-defined chunking for deduplication in backup systems.",
+      "principles": "Fingerprinting a window and updating it incrementally turns re-scanning text into a constant-time slide. It is the same idea behind checksums and deduplication: a cheap summary that is almost always trustworthy, verified only when it matters.",
+      "example": {
+        "label": "A rolling hash sliding across text",
+        "code": "def rabin_karp(text, pattern, base=256, mod=1_000_000_007):\n    n, m = len(text), len(pattern)\n    if m > n:\n        return []\n    high_order = pow(base, m - 1, mod)\n    pattern_hash = 0\n    window_hash = 0\n    for i in range(m):\n        pattern_hash = (pattern_hash * base + ord(pattern[i])) % mod\n        window_hash = (window_hash * base + ord(text[i])) % mod\n    matches = []\n    for i in range(n - m + 1):\n        if window_hash == pattern_hash and text[i:i + m] == pattern:      # verify to rule out a hash collision\n            matches.append(i)\n        if i < n - m:\n            window_hash = ((window_hash - ord(text[i]) * high_order) * base + ord(text[i + m])) % mod\n    return matches\n\nprint(rabin_karp(\"abracadabra and abracadabra again\", \"abracadabra\"))"
+      },
+      "requires": [
+        "string-search",
+        "modular-arithmetic"
+      ]
+    },
+    {
+      "id": "boyer-moore",
+      "picture": "Compare from the pattern's end, and skip ahead on a mismatch.",
+      "mechanism": "Align the pattern with the start of the text and compare characters right to left. On a mismatch, use precomputed tables, the bad-character rule (jump the pattern past where the mismatched text character last occurs in it) and the good-suffix rule (reuse the part that already matched), to slide the pattern forward by more than one position, sometimes skipping the whole matched length.",
+      "detail": "Robert Boyer and J Strother Moore published it in 1977. On typical English text it examines a fraction of the characters, and its best case is sublinear, since a mismatch on the last character can skip the whole pattern length at once. Longer patterns and larger alphabets make it faster still, which is why it excels on searching for a phrase in a book versus in a genome of only four letters.\n\nIt is the algorithm behind fast implementations of grep and many text editors' find function, sometimes combined with a simplified Horspool variant that uses only the bad-character rule for simplicity. Two-way and Boyer–Moore–Horspool variants trade some worst-case guarantees for simpler code. Compared with Knuth–Morris–Pratt, which never revisits text but has no early skip, Boyer–Moore usually wins in practice on natural-language text, while KMP's guaranteed linear time matters for adversarial or highly repetitive input.",
+      "principles": "Look at the end of the window first, and let a mismatch tell you how far you can safely jump. Checking the least likely character to match first is what lets the search skip most of the text instead of reading every letter.",
+      "example": {
+        "label": "Skipping ahead using the last occurrence table",
+        "code": "def boyer_moore_horspool(text, pattern):\n    m = len(pattern)\n    last = {ch: i for i, ch in enumerate(pattern[:-1])}          # last occurrence of each char, excluding the final one\n    matches, i = [], 0\n    while i <= len(text) - m:\n        j = m - 1\n        while j >= 0 and text[i + j] == pattern[j]:\n            j -= 1\n        if j < 0:\n            matches.append(i)\n            i += 1\n        else:\n            i += m - 1 - last.get(text[i + m - 1], -1)           # jump using the character that caused the mismatch\n    return matches\n\nprint(boyer_moore_horspool(\"the quick brown fox jumps over the lazy dog\", \"the\"))\nprint(boyer_moore_horspool(\"aaaaaaaaaaaaaaaaaaaab\", \"aaab\"))     # worst case: no skipping helps here"
+      },
+      "requires": [
+        "string-search"
+      ]
+    },
+    {
+      "id": "suffix-arrays",
+      "picture": "Sort every ending of a text, and any question about substrings becomes a binary search.",
+      "mechanism": "List every suffix of the text (from each starting position to the end) and sort them alphabetically; store only the starting positions, in sorted order. Because a substring is a prefix of some suffix, finding whether a pattern occurs, or how many times, becomes a binary search over this sorted list.",
+      "detail": "Udi Manber and Gene Myers introduced them in 1990 as a lighter alternative to suffix trees, which use more memory but support more operations directly. Naive construction sorts n suffixes of average length n/2, costing O(n² log n); the DC3 or SA-IS algorithms build one in O(n) time. Paired with the longest common prefix array, which records how much consecutive sorted suffixes share, they answer many string questions efficiently: the longest repeated substring, the longest common substring of two texts, and counting distinct substrings.\n\nTheir main use is indexing enormous texts for repeated search: genome assemblers and aligners such as BWA build suffix-array-like structures, often via the Burrows–Wheeler transform, to search a 3-billion-letter genome in milliseconds; full-text search engines and version-control diff tools use related structures; and data-compression schemes such as bzip2 are built on the same transform.",
+      "principles": "Sorting every ending of a text turns substring search into a binary search. Paying the cost once, to build the array, buys near-instant answers for every later query, which is the standard trade in indexing anything that will be searched many times.",
+      "example": {
+        "label": "Building a suffix array and searching it",
+        "code": "def suffix_array(s):\n    return sorted(range(len(s)), key=lambda i: s[i:])\n\ndef search(s, sa, pattern):\n    lo, hi = 0, len(sa)\n    while lo < hi:                                    # binary search for the first suffix >= pattern\n        mid = (lo + hi) // 2\n        if s[sa[mid]:sa[mid] + len(pattern)] < pattern:\n            lo = mid + 1\n        else:\n            hi = mid\n    hits = []\n    while lo < len(sa) and s[sa[lo]:sa[lo] + len(pattern)] == pattern:\n        hits.append(sa[lo]); lo += 1\n    return sorted(hits)\n\ntext = \"banana\"\nsa = suffix_array(text)\nprint(sa, [text[i:] for i in sa])                     # positions, sorted by the suffix they start\nprint(search(text, sa, \"ana\"))                        # both occurrences of \"ana\""
+      },
+      "requires": [
+        "string-search",
+        "binary-search"
+      ]
+    },
+    {
+      "id": "streaming-algorithms",
+      "picture": "Answer a question about a river of data you can only see once.",
+      "mechanism": "A streaming algorithm reads each item exactly once, in order, and keeps a small summary, far smaller than the full stream, updated as items arrive. It answers approximate questions, such as counts, distinct counts, or samples, using memory that grows with the logarithm of the stream size rather than the size itself.",
+      "detail": "The model was formalized by Alon, Matias, and Szegedy in 1996, work that won a Gödel Prize. It matters whenever data arrives faster than it can be stored, or is simply too large to revisit: network routers counting flows, web services counting unique visitors, sensor networks, and log analysis at scale. The unifying idea is a sketch, a compact structure that supports approximate answers with a provable error bound, often using randomness and hashing.\n\nStandard problems and their sketches: distinct counting (HyperLogLog), frequency estimation (Count–Min sketch), a uniform random sample of unknown size (reservoir sampling), and finding elements that appear more than a threshold fraction of the time (the Misra–Gries algorithm, from 1982, using only a handful of counters). The trade is always the same: a controlled, quantified error in exchange for using a tiny, fixed amount of memory regardless of how long the stream runs.",
+      "principles": "You cannot always store the world, only glance at it once and remember a little. Streaming algorithms show that a small, cleverly chosen summary can answer big questions about data you will never see again, at a cost you can quantify in advance.",
+      "example": {
+        "label": "Counting more than memory should allow",
+        "code": "import random\n\nrandom.seed(94)\ndef exact_distinct(stream):\n    return len(set(stream))\n\ndef misra_gries(stream, k):                          # frequent items using only k counters\n    counters = {}\n    for x in stream:\n        if x in counters:\n            counters[x] += 1\n        elif len(counters) < k - 1:\n            counters[x] = 1\n        else:\n            for key in list(counters):\n                counters[key] -= 1\n                if counters[key] == 0:\n                    del counters[key]\n    return counters\n\nstream = [random.choice(\"AAAAABBBBCCDE\") for _ in range(10_000)]\nprint(\"exact distinct values:\", exact_distinct(stream))\nprint(\"candidates using only 4 counters:\", misra_gries(stream, 5))"
+      },
+      "requires": [
+        "data-structures",
+        "hash-functions"
+      ]
+    },
+    {
+      "id": "hyperloglog",
+      "picture": "Count billions of distinct things using less memory than a single list of a thousand.",
+      "mechanism": "Hash every item, and look at the binary representation of the hash. Split hashes into buckets by their first few bits, and in each bucket track the longest run of leading zeros seen among the rest. A long run of zeros is rare, so seeing one suggests many distinct items were hashed; averaging the estimate across many buckets cancels out noise.",
+      "detail": "Philippe Flajolet and colleagues published it in 2007, building on his earlier Flajolet–Martin sketch of 1985. With about 16,384 buckets, roughly 12 to 16 kilobytes, it estimates cardinalities in the billions with a typical error of about 1 percent, regardless of whether the true count is a thousand or a trillion.\n\nIt supports merging: combining two sketches (by taking the max run length per bucket) gives the sketch for the union, so distributed systems can count unique users across many machines without ever gathering the raw data centrally. Redis, Google BigQuery, and analytics pipelines use it for questions like how many unique visitors this month?, where an exact answer would need to store every visitor ID. The trade for that memory saving is that it can only estimate counts, never list or exactly recall the items themselves.",
+      "principles": "A run of unusually many zeros is itself evidence of scale: the more distinct things you hash, the likelier you are to see a rare pattern. Trading a small, known error for a fixed, tiny memory footprint is what makes counting at internet scale possible at all.",
+      "example": {
+        "label": "Estimating billions of distinct items from thousands of buckets",
+        "code": "import hashlib, random, math\n\ndef estimate_distinct(stream, bucket_bits=10):\n    m = 2 ** bucket_bits\n    registers = [0] * m\n    for item in stream:\n        h = int(hashlib.sha1(str(item).encode()).hexdigest(), 16)\n        bucket = h & (m - 1)\n        rest = h >> bucket_bits\n        leading_zeros = (rest.bit_length() and (rest.bit_length() - 1 - (rest ^ (rest & -rest)).bit_length() + 1)) or 32\n        run = 0\n        while rest & 1 == 0 and run < 32:\n            run += 1; rest >>= 1\n        registers[bucket] = max(registers[bucket], run + 1)\n    alpha = 0.7213 / (1 + 1.079 / m)\n    raw = alpha * m * m / sum(2 ** -r for r in registers)\n    return raw\n\nrandom.seed(95)\ntruth = 50_000\nstream = [random.randrange(truth) for _ in range(400_000)]         # 400,000 events over 50,000 distinct users\nprint(\"true distinct count:\", len(set(stream)))\nprint(\"estimated with ~1KB of memory:\", round(estimate_distinct(stream)))"
+      },
+      "requires": [
+        "hash-functions",
+        "probability"
+      ]
+    },
+    {
+      "id": "count-min",
+      "picture": "Guess how often something appeared, using a table far smaller than the data.",
+      "mechanism": "Keep a small 2-D array of counters, one row per hash function. For each incoming item, hash it with every row's hash function and increment the counter at that position in every row. To estimate an item's count, hash it the same ways and take the minimum of the corresponding counters, since collisions can only inflate a count, never deflate it.",
+      "detail": "Graham Cormode and S. Muthukrishnan introduced it in 2005. With w columns and d rows, it uses O(w × d) memory, independent of how many distinct items or total events pass through, while guaranteeing the estimate overshoots the truth by at most a small, tunable fraction with high probability. Taking the minimum across independent rows is the key: any one row can suffer a collision that inflates a count, but it is unlikely that all rows collide for the same wrong reason.\n\nIt is used to find heavy hitters in network traffic (which IP addresses are sending the most packets, for detecting attacks), trending hashtags and search queries at social platforms, and approximate join-size estimation in database query planners. It complements HyperLogLog: HyperLogLog answers how many distinct items?, while Count–Min answers how often did this particular one occur?",
+      "principles": "Several independent, noisy guesses combined by taking the smallest one cancel out the noise, because a collision can only make a count too big, never too small. That asymmetry is what turns a compact table into a reliable, if slightly pessimistic, frequency counter.",
+      "example": {
+        "label": "Frequency estimates that never undercount",
+        "code": "import hashlib, random\nfrom collections import Counter\n\ndef count_min(stream, width=200, depth=4):\n    table = [[0] * width for _ in range(depth)]\n    def hashes(item):\n        return [int(hashlib.md5(f\"{seed}:{item}\".encode()).hexdigest(), 16) % width for seed in range(depth)]\n    for item in stream:\n        for row, col in enumerate(hashes(item)):\n            table[row][col] += 1\n    def estimate(item):\n        return min(table[row][col] for row, col in enumerate(hashes(item)))\n    return estimate\n\nrandom.seed(96)\nstream = ([\"popular\"] * 5000) + [f\"rare-{i}\" for i in range(50_000)]\nrandom.shuffle(stream)\ntruth = Counter(stream)\nestimate = count_min(stream)\nprint(\"true count:\", truth[\"popular\"], \" estimated:\", estimate(\"popular\"))\nprint(\"a rare item, true count:\", truth[\"rare-1\"], \" estimated:\", estimate(\"rare-1\"), \"(never lower than the truth)\")"
+      },
+      "requires": [
+        "hash-functions",
+        "streaming-algorithms"
+      ]
+    },
+    {
+      "id": "reservoir-sampling",
+      "picture": "Pick a fair random sample from a line of unknown length, seeing each item only once.",
+      "mechanism": "Keep the first k items as your sample. For the n-th item after that, with n > k, replace a uniformly random member of the current sample with it with probability k/n; otherwise discard it. When the stream ends, the k kept items are a uniform random sample of everything seen.",
+      "detail": "Alan Waterman is credited with the algorithm, popularized by Donald Knuth in 1985. The proof by induction is short: at each step, every item seen so far ends up in the sample with exactly the same probability, k/n, whatever n eventually turns out to be, which is remarkable since the algorithm never knows the final length in advance.\n\nIt solves a real constraint: sampling k rows uniformly from a database table, log file, or live stream too large to hold in memory, or whose total size is unknown until it ends, such as tweets matching a filter or requests hitting a server. Weighted variants (A-Res and A-ExpJ) extend it to sampling proportional to a weight rather than uniformly. It is a single pass and uses only O(k) memory, which is optimal, since any correct sampler must remember the sample itself.",
+      "principles": "You can sample fairly from a stream without ever knowing how long it will be, by giving each new arrival a shrinking chance to bump out an old one. It is a small piece of probability that turns an apparently impossible constraint, unknown length, one pass, into a solved problem.",
+      "example": {
+        "label": "A uniform sample of 5 from a stream of unknown length",
+        "code": "import random\n\ndef reservoir_sample(stream, k):\n    sample = []\n    for n, item in enumerate(stream, start=1):\n        if n <= k:\n            sample.append(item)\n        else:\n            j = random.randrange(n)               # a random index from 0 to n-1\n            if j < k:\n                sample[j] = item\n    return sample\n\nrandom.seed(97)\nappearances = [0] * 100\ntrials = 20_000\nfor _ in range(trials):\n    for item in reservoir_sample(range(100), 5):            # how often does each value make it into the sample at all?\n        appearances[item] += 1\nexpected = trials * 5 / 100                                  # every item should appear about k/n of the time: 5%\nprint(\"min\", min(appearances), \"max\", max(appearances), \"expected around\", round(expected), \"each: roughly uniform\")"
+      },
+      "requires": [
+        "randomness",
+        "streaming-algorithms"
+      ]
+    },
+    {
+      "id": "computational-geometry",
+      "picture": "Algorithms for questions about points, lines, and shapes.",
+      "mechanism": "Represent geometric objects as coordinates and combinations of them, and answer questions such as do these two segments cross?, which points lie inside this polygon?, and what is the shortest path around these obstacles? using arithmetic on those coordinates, especially the sign of a cross product or determinant to test orientation.",
+      "detail": "It emerged as a field in the 1970s, with Michael Shamos's 1975 thesis often cited as a starting point, driven by needs in computer graphics, VLSI chip design, robotics, and geographic information systems. A central technique is the sweep line: move an imaginary line across the plane, processing events (segment starts, ends, crossings) in order, which turns many problems, such as finding all intersections among n segments, into O(n log n) algorithms instead of the O(n²) of checking every pair.\n\nCore problems include the convex hull, the closest pair of points, point-in-polygon tests, triangulation of a polygon or a point set (Delaunay triangulation, which avoids thin slivers and underlies terrain models and mesh generation), Voronoi diagrams (the regions closest to each of a set of points, used in facility location and nearest-neighbor search), and range searching with k-d trees. Robustness against floating-point rounding, where a supposedly exact test flips sign due to error, is a persistent, practical challenge, addressed with exact or interval arithmetic in production systems such as CAD software and map engines.",
+      "principles": "Geometric questions become sign-of-a-determinant questions once everything is coordinates. Sweeping across the plane in an orderly pass is the trick that turns an apparent all-pairs comparison into something that scales.",
+      "example": {
+        "label": "Orientation, and testing if a point is inside a triangle",
+        "code": "def orientation(p, q, r):                             # positive: counterclockwise turn; negative: clockwise\n    return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])\n\ndef point_in_triangle(pt, a, b, c):\n    d1 = orientation(pt, a, b)\n    d2 = orientation(pt, b, c)\n    d3 = orientation(pt, c, a)\n    has_neg = d1 < 0 or d2 < 0 or d3 < 0\n    has_pos = d1 > 0 or d2 > 0 or d3 > 0\n    return not (has_neg and has_pos)                  # inside if all three turns agree in sign\n\ntriangle = [(0, 0), (4, 0), (2, 4)]\nfor point in [(2, 1), (5, 5), (2, 4)]:\n    print(point, point_in_triangle(point, *triangle))"
+      },
+      "requires": [
+        "geometry",
+        "cross-product"
+      ]
+    },
+    {
+      "id": "convex-hull",
+      "picture": "The tightest shape that wraps around every point, like a rubber band snapped around pins.",
+      "mechanism": "Sort the points, then build the hull by sweeping through them and keeping only those that make a consistent turn (say, counterclockwise), discarding any point that would make the path turn the wrong way, since that point must lie inside. Graham's scan does this with one sort and one sweep; the gift-wrapping algorithm instead walks around the outside, picking the most clockwise next point at each step.",
+      "detail": "Ronald Graham published his scan in 1972. Graham's scan and the divide-and-conquer approach both achieve O(n log n), matched by a lower bound, since sorting can be reduced to finding a hull, so no comparison-based algorithm can do better in the worst case; gift wrapping is O(nh) for h points on the hull, faster when the hull is small. In three and more dimensions the problem is harder but well studied, with the quickhull algorithm a common practical choice.\n\nIt is a building block for many other algorithms: the diameter of a point set (the farthest pair always lies on the hull), collision detection in games and robotics using hulls as simplified bounding shapes, GIS applications finding the outer boundary of a set of locations, and pattern recognition and outlier detection, since points strictly inside the hull are, in a geometric sense, unremarkable.",
+      "principles": "Only the outermost points define the boundary; everything else is redundant once you have them. Recognizing what is inside and can be ignored is the same skill that makes many geometric algorithms fast: throw away what cannot possibly matter.",
+      "example": {
+        "label": "Graham's scan",
+        "code": "def cross(o, a, b):\n    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])\n\ndef convex_hull(points):\n    points = sorted(set(points))\n    if len(points) <= 2:\n        return points\n    def half(seq):\n        hull = []\n        for p in seq:\n            while len(hull) >= 2 and cross(hull[-2], hull[-1], p) <= 0:\n                hull.pop()\n            hull.append(p)\n        return hull\n    lower = half(points)\n    upper = half(reversed(points))\n    return lower[:-1] + upper[:-1]\n\npts = [(0, 0), (2, 0), (2, 2), (0, 2), (1, 1), (3, 1), (1, 3)]\nprint(convex_hull(pts))                                # the interior point (1,1) is correctly excluded"
+      },
+      "requires": [
+        "computational-geometry",
+        "sorting"
+      ]
+    },
+    {
+      "id": "closest-pair",
+      "picture": "Find the two nearest points among thousands without comparing every pair.",
+      "mechanism": "Checking every pair of n points costs O(n²). Instead, sort points by x-coordinate, split them in half, recursively find the closest pair in each half, and then check only the narrow strip near the dividing line for a pair closer than the best found so far, since any closer pair must straddle it.",
+      "detail": "The strip check looks like it could still be slow, but a geometric argument bounds it tightly: within the strip, sorted by y-coordinate, any point needs to be compared with only a small constant number of its neighbors, because more than that could not all fit close together without violating the best distance already found. That bound is what brings the whole algorithm down to O(n log n), matching the cost of sorting.\n\nShamos and Hoey described it in 1975 as an early triumph of divide-and-conquer applied to geometry, alongside the convex hull. It generalizes to higher dimensions and to related problems such as finding all pairs within a given distance (useful in collision detection and clustering), and it appears in computational biology for finding similar sequences, in astronomy for finding close stellar pairs in catalogs, and in any setting where an O(n²) all-pairs comparison is too slow for the data at hand.",
+      "principles": "Splitting the plane in half and trusting a geometric bound on how many neighbors could possibly matter turns a quadratic scan into an n log n algorithm. It is the same divide-and-conquer shape as merge sort, applied to space instead of a list.",
+      "example": {
+        "label": "Divide, conquer, and check only the strip",
+        "code": "import math\n\ndef closest_pair(points):\n    points = sorted(points)\n    def rec(pts):                                        # pts sorted by x already\n        if len(pts) <= 3:\n            return min((math.dist(a, b), a, b) for i, a in enumerate(pts) for b in pts[i + 1:])\n        mid = len(pts) // 2\n        midx = pts[mid][0]\n        best = min(rec(pts[:mid]), rec(pts[mid:]))\n        strip = sorted((p for p in pts if abs(p[0] - midx) < best[0]), key=lambda p: p[1])\n        for i, a in enumerate(strip):\n            for b in strip[i + 1:i + 8]:                  # only a few neighbours in y can possibly be closer\n                d = math.dist(a, b)\n                if d < best[0]:\n                    best = (d, a, b)\n        return best\n    return rec(points)\n\npts = [(0, 0), (5, 5), (1, 1), (9, 9), (1.02, 1.01), (7, 2)]\ndist, a, b = closest_pair(pts)\nprint(round(dist, 4), a, b)"
+      },
+      "requires": [
+        "computational-geometry",
+        "divide-and-conquer"
+      ]
+    }
+  ]
+}

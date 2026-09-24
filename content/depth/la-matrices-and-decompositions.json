@@ -1,0 +1,256 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Linear algebra, part two: matrices and their products, determinants, inverses, transformations and rotations, projections, linear systems, vector spaces, rank, eigenvalues, the SVD, and PCA, each in four layers.",
+  "depth": [
+    {
+      "id": "matrices",
+      "picture": "A grid of numbers that can move points, store data, or record connections.",
+      "mechanism": "An m × n matrix has m rows and n columns. Three readings: a table of data (rows are samples, columns are features); a linear transformation, where multiplying a vector by it moves the vector; or a network, where entry i, j records the link from i to j. Add matrices entry by entry; multiply by a number to scale.",
+      "detail": "The word means womb in Latin, from Sylvester in 1850; Cayley set out matrix algebra in 1858. Special kinds: square, identity (ones on the diagonal, which does nothing), diagonal (only stretches), symmetric (equal to its transpose), orthogonal (rotations and reflections), triangular, and sparse (mostly zeros). A matrix acts on a column vector so that column j is where the j-th basis vector lands, which lets you read a transformation straight off.\n\nStorage is dense or sparse, the latter essential for graphs and finite-element models with millions of rows, and memory layout affects speed. Data matrices are everywhere: an image is a matrix of pixels, a spreadsheet is a matrix, a document collection is a matrix of word counts. Heisenberg's matrix mechanics of 1925 represented quantum observables as matrices, which is why quantum theory is linear algebra. Libraries and GPUs make matrix operations extremely fast, and much of modern computing performance work is about matrix multiplication.",
+      "principles": "A matrix is a small object with three lives: as data, as an action, and as a network. Seeing which one you are looking at is half of understanding a problem in linear algebra.",
+      "example": {
+        "label": "A matrix as data, as action, and as a network",
+        "code": "data = [[5.1, 3.5], [4.9, 3.0], [6.2, 3.4]]        # three flowers, two measurements each: a data matrix\nprint(len(data), \"x\", len(data[0]))\n\nidentity = [[1, 0], [0, 1]]\nscale = [[3, 0], [0, 0.5]]\napply = lambda m, v: [sum(m[i][j] * v[j] for j in range(len(v))) for i in range(len(m))]\nprint(apply(identity, [4, 6]), apply(scale, [4, 6]))   # the identity changes nothing; the diagonal stretches\n\nlinks = [[0, 1, 1], [0, 0, 1], [1, 0, 0]]            # a network: row i links to column j\nprint([sum(row) for row in links], \"outgoing links per page\")"
+      },
+      "requires": [
+        "vectors"
+      ]
+    },
+    {
+      "id": "matrix-multiplication",
+      "picture": "Do one transformation, then the other.",
+      "mechanism": "(AB)ᵢⱼ is row i of A dotted with column j of B. It is defined when A's columns match B's rows. Read as composition, AB means apply B first, then A. It is associative, (AB)C = A(BC), and distributes over addition, but generally AB ≠ BA.",
+      "detail": "The odd-looking rule is forced by wanting matrix multiplication to match composing transformations. Non-commutativity is real: rotating then stretching differs from stretching then rotating, and the uncertainty principle comes from quantum operators that do not commute.\n\nThe naive cost is n³ multiplications for n × n matrices; Strassen in 1969 reduced the exponent to 2.807, and theory has pushed it below 2.372, though practical libraries use blocked classical algorithms tuned to caches and vector units. In 2022 a search system, AlphaTensor, found faster algorithms for small matrices. It dominates deep-learning cost: each layer of a network is a matrix multiplication, transformers spend most of their time in it, and GPUs and TPUs are essentially matrix multiplication machines. Applications: composing graphics transformations into one matrix, counting walks in a graph (the entries of Aᵏ count walks of length k), running Markov chains, and computing Fibonacci numbers. The order of multiplication changes cost, which the matrix-chain problem solves by dynamic programming.",
+      "principles": "The rule for multiplying matrices is the rule for doing one transformation after another. That single fact explains its shape, its non-commutativity, and why almost all of scientific and AI computing comes down to doing it fast.",
+      "example": {
+        "label": "Order matters, Fibonacci, and walks",
+        "code": "def matmul(A, B):\n    return [[sum(A[i][k] * B[k][j] for k in range(len(B))) for j in range(len(B[0]))] for i in range(len(A))]\n\nrotate = [[0, -1], [1, 0]]                 # a quarter turn\nstretch = [[2, 0], [0, 1]]                 # double the width\nprint(matmul(rotate, stretch), matmul(stretch, rotate))     # different: order matters\n\nfib = [[1, 1], [1, 0]]                     # powers of this matrix give Fibonacci numbers\nm = [[1, 0], [0, 1]]\nfor _ in range(10):\n    m = matmul(m, fib)\nprint(m[0][1], \"= the 10th Fibonacci number\")\n\nlinks = [[0, 1, 1], [0, 0, 1], [1, 0, 0]]\nprint(matmul(links, links))                # entry (i, j) counts the walks of length 2 from i to j"
+      },
+      "requires": [
+        "matrices",
+        "dot-product"
+      ]
+    },
+    {
+      "id": "determinant",
+      "picture": "The factor by which a transformation scales area or volume.",
+      "mechanism": "For a 2 × 2 matrix [[a, b], [c, d]], the determinant is ad − bc. It is the signed area of the parallelogram formed by the columns: the unit square is sent to a parallelogram of that area. Negative means orientation flips, as in a reflection; zero means the square is flattened to a line or a point.",
+      "detail": "For 3 × 3 it is the volume of the parallelepiped spanned by the columns. Properties: det(AB) = det(A) det(B); det(Aᵀ) = det(A); swapping two rows flips the sign; a matrix is invertible exactly when its determinant is nonzero; and it equals the product of the eigenvalues. Cofactor expansion costs n! and is only for teaching; Gaussian elimination gives it in n³ by multiplying the pivots. Seki Takakazu in 1683 and Leibniz in 1693 discovered determinants independently, before matrices existed, in connection with solving equations; Cramer's rule expresses solutions as ratios of determinants, elegant but inefficient.\n\nUses: Jacobians for changing variables in integrals, the test for whether a system has a unique solution, the orientation of triangles in geometry code, and the characteristic polynomial det(A − λI), whose roots are the eigenvalues. Numerical caution: a tiny determinant does not necessarily mean a nearly singular matrix; the condition number is a better measure.",
+      "principles": "One number that says whether a transformation preserves, stretches, flips, or crushes space. When it hits zero, information is lost and the transformation cannot be undone.",
+      "example": {
+        "label": "Area scaling, and elimination",
+        "code": "det2 = lambda m: m[0][0] * m[1][1] - m[0][1] * m[1][0]\nprint(det2([[2, 0], [0, 3]]))              # 6: stretches area by 6\nprint(det2([[0, -1], [1, 0]]))             # 1: a rotation preserves area\nprint(det2([[1, 2], [2, 4]]))              # 0: the columns are parallel; the square is flattened to a line\nprint(det2([[0, 1], [1, 0]]))              # -1: a reflection flips orientation\n\ndef det(m):                                 # elimination: multiply the pivots\n    m = [list(map(float, r)) for r in m]; n = len(m); d = 1.0\n    for c in range(n):\n        p = max(range(c, n), key=lambda i: abs(m[i][c]))\n        if abs(m[p][c]) < 1e-12: return 0.0\n        if p != c: m[c], m[p] = m[p], m[c]; d = -d\n        d *= m[c][c]\n        for i in range(c + 1, n):\n            f = m[i][c] / m[c][c]\n            m[i] = [a - f * b for a, b in zip(m[i], m[c])]\n    return d\n\nprint(round(det([[2, 1, 3], [0, -1, 4], [1, 0, 5]]), 6))          # -3.0"
+      },
+      "requires": [
+        "matrices"
+      ]
+    },
+    {
+      "id": "matrix-inverse",
+      "picture": "The transformation that puts everything back.",
+      "mechanism": "A⁻¹ satisfies A⁻¹A = AA⁻¹ = I. It exists only for square matrices with nonzero determinant. For the system Ax = b the solution is x = A⁻¹b. For 2 × 2, the inverse of [[a, b], [c, d]] is 1/(ad − bc) times [[d, −b], [−c, a]]. And (AB)⁻¹ = B⁻¹A⁻¹: undo in reverse order.",
+      "detail": "A matrix without an inverse is singular: it crushes some directions to zero, destroying information no transformation can restore. Nearly singular ones are ill-conditioned: tiny errors in the data cause huge errors in the answer, which the condition number, the ratio of largest to smallest stretch, measures.\n\nIn practice you almost never compute the inverse: solving Ax = b by elimination or factorization (LU, QR, Cholesky) is faster and more accurate, and for large sparse systems iterative methods avoid factorizing at all. Special inverses are easy: a rotation's inverse is its transpose, and a diagonal matrix's inverse takes reciprocals. The pseudoinverse generalizes to non-square or singular matrices and gives least-squares solutions. Uses: undoing a change of basis, the normal equations (XᵀX)⁻¹Xᵀy in regression, control and Kalman filtering, and the Hill cipher in classical cryptography.",
+      "principles": "An inverse exists only when nothing was lost. Recognizing when a matrix has no inverse, and being careful when it almost has none, is much of what separates numerical linear algebra from the algebra taught in class.",
+      "example": {
+        "label": "Inverting, solving, and failing to invert",
+        "code": "def inverse2(m):\n    (a, b), (c, d) = m\n    det = a * d - b * c\n    if det == 0:\n        raise ValueError(\"singular: no inverse\")\n    return [[d / det, -b / det], [-c / det, a / det]]\n\nmatmul = lambda A, B: [[sum(A[i][k] * B[k][j] for k in range(2)) for j in range(2)] for i in range(2)]\nA = [[4, 7], [2, 6]]\ninv = inverse2(A)\nprint(inv, matmul(A, inv))                       # A times its inverse is the identity\n\nx = [sum(inv[i][j] * v for j, v in enumerate([1, 2])) for i in range(2)]          # solve A x = (1, 2)\nprint(x, [A[0][0] * x[0] + A[0][1] * x[1], A[1][0] * x[0] + A[1][1] * x[1]])\n\ntry:\n    inverse2([[1, 2], [2, 4]])\nexcept ValueError as e:\n    print(e)                                     # parallel columns: information was lost, nothing can restore it"
+      },
+      "requires": [
+        "determinant",
+        "matrix-multiplication"
+      ]
+    },
+    {
+      "id": "transpose",
+      "picture": "Flip a matrix over its diagonal: rows become columns.",
+      "mechanism": "(Aᵀ)ᵢⱼ = Aⱼᵢ. An m × n matrix becomes n × m. Rules: (AB)ᵀ = BᵀAᵀ, so the order reverses; (Aᵀ)ᵀ = A; (A + B)ᵀ = Aᵀ + Bᵀ. A matrix equal to its own transpose is symmetric; equal to minus its transpose, antisymmetric.",
+      "detail": "The dot product of column vectors is aᵀb, so much of linear algebra is written with transposes. The Gram matrix AᵀA collects all pairwise dot products of A's columns, is symmetric, and appears in least squares (the normal equations AᵀAx = Aᵀb), covariance matrices, and kernel methods. Symmetric matrices have real eigenvalues and orthogonal eigenvectors, the spectral theorem, which is why they behave so nicely in physics, optimization (Hessians), and statistics (covariance). For orthogonal matrices the transpose is the inverse.\n\nThe adjoint, the conjugate transpose, generalizes it to complex matrices: Hermitian matrices are the observables of quantum mechanics. In code, transposing may be free, just swapping strides, or may require moving data, so memory layout matters and cache-friendly transposition is a classic optimization exercise. In graph theory, transposing an adjacency matrix reverses all edge directions.",
+      "principles": "Swapping rows and columns looks like bookkeeping, but it is what lets one write dot products as products of matrices. The symmetric matrices it defines are the well-behaved ones that physics and statistics keep producing.",
+      "example": {
+        "label": "(AB)ᵀ = BᵀAᵀ, and the Gram matrix",
+        "code": "transpose = lambda m: [list(r) for r in zip(*m)]\nmatmul = lambda A, B: [[sum(a * b for a, b in zip(row, col)) for col in zip(*B)] for row in A]\n\nA = [[1, 2, 3], [4, 5, 6]]\nprint(transpose(A))                                              # 3 x 2\n\nB = [[1, 0], [2, 1], [0, 3]]\nprint(transpose(matmul(A, B)) == matmul(transpose(B), transpose(A)))       # True: the order reverses\n\ngram = matmul(transpose(A), A)                                   # A^T A is always symmetric\nprint(gram, gram == transpose(gram))"
+      },
+      "requires": [
+        "matrices"
+      ]
+    },
+    {
+      "id": "tensors",
+      "picture": "A grid of numbers with any number of axes.",
+      "mechanism": "A scalar is a tensor with no axes, a vector has one, a matrix two, and beyond that: a color image has three axes (height, width, channels), a batch of images four. The number of axes is its rank or order; the length of each is its shape. In physics a tensor also transforms in a specific way under changes of coordinates.",
+      "detail": "There are two meanings. In machine learning, tensors are multi-dimensional arrays, and the operations are elementwise math, broadcasting (stretching smaller shapes to match), reductions (sums along an axis), and contractions such as matrix multiplication and Einstein summation. In physics and geometry, tensors are multilinear maps whose components change in a defined way with the coordinates: the stress tensor, the moment of inertia tensor, the electromagnetic field tensor, the metric tensor, and the Riemann curvature tensor of general relativity, which says that mass curves spacetime. Ricci and Levi-Civita developed tensor calculus, which Einstein used in 1915.\n\nDecompositions generalize the SVD to multi-way data, such as user by item by time. Practical issues: shapes are the most common source of bugs in deep-learning code, and a tensor with 10 axes of length 10 has 10 billion entries. A machine-learning tensor is an array; a physics tensor is an array with transformation rules.",
+      "principles": "Tensors extend the idea of vector and matrix to any number of directions at once. They are the arrays data and weights flow through in machine learning, and, in physics, the objects that make a law independent of the coordinates you happen to choose.",
+      "example": {
+        "label": "Shapes, and a contraction",
+        "code": "def shape(t):\n    s = []\n    while isinstance(t, list):\n        s.append(len(t)); t = t[0]\n    return tuple(s)\n\nvector = [1, 2, 3]\nmatrix = [[1, 2], [3, 4]]\nimage = [[[0.0] * 3 for _ in range(4)] for _ in range(4)]          # a tiny 4 x 4 colour image: height, width, channels\nprint(shape(vector), shape(matrix), shape(image))\n\nA = [[1, 2], [3, 4]]; B = [[5, 6], [7, 8]]\nC = [[sum(A[i][k] * B[k][j] for k in range(2)) for j in range(2)] for i in range(2)]      # a contraction over k\nprint(C)\nprint(10 ** 10, \"entries in a tensor with 10 axes of length 10\")"
+      },
+      "requires": [
+        "matrices"
+      ]
+    },
+    {
+      "id": "linear-transformations",
+      "picture": "A rule that moves every point while keeping straight lines straight.",
+      "mechanism": "T is linear if T(a + b) = T(a) + T(b) and T(cv) = cT(v). Then the origin stays put and grid lines stay parallel and evenly spaced. Knowing where T sends the basis vectors determines everything: those images are the columns of its matrix.",
+      "detail": "Examples: rotations, reflections, scalings, shears, and projections in geometry; differentiation and integration on polynomials and functions, since the derivative of a sum is the sum of the derivatives; the discrete Fourier transform; and convolution with a fixed filter, as in blurring an image. Non-examples are translation, which moves the origin, and anything with squares. Homogeneous coordinates encode translation as a linear map one dimension higher, which is how graphics pipelines chain rotations, scaling, and translation into one matrix.\n\nComposition of linear maps is linear, and corresponds to matrix multiplication. A map can be invertible or lose information (its kernel), and its image is the set of outputs. Every linear map between finite-dimensional spaces is a matrix once bases are chosen, and changing bases changes the matrix but not the map. Linearity is the assumption of superposition: the response to a sum of inputs is the sum of the responses, the foundation of signal processing, circuit theory, and quantum mechanics.",
+      "principles": "Linear maps are the transformations simple enough to fully understand: they are decided by what they do to a few vectors. Everything else is studied by approximating it with one.",
+      "example": {
+        "label": "A shear, tested for linearity",
+        "code": "apply = lambda m, v: [sum(m[i][j] * v[j] for j in range(2)) for i in range(2)]\nshear = [[1, 1], [0, 1]]\nprint(apply(shear, [1, 0]), apply(shear, [0, 1]))        # columns of the matrix: where the basis vectors land\n\na, b, c = [1, 2], [3, -1], 4\nlhs = apply(shear, [x + y for x, y in zip(a, b)])\nrhs = [x + y for x, y in zip(apply(shear, a), apply(shear, b))]\nprint(lhs == rhs, apply(shear, [c * x for x in a]) == [c * x for x in apply(shear, a)])       # True True: linear\n\ntranslate = lambda v: [v[0] + 1, v[1]]                   # translation is NOT linear: the origin moves\nprint(translate([0, 0]))"
+      },
+      "requires": [
+        "matrices",
+        "vectors"
+      ]
+    },
+    {
+      "id": "rotation-matrices",
+      "picture": "The matrix that turns everything by the same angle.",
+      "mechanism": "In the plane, R(θ) is [[cos θ, −sin θ], [sin θ, cos θ]]. Its first column is where (1, 0) lands, at angle θ; its second is where (0, 1) lands. It preserves lengths and angles, has determinant 1, and its inverse is its transpose. Rotating by α then β equals rotating by α + β.",
+      "detail": "In three dimensions, rotations about the coordinate axes have similar matrices, and any rotation is a product of them. Euler angles specify orientation with three angles but suffer gimbal lock: two axes align and a degree of freedom is lost, an issue famous from the Apollo guidance system. Quaternions represent 3-D rotations with four numbers, compose cleanly, interpolate smoothly, and avoid gimbal lock, so games, robotics, and spacecraft use them.\n\nRotation matrices are orthogonal with determinant +1; orthogonal matrices with determinant −1 include reflections. Multiplying a vector by one is how graphics engines orient objects and cameras, and combined with scaling and translation in homogeneous coordinates they give a single transformation matrix. Multiplying a complex number by e^(iθ) is the same rotation. Gyroscopes in phones integrate angular velocity into orientation, and numerical drift makes matrices lose orthogonality over time, so they are periodically re-orthonormalized.",
+      "principles": "Turning is multiplication by a matrix whose columns are the new positions of the axes. That every rotation preserves length is written into its shape: perpendicular unit columns.",
+      "example": {
+        "label": "Turning vectors, and adding angles",
+        "code": "import math\n\ndef rot(theta):\n    c, s = math.cos(theta), math.sin(theta)\n    return [[c, -s], [s, c]]\n\napply = lambda m, v: [sum(m[i][j] * v[j] for j in range(2)) for i in range(2)]\nv = [1, 0]\nfor deg in (30, 90, 180):\n    print(deg, [round(x, 3) for x in apply(rot(math.radians(deg)), v)])\n\nbefore, after = math.hypot(3, 4), math.hypot(*apply(rot(1.234), [3, 4]))\nprint(before, round(after, 10))                         # lengths are preserved\n\nmatmul = lambda A, B: [[sum(A[i][k] * B[k][j] for k in range(2)) for j in range(2)] for i in range(2)]\nr = lambda M: [[round(x, 6) for x in row] for row in M]\nprint(r(matmul(rot(0.4), rot(0.9))) == r(rot(1.3)))     # rotating by 0.4 then 0.9 is rotating by 1.3"
+      },
+      "requires": [
+        "linear-transformations",
+        "trigonometric-functions"
+      ]
+    },
+    {
+      "id": "projections",
+      "picture": "The shadow of a vector on a line or a plane.",
+      "mechanism": "The projection of b onto a line along a is p = ((a · b)/(a · a)) a. The leftover b − p is perpendicular to a. Projecting onto a subspace spanned by the columns of A gives p = A(AᵀA)⁻¹Aᵀb. A projection matrix P satisfies P² = P, projecting twice changes nothing, and is symmetric for orthogonal projections.",
+      "detail": "The projection is the closest point in the subspace to b, which is why it solves least squares: the best-fit solution of an unsolvable Ax = b is the x for which Ax is the projection of b onto the column space of A, and the error is perpendicular to that space. Gram–Schmidt repeatedly subtracts projections to build orthogonal vectors. Projections lose information: they have a non-trivial null space.\n\nIn graphics, perspective projection maps 3-D scenes to 2-D screens, and orthographic projection just drops a coordinate. In statistics, the hat matrix projects observed values onto fitted values; in signal processing, filtering keeps only a subspace, such as the low frequencies; in dimensionality reduction, PCA projects data onto the top principal directions. Quantum measurement is a projection of the state onto an eigenspace of the observable.",
+      "principles": "Projection finds the closest point in a space of what you can reach. It is the geometric heart of fitting a model, compressing data, and every best-approximation problem.",
+      "example": {
+        "label": "Projecting onto a line",
+        "code": "dot = lambda a, b: sum(x * y for x, y in zip(a, b))\n\ndef project(b, a):\n    k = dot(a, b) / dot(a, a)\n    return [k * x for x in a]\n\nb, a = [3, 4], [1, 0]\np = project(b, a)\nprint(p, [x - y for x, y in zip(b, p)])                  # [3.0, 0.0] and the perpendicular leftover [0.0, 4.0]\n\nb, a = [2, 3], [1, 1]\np = project(b, a)\nresid = [x - y for x, y in zip(b, p)]\nprint(p, resid, dot(resid, a))                           # the residual is perpendicular to a: dot = 0\n\nprint(project(p, a) == p)                                # projecting twice changes nothing"
+      },
+      "requires": [
+        "linear-transformations",
+        "orthogonality"
+      ]
+    },
+    {
+      "id": "linear-systems",
+      "picture": "Several equations to satisfy at once, each a weighted sum of the unknowns.",
+      "mechanism": "A system such as 2x + y = 5 and x − y = 1 is written Ax = b, with A the grid of coefficients. Geometrically each equation is a line, or a plane: a solution is where they all meet. There can be exactly one solution, none (parallel lines), or infinitely many (the same line).",
+      "detail": "Chinese mathematicians solved them by elimination around 200 BCE. Existence and uniqueness are governed by rank: solutions exist if b lies in the column space of A, and are unique if the columns are independent. With more equations than unknowns, typical of data, an exact solution usually does not exist and least squares finds the best compromise; with fewer equations than unknowns there is a whole family, and one picks the smallest or sparsest.\n\nMethods: Gaussian elimination and LU factorization for moderate sizes, Cholesky for symmetric positive definite systems, QR for stability, and iterative solvers such as conjugate gradients for huge sparse ones. An ill-conditioned system amplifies small errors. They arise in circuits (Kirchhoff's laws), structural analysis, economics (Leontief input–output models), balancing chemical equations, network flows, interpolation, and every finite-element and finite-difference discretization of a differential equation, which is why solving linear systems is among the most heavily optimized computations in science.",
+      "principles": "Any question of the form these things must balance, given how they depend on each other is a linear system. Whether it has one answer, none, or many is a geometric fact, and how stable that answer is is a property of the matrix.",
+      "example": {
+        "label": "Two lines, and a circuit",
+        "code": "import fractions\n\na, b, e = 2, 1, 5                       # 2x + y = 5\nc, d, f = 1, -1, 1                      # x - y = 1\ndet = a * d - b * c\nx, y = (e * d - b * f) / det, (a * f - e * c) / det           # Cramer's rule\nprint(x, y, a * x + b * y, c * x + d * y)                     # 2.0 1.0 and the two right-hand sides, 5 and 1\n\nprint(\"parallel lines: 2x + y = 5 and 4x + 2y = 7 have determinant\", 2 * 2 - 1 * 4, \"-> no unique solution\")\n\nA = [[fractions.Fraction(v) for v in row] for row in [[10, -4, 12], [-4, 10, 6]]]     # Kirchhoff's laws, two loops\ndet = A[0][0] * A[1][1] - A[0][1] * A[1][0]\ni1 = (A[0][2] * A[1][1] - A[0][1] * A[1][2]) / det\ni2 = (A[0][0] * A[1][2] - A[0][2] * A[1][0]) / det\nprint(\"currents:\", i1, i2)"
+      },
+      "requires": [
+        "matrices"
+      ]
+    },
+    {
+      "id": "gaussian-elimination",
+      "picture": "Solve by eliminating one unknown at a time.",
+      "mechanism": "Use row operations (swap rows, scale a row, add a multiple of one row to another), which never change the solutions, to turn the system into triangular form: the first unknown appears only in the first equation, the second in the first two, and so on. Then back-substitute from the last equation up.",
+      "detail": "It was described in the Chinese Nine Chapters around 200 BCE; Gauss used it in 1809 for the orbit of the asteroid Pallas, and the name stuck. Gauss–Jordan continues to reduced form, which reads off the solution directly. The cost is about (2/3)n³ operations, so a 1,000-unknown system takes a billion operations and a million-unknown dense one is out of reach. Partial pivoting, choosing the largest available entry as the pivot, keeps round-off errors from blowing up.\n\nElimination is equivalent to LU factorization, A = LU, with L recording the multipliers; once you have it, additional right-hand sides are cheap. It also computes the determinant (the product of the pivots), the rank (the number of pivots), the inverse, and the null space, and it detects when a system has no solution (a row reading 0 = 1) or infinitely many (a free variable). Sparse variants exploit zeros, and the LINPACK benchmark that ranks supercomputers is a Gaussian elimination.",
+      "principles": "Trade the tangled system for a triangle, and each unknown falls out in turn. Twenty centuries later it is still how computers solve equations, because its cost and its stability are so well understood.",
+      "example": {
+        "label": "Elimination with partial pivoting",
+        "code": "def solve(A, b):\n    n = len(A)\n    M = [list(map(float, row)) + [float(v)] for row, v in zip(A, b)]           # the augmented matrix\n    for c in range(n):\n        p = max(range(c, n), key=lambda i: abs(M[i][c]))                        # partial pivoting\n        M[c], M[p] = M[p], M[c]\n        for i in range(c + 1, n):\n            f = M[i][c] / M[c][c]\n            M[i] = [a - f * b_ for a, b_ in zip(M[i], M[c])]                     # eliminate below the pivot\n    x = [0.0] * n\n    for i in reversed(range(n)):                                                # back-substitution\n        x[i] = (M[i][n] - sum(M[i][j] * x[j] for j in range(i + 1, n))) / M[i][i]\n    return x\n\nA = [[2, 1, -1], [-3, -1, 2], [-2, 1, 2]]\nb = [8, -11, -3]\nprint([round(v, 6) for v in solve(A, b)])                # [2.0, 3.0, -1.0]"
+      },
+      "requires": [
+        "linear-systems"
+      ]
+    },
+    {
+      "id": "vector-spaces",
+      "picture": "Anything you can add and scale, following the usual rules.",
+      "mechanism": "A vector space is a set with addition and multiplication by numbers satisfying rules such as commutativity and distributivity, plus a zero and negatives. Everything in linear algebra then follows from those rules, without mentioning arrows: independence, basis, dimension, and linear maps make sense for any vector space.",
+      "detail": "Examples beyond arrows: polynomials of degree at most n (dimension n + 1), continuous functions on an interval (infinite-dimensional), m × n matrices, sequences, solutions of a linear differential equation (dimension equal to the order), and quantum states, which live in Hilbert spaces, complex vector spaces with an inner product. Peano gave the first axioms in 1888. A subspace is a subset that is itself a vector space, such as a line or plane through the origin.\n\nAbstraction pays off: the same theorems apply to signals and to arrows, so results about Fourier series are results about vectors in a function space, with sines and cosines as an orthogonal basis. Norms make it a normed space, and completeness gives Banach and Hilbert spaces, the setting for functional analysis and quantum mechanics. Over finite fields, vector spaces underlie error-correcting codes, where a code is a subspace of bit strings. Not every collection is one: the unit circle fails closure.",
+      "principles": "By listing only the rules of adding and scaling, mathematicians found that arrows, polynomials, signals, and quantum states are all the same kind of thing. Anything that satisfies them inherits every theorem of linear algebra for free.",
+      "example": {
+        "label": "Polynomials, functions, and bit strings as vectors",
+        "code": "add = lambda p, q: [a + b for a, b in zip(p, q)]\nscale = lambda c, p: [c * a for a in p]\np, q = [1, 2, 3], [0, 1, -1]          # 1 + 2x + 3x^2  and  x - x^2\nprint(add(p, q), scale(2, p))         # still polynomials of degree <= 2: closed under + and scaling\n\nevaluate = lambda p, x: sum(a * x ** k for k, a in enumerate(p))\nprint(evaluate(add(p, q), 2), evaluate(p, 2) + evaluate(q, 2))           # adding polynomials adds their values\n\nf, g = (lambda x: x * x), (lambda x: 3 * x)\nh = lambda x: f(x) + 2 * g(x)         # functions form a vector space too\nprint(h(2))                            # 4 + 12 = 16\n\na, b = 0b1011, 0b0110                  # bit strings under XOR: a vector space over the field with two elements\nprint(bin(a ^ b), bin(a ^ a))          # adding a vector to itself gives the zero vector"
+      },
+      "requires": [
+        "basis",
+        "linear-transformations"
+      ]
+    },
+    {
+      "id": "rank",
+      "picture": "The number of genuinely different directions in a matrix.",
+      "mechanism": "The rank of a matrix is the dimension of the space spanned by its columns, equivalently by its rows: the number of independent columns, or pivots after elimination. An m × n matrix has rank at most min(m, n); full rank means it reaches the most it could. The rank–nullity theorem says rank plus nullity is the number of columns.",
+      "detail": "Rank counts the real information in a matrix: a 1,000 × 1,000 table of numbers of rank 3 is really three columns' worth of information, describable with 6,000 numbers instead of a million. Low-rank structure is the foundation of compression (truncating the SVD to the top k singular values gives the best rank-k approximation, the Eckart–Young theorem), recommender systems, where ratings matrices are approximately low rank because tastes have few dimensions, and fast fine-tuning of language models with low-rank updates.\n\nFor systems Ax = b, rank tells whether solutions exist and whether they are unique. Numerically rank is fuzzy: a matrix with tiny singular values is numerically rank-deficient, and one chooses a tolerance. A random matrix has full rank almost surely, so low rank in real data means structure worth finding. Robust PCA separates background from moving objects in video by splitting a matrix into low-rank and sparse parts.",
+      "principles": "A big table of numbers may hold only a little information. Rank measures how much, and the fact that real data is so often nearly low-rank is what makes compression and recommendation possible.",
+      "example": {
+        "label": "Hidden low rank",
+        "code": "import random\n\ndef rank(rows, tol=1e-9):\n    m = [list(map(float, r)) for r in rows]; r = 0\n    for c in range(len(m[0])):\n        if r == len(m): break\n        p = max(range(r, len(m)), key=lambda i: abs(m[i][c]))\n        if abs(m[p][c]) < tol: continue\n        m[r], m[p] = m[p], m[r]\n        for i in range(len(m)):\n            if i != r:\n                f = m[i][c] / m[r][c]; m[i] = [a - f * b for a, b in zip(m[i], m[r])]\n        r += 1\n    return r\n\nrandom.seed(91)\nu = [random.random() for _ in range(6)]; v = [random.random() for _ in range(5)]\nouter = [[a * b for b in v] for a in u]                         # a 6 x 5 matrix that is really one direction: rank 1\nprint(rank(outer))\n\nw = [random.random() for _ in range(6)]; z = [random.random() for _ in range(5)]\ntwo = [[a * b + c * d for b, d in zip(v, z)] for a, c in zip(u, w)]      # a sum of two outer products: rank 2\nprint(rank(two), rank([[random.random() for _ in range(5)] for _ in range(6)]))    # 2 and 5: a random matrix has full rank"
+      },
+      "requires": [
+        "vector-spaces",
+        "gaussian-elimination"
+      ]
+    },
+    {
+      "id": "null-space",
+      "picture": "Everything the transformation crushes to nothing.",
+      "mechanism": "The null space, or kernel, of A is the set of all x with Ax = 0. It is a subspace. If it contains only the zero vector, A loses no information, since its columns are independent. Otherwise, if x₀ solves Ax = b, so does x₀ plus anything in the null space: the solutions are a whole flat family.",
+      "detail": "The dimension of the null space is the nullity, and rank plus nullity is the number of columns. To find it, row-reduce and solve for the free variables: each free variable contributes one basis vector. Examples: projection onto the x-axis has the y-axis as its null space; the derivative operator's null space is the constants, which is why integrals need +C.\n\nIn engineering, redundant robot arms have null-space motions that move the joints without moving the hand, exploited to avoid obstacles. In networks, the null space of the incidence matrix is the set of circulations, flows with no net gain at any node. In statistics, perfect collinearity gives the design matrix a null space, so coefficients are not identifiable. In coding theory, a linear code is the null space of its parity-check matrix. The four fundamental subspaces, column space, row space, null space, and left null space, and their orthogonal pairing organize Gilbert Strang's picture of linear algebra.",
+      "principles": "What a transformation forgets is as informative as what it keeps. The null space says exactly which changes go unnoticed, and so how much freedom a solution has.",
+      "example": {
+        "label": "A family of solutions",
+        "code": "A = [[1, 2, 3], [2, 4, 6]]                          # rank 1: x + 2y + 3z = 0 has two free variables\nnull_basis = [(-2, 1, 0), (-3, 0, 1)]\napply = lambda m, v: [sum(m[i][j] * v[j] for j in range(3)) for i in range(2)]\nfor v in null_basis:\n    print(v, \"->\", apply(A, v))                      # both map to [0, 0]\n\nx0 = [1, 1, 1]                                       # one particular solution of A x = b\nb = apply(A, x0)\nfor t in (0, 1, 5):\n    x = [x0[i] + t * null_basis[0][i] + 2 * t * null_basis[1][i] for i in range(3)]\n    print(x, apply(A, x) == b)                       # the same b every time: a whole family of solutions"
+      },
+      "requires": [
+        "vector-spaces",
+        "linear-systems"
+      ]
+    },
+    {
+      "id": "eigenvalues",
+      "picture": "Directions a transformation only stretches, and by how much.",
+      "mechanism": "An eigenvector of A is a nonzero vector v with Av = λv: the transformation sends v to a multiple of itself. The multiplier λ is its eigenvalue. Eigenvalues solve det(A − λI) = 0. Applying A repeatedly multiplies along each eigenvector by λᵏ, so the largest eigenvalue eventually dominates.",
+      "detail": "The German eigen means own: they are a matrix's characteristic directions. If A has enough independent eigenvectors it can be diagonalized, A = PDP⁻¹, reducing it to stretching along eigen-axes, which makes powers and exponentials easy. Symmetric real matrices have real eigenvalues and orthogonal eigenvectors.\n\nInterpretations: the principal axes of an ellipse (covariance matrices, hence PCA); the natural vibration modes of a structure, each eigenvalue a squared frequency; the stable states of dynamical systems; the stationary distribution of a Markov chain, eigenvalue 1; Google's PageRank, the dominant eigenvector of the web's link matrix, found by power iteration; quantum energy levels, eigenvalues of the Hamiltonian; and the connectivity of a graph. Complex eigenvalues signal rotation. Computing them uses the power method, the QR algorithm, and Lanczos for large sparse matrices, never the characteristic polynomial, which is unstable. Eigenfaces used PCA eigenvectors to recognize faces.",
+      "principles": "Eigenvectors are the directions in which a complicated transformation becomes simple. Finding them tells you a system's natural modes, its long-run behavior, and which few directions matter most.",
+      "example": {
+        "label": "Power iteration, and a Markov chain's steady state",
+        "code": "import math\n\ndef power_iteration(A, steps=100):\n    v = [1.0, 1.0]\n    for _ in range(steps):\n        w = [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]]\n        norm = math.hypot(*w)\n        v = [x / norm for x in w]\n    Av = [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]]\n    return v, Av[0] / v[0]\n\nA = [[2, 1], [1, 2]]                                       # eigenvalues 3 and 1\nvec, val = power_iteration(A)\nprint([round(x, 4) for x in vec], round(val, 4))           # [0.7071, 0.7071] 3.0: the direction only stretched\n\ntr, det = A[0][0] + A[1][1], A[0][0] * A[1][1] - A[0][1] * A[1][0]        # from the characteristic equation\ndisc = math.sqrt(tr * tr / 4 - det)\nprint(tr / 2 + disc, tr / 2 - disc)\n\nP = [[0.8, 0.4], [0.2, 0.6]]                               # a Markov chain: its long-run distribution is the eigenvector for 1\npi = [0.5, 0.5]\nfor _ in range(100):\n    pi = [P[0][0] * pi[0] + P[0][1] * pi[1], P[1][0] * pi[0] + P[1][1] * pi[1]]\nprint([round(x, 3) for x in pi])                           # [0.667, 0.333]"
+      },
+      "requires": [
+        "matrix-multiplication",
+        "determinant",
+        "linear-transformations"
+      ]
+    },
+    {
+      "id": "svd",
+      "picture": "Every matrix is a rotation, a stretch, and another rotation.",
+      "mechanism": "A = UΣVᵀ, with U and V orthogonal, rotations or reflections, and Σ diagonal with nonnegative entries σ₁ ≥ σ₂ ≥ …, the singular values. Read it as: rotate by Vᵀ, stretch each axis by σᵢ, rotate by U. The singular values are the square roots of the eigenvalues of AᵀA.",
+      "detail": "Every matrix has one, square or not, which eigen-decomposition cannot claim. Beltrami and Jordan found it in the 1870s, and Golub and Kahan's algorithm of 1965 made it computable. It reveals rank (the number of nonzero singular values), the condition number (σ₁ over the smallest), and the best low-rank approximation: keeping the top k terms gives the closest rank-k matrix, the Eckart–Young theorem.\n\nUses: image compression, latent semantic analysis of document-term matrices, recommender systems, denoising by discarding small singular values, pseudoinverses and least squares for singular problems, and principal component analysis, which is the SVD of centered data. Randomized SVD gets the top few components of huge matrices quickly. Truncated SVD is central to how large models are compressed and fine-tuned. Columns of U and V are modes, or patterns, and singular values are their strengths.",
+      "principles": "Any linear action decomposes into a rotation, a stretch along special axes, and another rotation. The stretches rank the directions by importance, so keeping only the large ones gives the best compressed version of the whole.",
+      "example": {
+        "label": "Recovering a hidden pattern by power iteration",
+        "code": "import math, random\n\ndef matvec(A, v): return [sum(a * x for a, x in zip(row, v)) for row in A]\ndef transpose(A): return [list(r) for r in zip(*A)]\ndef norm(v): return math.sqrt(sum(x * x for x in v))\n\ndef top_singular(A, iters=200):                       # power iteration on A^T A\n    v = [1.0] * len(A[0])\n    for _ in range(iters):\n        w = matvec(transpose(A), matvec(A, v))\n        v = [x / norm(w) for x in w]\n    sigma = norm(matvec(A, v))\n    u = [x / sigma for x in matvec(A, v)]\n    return sigma, u, v\n\nrandom.seed(92)\npattern_u, pattern_v = [1, 2, 3, 4], [1, 0.5, 0.25]\nA = [[a * b + random.gauss(0, 0.05) for b in pattern_v] for a in pattern_u]        # a rank-1 pattern plus a little noise\nsigma, u, v = top_singular(A)\napprox = [[sigma * ui * vj for vj in v] for ui in u]                               # keep only the top singular value\nerr = math.sqrt(sum((A[i][j] - approx[i][j]) ** 2 for i in range(4) for j in range(3)))\nprint(round(sigma, 3), \"top singular value;\", round(err, 3), \"left over (just the noise)\")\nprint([round(x, 2) for x in v])                                                     # the hidden pattern, recovered up to scale"
+      },
+      "requires": [
+        "eigenvalues",
+        "orthogonality"
+      ]
+    },
+    {
+      "id": "pca",
+      "picture": "Find the directions in which the data varies most.",
+      "mechanism": "Center the data, compute its covariance matrix, and find its eigenvectors: the principal components. The first is the direction of greatest variance, the second the greatest variance perpendicular to the first, and so on. Each eigenvalue is the variance along its component. Project the data onto the top few to reduce dimension.",
+      "detail": "Karl Pearson in 1901 and Harold Hotelling in 1933 developed it. It is equivalent to the SVD of the centered data matrix. The share of variance explained by each component helps decide how many to keep, using the elbow of a scree plot or a cumulative 90 to 95 percent. Uses: visualizing high-dimensional data in two or three dimensions, removing noise and redundancy, compressing, preparing inputs for other models, finding hidden factors, eigenfaces, and genetics, where the first two components of genome data often map the geography of ancestry.\n\nCautions: it assumes linear structure and finds directions of high variance, which need not be the informative ones; it is sensitive to scaling, so features are usually standardized first; components mix all the features and can be hard to interpret; and outliers distort it. Nonlinear cousins include kernel PCA, t-SNE, UMAP, and autoencoders.",
+      "principles": "Real data rarely fills all the dimensions it lives in. PCA finds the few directions that carry the variation, which is the first step in seeing, compressing, or understanding a table with too many columns.",
+      "example": {
+        "label": "The main direction of a stretched cloud",
+        "code": "import math, random\n\nrandom.seed(93)\nn = 500\npts = []\nfor _ in range(n):                                           # data stretched along a diagonal\n    t = random.gauss(0, 3)\n    pts.append((t + random.gauss(0, 0.5), 0.5 * t + random.gauss(0, 0.5)))\n\nmx = sum(p[0] for p in pts) / n; my = sum(p[1] for p in pts) / n\ncxx = sum((p[0] - mx) ** 2 for p in pts) / n\ncyy = sum((p[1] - my) ** 2 for p in pts) / n\ncxy = sum((p[0] - mx) * (p[1] - my) for p in pts) / n\n\ntr, det = cxx + cyy, cxx * cyy - cxy ** 2                   # eigenvalues of the 2x2 covariance matrix\nl1 = tr / 2 + math.sqrt(tr * tr / 4 - det); l2 = tr / 2 - math.sqrt(tr * tr / 4 - det)\nangle = 0.5 * math.degrees(math.atan2(2 * cxy, cxx - cyy))  # direction of the first principal component\nprint(f\"first component at {angle:.1f} degrees, explains {100 * l1 / (l1 + l2):.1f}% of the variance\")\n\nproj = [(p[0] - mx) * math.cos(math.radians(angle)) + (p[1] - my) * math.sin(math.radians(angle)) for p in pts]\nprint(\"reduced from 2 numbers to 1 per point; the spread along it:\", round(math.sqrt(sum(x * x for x in proj) / n), 2))"
+      },
+      "requires": [
+        "svd",
+        "variance"
+      ]
+    }
+  ]
+}

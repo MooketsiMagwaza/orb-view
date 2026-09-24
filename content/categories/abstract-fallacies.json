@@ -1,0 +1,32 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-fallacies",
+  "group": "Abstract",
+  "order": 4,
+  "title": "Fallacies",
+  "blurb": "The ways reasoning goes wrong: straw men, false dilemmas, false causes, and the rest.",
+  "orb": "searching",
+  "entry": "fallacies",
+  "path": [
+    "fallacies",
+    "formal-fallacies",
+    "affirming-consequent",
+    "fallacies-of-relevance",
+    "ad-hominem",
+    "straw-man",
+    "red-herring",
+    "whataboutism",
+    "fallacious-appeals",
+    "appeal-to-authority",
+    "bandwagon",
+    "fallacies-of-presumption",
+    "begging-the-question",
+    "false-dilemma",
+    "no-true-scotsman",
+    "moving-goalposts",
+    "fallacies-of-causation",
+    "post-hoc",
+    "correlation-causation",
+    "slippery-slope"
+  ]
+}

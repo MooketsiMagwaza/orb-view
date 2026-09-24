@@ -1,0 +1,28 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "abstract-calculus-foundations",
+  "group": "Abstract",
+  "order": 5,
+  "title": "Calculus: Change",
+  "blurb": "Functions, limits, and the derivative: how fast things change, and what is best.",
+  "orb": "composing",
+  "entry": "calculus",
+  "path": [
+    "calculus",
+    "functions",
+    "exponential-function",
+    "logarithm",
+    "trigonometric-functions",
+    "limits",
+    "epsilon-delta",
+    "continuity",
+    "derivatives",
+    "tangent-line",
+    "differentiation-rules",
+    "chain-rule",
+    "optimization",
+    "second-derivative",
+    "linear-approximation",
+    "newtons-method"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-software",
+  "group": "Tech",
+  "order": 1,
+  "title": "Software & Data",
+  "blurb": "Programs, the languages they're written in, and the data they keep.",
+  "orb": "weaving",
+  "entry": "computing",
+  "path": [
+    "computing",
+    "software",
+    "programming-languages",
+    "operating-systems",
+    "apis",
+    "version-control",
+    "debugging",
+    "data",
+    "databases",
+    "sql",
+    "cache"
+  ]
+}

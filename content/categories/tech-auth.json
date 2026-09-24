@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "tech-auth",
+  "group": "Tech",
+  "order": 5,
+  "title": "Auth: Who You Are, What You Can Do",
+  "blurb": "Passwords, sessions, JWT, OAuth, and how permissions are decided.",
+  "orb": "searching",
+  "entry": "authentication",
+  "path": [
+    "authentication",
+    "passwords",
+    "salting",
+    "mfa",
+    "sessions",
+    "jwt",
+    "oauth",
+    "authorization",
+    "rbac",
+    "least-privilege"
+  ]
+}

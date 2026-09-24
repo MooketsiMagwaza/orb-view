@@ -1,0 +1,21 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "me-nature-and-peace",
+  "group": "Me",
+  "order": 5,
+  "title": "Nature & Stillness",
+  "blurb": "Cycles, ecosystems, and the quiet that resets a nervous system.",
+  "orb": "breathing",
+  "entry": "nature",
+  "path": [
+    "nature",
+    "cycles",
+    "seasons",
+    "water",
+    "ecosystems",
+    "part-of-nature",
+    "peace",
+    "meditation",
+    "silence"
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Data structures, part three: graphs and how to store them, abstract data types and the structures behind them, and the mathematics of graphs, each in four layers.",
+  "depth": [
+    {
+      "id": "graphs",
+      "picture": "Dots and the lines between them: things, and what connects them.",
+      "mechanism": "A graph is a set of vertices (nodes) and a set of edges, each joining two vertices. Edges may have a direction (a one-way street) and a weight (a distance or cost). Two standard ways to store it are an adjacency list and an adjacency matrix.",
+      "detail": "Terminology: degree is the number of edges at a node, a path is a sequence of edges, a cycle is a path that returns to its start, a graph is connected if a path exists between every pair, and a tree is a connected graph without cycles.\n\nGraphs model what other structures cannot: roads and flights, the web (pages and links), social networks, molecules, circuits, dependencies, state machines, and the internet. Algorithms on graphs (traversal, shortest paths, spanning trees, flow, matching) make up a large part of computer science. Size is measured by V vertices and E edges; a graph is sparse if E is about V and dense if E is about V². Real-world networks tend to be sparse, often with a few very well-connected hubs.",
+      "principles": "A graph strips a problem down to what is related to what and discards everything else. That abstraction is why one set of algorithms can route packets, rank web pages, schedule builds, and plan trips.",
+      "example": {
+        "label": "Build a graph and read the degrees",
+        "code": "edges = [(\"A\", \"B\"), (\"A\", \"C\"), (\"B\", \"C\"), (\"C\", \"D\")]\n\ngraph = {}\nfor a, b in edges:\n    graph.setdefault(a, []).append(b)\n    graph.setdefault(b, []).append(a)      # undirected: record both ways\n\nfor node, neighbors in sorted(graph.items()):\n    print(node, \"->\", neighbors, \"degree\", len(neighbors))"
+      },
+      "requires": [
+        "trees"
+      ]
+    },
+    {
+      "id": "adjacency-list",
+      "picture": "A phone book of neighbors: for each node, the list of who it connects to.",
+      "mechanism": "Keep an array or hash map indexed by node, where each entry is a list of that node's neighbors (with weights if needed). To visit a node's neighbors, walk its list. Adding an edge appends to a list.",
+      "detail": "Space is O(V + E), proportional to what actually exists. Listing the neighbors of a node takes time proportional to its degree, so a full traversal is O(V + E). Checking whether one particular edge exists takes O(degree), unless the neighbors are kept in a set. For undirected graphs each edge is stored twice.\n\nThis is the default representation for sparse graphs, which covers almost every real network: road maps, social graphs, links between web pages. Variants include neighbor sets for O(1) edge checks, compressed sparse row arrays for cache-friendly, memory-tight storage in big-graph systems, and plain edge lists for algorithms that process all edges at once, such as Kruskal's.",
+      "principles": "Store only what exists. For the sparse networks of the real world, listing neighbors uses memory and time in proportion to the connections that are actually there.",
+      "example": {
+        "label": "Roads as an adjacency list",
+        "code": "from collections import defaultdict\n\ngraph = defaultdict(list)\nroads = [(\"Rome\", \"Florence\", 275), (\"Florence\", \"Milan\", 300), (\"Rome\", \"Naples\", 225)]\nfor a, b, km in roads:\n    graph[a].append((b, km))\n    graph[b].append((a, km))\n\nprint(graph[\"Rome\"])                              # [('Florence', 275), ('Naples', 225)]\nprint(sum(len(v) for v in graph.values()) // 2, \"roads\")"
+      },
+      "requires": [
+        "graphs",
+        "arrays"
+      ]
+    },
+    {
+      "id": "adjacency-matrix",
+      "picture": "A grid where row i, column j says whether i is connected to j.",
+      "mechanism": "For V nodes, make a V by V table; put 1 (or the edge weight) at [i][j] if there is an edge from i to j, and 0 (or infinity) otherwise. For an undirected graph the table is symmetric.",
+      "detail": "Checking an edge is O(1). Listing a node's neighbors takes O(V), by scanning its row. Space is O(V²) however few edges exist, so a graph of a million nodes would need a trillion cells: hopeless for sparse graphs, good for small or dense ones.\n\nIts great strength is algebra. Multiplying the matrix by itself counts paths of length two, the k-th power counts walks of length k, and the eigenvalues reveal structure: this is spectral graph theory, the basis of PageRank and community detection. Floyd–Warshall's all-pairs shortest paths works directly on the matrix, and bit-matrices pack a row into machine words for fast set operations.",
+      "principles": "Trade space for speed and gain algebra. A matrix representation lets you answer connectivity questions with arithmetic, which is why linear algebra is so effective on graphs.",
+      "example": {
+        "label": "Counting two-step routes by multiplying",
+        "code": "edges = [(0, 1), (0, 2), (1, 2), (2, 3)]      # A=0, B=1, C=2, D=3\nn = 4\nm = [[0] * n for _ in range(n)]\nfor a, b in edges:\n    m[a][b] = m[b][a] = 1\n\ndef times(x, y):\n    return [[sum(x[i][k] * y[k][j] for k in range(n)) for j in range(n)] for i in range(n)]\n\ntwo = times(m, m)\nprint(m[0][2])       # 1: A and C are directly connected\nprint(two[0][3])     # 1: exactly one two-step route from A to D (through C)"
+      },
+      "requires": [
+        "graphs",
+        "arrays"
+      ]
+    },
+    {
+      "id": "directed-graphs",
+      "picture": "A graph where the lines are arrows: from A to B does not mean from B to A.",
+      "mechanism": "Each edge has a tail (start) and a head (end). A node has an in-degree (arrows arriving) and an out-degree (arrows leaving). A path must follow the arrows, so reachability is no longer symmetric.",
+      "detail": "Directed graphs, or digraphs, model anything with asymmetry: links between web pages, follows on social media, one-way streets, function calls, task dependencies, citations, and state transitions.\n\nStrong connectivity means every node can reach every other by following arrows. Strongly connected components partition a digraph into maximal such groups, found in linear time by Tarjan's or Kosaraju's algorithms; collapsing each one gives a DAG. Cycles matter: a dependency cycle is a deadlock or an impossible build order. Key algorithms include depth-first topological sort, shortest paths that respect direction, and PageRank, which follows out-links like a random surfer. The web's bow-tie structure, a big strongly connected core with pages flowing in and out, is a well-known result.",
+      "principles": "Direction encodes cause, dependency, and flow. Many relations in the world are one-way, and a model that pretends otherwise loses the very structure that makes the problem interesting.",
+      "requires": [
+        "graphs"
+      ]
+    },
+    {
+      "id": "dag",
+      "picture": "Arrows that never lead back to where they started, so there is always a first and a last.",
+      "mechanism": "A directed acyclic graph has no cycle: following arrows, you can never return to a node. So its nodes can be lined up with every arrow pointing forward (a topological order), and some nodes have no incoming arrows (sources) and some no outgoing ones (sinks).",
+      "detail": "It is the natural shape of dependencies, of what must precede what. Build systems (make, Bazel), package managers, CI pipelines, spreadsheets (a cell depends on other cells), course prerequisites, and workflow engines such as Airflow are all DAGs. Git's commit history is a DAG: each commit points to its parents, and merges have two. Computation graphs in machine-learning frameworks are DAGs, evaluated forward and differentiated backward.\n\nTo test acyclicity or find an order, run a topological sort; failure means a cycle. The longest path in a DAG, the critical path, is computed in linear time and gives the minimum duration of a project.",
+      "principles": "Forbidding cycles is what makes \"before\" meaningful. Once dependencies form a DAG, you can always find an order to do things in, and things with no dependency between them can happen at the same time.",
+      "requires": [
+        "directed-graphs"
+      ]
+    },
+    {
+      "id": "union-find",
+      "picture": "A way to keep track of which items are in the same group, and to merge groups.",
+      "mechanism": "Each item points toward a representative of its group. Find follows the pointers up to the representative; union links one group's representative to the other's. Two tricks make it nearly instant: path compression (flatten the chain after a find) and union by rank (attach the smaller tree beneath the larger).",
+      "detail": "With both tricks, m operations on n items cost O(m α(n)), where α is the inverse Ackermann function, below 5 for any input that fits in the universe: effectively constant. It is also called disjoint-set union.\n\nUses include Kruskal's minimum spanning tree (does adding this edge join two separate components or close a cycle?), counting connected components in a graph or an image, detecting cycles in undirected graphs, percolation simulations, and grouping equivalent variables in a compiler's type inference. It supports merging but not splitting.",
+      "principles": "Sometimes you only need to know whether two things are connected, not how. Dropping the path and keeping just the answer makes the question almost free.",
+      "example": {
+        "label": "Groups that merge",
+        "code": "class UnionFind:\n    def __init__(self, n):\n        self.parent = list(range(n))\n\n    def find(self, x):\n        while self.parent[x] != x:\n            self.parent[x] = self.parent[self.parent[x]]   # path compression\n            x = self.parent[x]\n        return x\n\n    def union(self, a, b):\n        ra, rb = self.find(a), self.find(b)\n        if ra != rb:\n            self.parent[ra] = rb\n        return ra != rb          # False if they were already joined\n\nuf = UnionFind(6)\nuf.union(0, 1); uf.union(1, 2); uf.union(4, 5)\nprint(uf.find(0) == uf.find(2), uf.find(0) == uf.find(4))   # True False\nprint(uf.union(0, 2))                                       # False: already connected"
+      },
+      "requires": [
+        "graphs",
+        "arrays"
+      ]
+    },
+    {
+      "id": "abstract-data-types",
+      "picture": "A promise about what you can do, without saying how it is done.",
+      "mechanism": "An abstract data type is defined by its operations and their behavior: a stack has push and pop; a set has add, remove, and contains. It says nothing about memory layout. Any implementation that keeps the promises will do, and code using the type is unaffected if the implementation changes.",
+      "detail": "This separation of interface from implementation, developed in the 1970s in work such as Barbara Liskov's CLU language, is the ancestor of modern interfaces, classes, and modules. The common types are list, stack, queue, deque, set, map, priority queue, and graph. Each can be implemented in several ways with different costs: a set as a hash table (fast, unordered) or a balanced tree (sorted, log n).\n\nChoosing the abstract type first and the implementation second keeps designs clear: say what you need, then pick how. Standard libraries expose this directly, as with Java's List (ArrayList or LinkedList) and Map (HashMap or TreeMap). The data structure is the concrete thing; the abstract type is the contract.",
+      "principles": "Hiding the how behind the what lets each side change independently. It is the basic move of abstraction, and it lets large programs be built from parts that need not know about each other's insides.",
+      "requires": [
+        "data-structures",
+        "abstraction"
+      ]
+    },
+    {
+      "id": "lists",
+      "picture": "An ordered collection: first, second, third, where you can add and remove items.",
+      "mechanism": "The list type offers operations such as get the item at position i, set it, insert at position i, remove at position i, append, and length. Order matters and duplicates are allowed.",
+      "detail": "Two classic implementations differ in what they make cheap. An array-backed list gives O(1) access by position and amortized O(1) append, but O(n) insertion in the middle. A linked list gives O(1) insertion at a known place but O(n) access by position. In practice array-backed lists win for most workloads, thanks to cache locality, so the default list in Python, JavaScript, and Java's ArrayList is one.\n\nFunctional languages use immutable linked lists, where adding to the front is O(1) and old versions stay valid. Lists are also the general-purpose container from which stacks, queues, and deques are made by restricting the operations.",
+      "principles": "Which implementation to use depends on which operation you do most. The abstract idea is the same and the costs differ, and knowing both lets you decide with evidence rather than habit.",
+      "requires": [
+        "abstract-data-types",
+        "arrays",
+        "linked-lists"
+      ]
+    },
+    {
+      "id": "set-adt",
+      "picture": "A bag of distinct things where order does not matter, only whether something is in it.",
+      "mechanism": "A set supports add, remove, and contains, and never stores duplicates. It also supports the operations of set theory: union (everything in either), intersection (only what is in both), and difference (in one but not the other).",
+      "detail": "Hash sets give O(1) average membership tests but no order; tree sets, built on balanced trees, give O(log n) with sorted iteration and range queries; bit sets store a set of small integers as bits, making union and intersection a single machine instruction per word.\n\nUses include deduplication, membership checks (have we seen this URL?), the visited set in graph algorithms, comparing collections, permissions, and tags. Converting a list to a set to check membership can turn an O(n²) loop into an O(n) one. Bloom filters are approximate sets. Elements must be hashable or comparable.",
+      "principles": "Removing order and duplicates leaves membership as the only question, which is what makes sets fast and their algebra clean. Much of programming is asking is it in there? and sets answer it directly.",
+      "example": {
+        "label": "Set algebra",
+        "code": "a = {\"python\", \"sql\", \"linux\"}\nb = {\"sql\", \"docker\", \"linux\", \"nginx\"}\nprint(sorted(a | b))          # union\nprint(sorted(a & b))          # intersection: ['linux', 'sql']\nprint(sorted(a - b))          # difference: ['python']\nprint(\"sql\" in a)             # True, an O(1) average membership test"
+      },
+      "requires": [
+        "abstract-data-types",
+        "hash-tables"
+      ]
+    },
+    {
+      "id": "associative-arrays",
+      "picture": "A collection of labeled slots: look things up by name instead of position.",
+      "mechanism": "Also called a map or dictionary. It stores key–value pairs and supports put(key, value), get(key), remove(key), and contains(key). Each key appears once. Given a key you get its value directly, without searching.",
+      "detail": "Implementations: a hash table (average O(1), no inherent order; Python's dict, JavaScript's Map, Java's HashMap) or a balanced tree (O(log n), keys in sorted order; C++'s std::map, Java's TreeMap). Python's dict also preserves insertion order.\n\nUses are endless: counting occurrences, caching, indexing records by ID, symbol tables, configuration, JSON objects, database indexes, and memoization. A common idiom is grouping: build a map from a key to the list of items that share it. Keys must be immutable or otherwise stably hashable (lists cannot be dict keys in Python; tuples can). Missing keys should be handled explicitly, with default values or a fallback, since failed lookups are a top source of bugs.",
+      "principles": "People remember by names, not addresses, and a map gives programs the same convenience. The idea of lookup by label is so useful that most languages build it in as a basic type.",
+      "example": {
+        "label": "Counting and grouping",
+        "code": "text = \"the cat and the hat and the bat\"\ncounts = {}\nfor word in text.split():\n    counts[word] = counts.get(word, 0) + 1\nprint(counts)                       # {'the': 3, 'cat': 1, 'and': 2, 'hat': 1, 'bat': 1}\n\ngroups = {}\nfor word in counts:\n    groups.setdefault(len(word), []).append(word)\nprint(groups)                       # {3: ['the', 'cat', 'and', 'hat', 'bat']}"
+      },
+      "requires": [
+        "abstract-data-types",
+        "hash-tables"
+      ]
+    },
+    {
+      "id": "iterators",
+      "picture": "A bookmark that moves through a collection, one item at a time.",
+      "mechanism": "An iterator has two abilities: give me the next item, and tell me when there are no more. A loop asks for the next item repeatedly until the iterator says it is done, without knowing what is being walked.",
+      "detail": "This decouples algorithms from containers: the same for-loop works over an array, a linked list, a tree, the lines of a file, or the rows returned by a database. Many languages build it into loop syntax (Python's for, Java's for-each, JavaScript's for-of).\n\nGenerators produce values lazily, one at a time, so you can iterate over an infinite sequence or a huge file without holding it all in memory. Pitfalls are modifying a collection while iterating over it (which can skip items or raise errors) and iterators that are used up after one pass. Lazy chains of map, filter, and take compose without creating intermediate lists, which is the idea behind streams and pipelines.",
+      "principles": "Separating how to walk from what is walked lets one piece of code work on anything walkable. Laziness goes further: computing only what is asked for makes even endless things usable.",
+      "example": {
+        "label": "An endless sequence, produced lazily",
+        "code": "def fibonacci():\n    a, b = 0, 1\n    while True:               # infinite, but only computed on demand\n        yield a\n        a, b = b, a + b\n\nit = fibonacci()\nprint([next(it) for _ in range(10)])    # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]\n\nevens = (n for n in fibonacci() if n % 2 == 0)\nprint([next(evens) for _ in range(4)])  # [0, 2, 8, 34]"
+      },
+      "requires": [
+        "abstract-data-types"
+      ]
+    },
+    {
+      "id": "graph-theory",
+      "picture": "The mathematics of dots and lines: what can be said about anything made of connections.",
+      "mechanism": "A graph is a set of vertices with edges between some pairs. Graph theory asks what follows: Is it connected? Can you trace it without lifting your pen? How many colors does it need? What is the shortest route? What must happen if it has too many edges?",
+      "detail": "Leonhard Euler founded it in 1736 with the Königsberg bridge problem. It grew through the four-color problem, Kirchhoff's analysis of electrical circuits, and Cayley's counting of trees, which counted chemical isomers.\n\nKey results: Euler's theorem on routes using every edge once; Hamiltonian paths (through every vertex once, NP-hard to find); planar graphs, drawable without crossings, with Euler's formula V − E + F = 2; Ramsey theory, in which order must appear in any large enough structure; the random graphs of Erdős and Rényi and the sudden emergence of a giant connected component; and the network science of the 1990s, small worlds and scale-free networks. Applications span routing, scheduling, social networks, chemistry, biology, and the internet.",
+      "principles": "Strip a system to nodes and links and surprising truths appear. Graph theory is a reminder that structure, who is connected to whom, can matter more than what the things are.",
+      "requires": [
+        "graphs",
+        "proof"
+      ]
+    },
+    {
+      "id": "konigsberg",
+      "picture": "Can you walk across all seven bridges of a city exactly once? Euler proved you cannot.",
+      "mechanism": "Euler replaced the map with a graph: each landmass is a node and each bridge an edge. A walk crossing every edge exactly once must enter and leave each node the same number of times, so every node, except possibly the start and end, needs an even number of edges. In Königsberg all four landmasses have an odd number.",
+      "detail": "The city, now Kaliningrad in Russia, sat on the river Pregel, with two islands and seven bridges. Residents wondered whether a walk could cross each bridge exactly once. Euler answered in 1736: it is impossible, and in general a connected graph has such a route (an Euler path) if and only if zero or two of its nodes have odd degree; it forms a closed loop (an Euler circuit) if none do.\n\nHis paper is considered the first in graph theory and an early step toward topology, since it shows that only connections matter, not distances or shapes. Some of the bridges were destroyed in the Second World War, and the remaining layout does allow such a walk.",
+      "principles": "Solving a problem sometimes means deciding what to ignore. Euler's answer came from realizing that the shape of the land did not matter, only the pattern of connections.",
+      "requires": [
+        "graph-theory"
+      ]
+    },
+    {
+      "id": "graph-coloring",
+      "picture": "Color the dots so that no two joined by a line share a color, using as few colors as possible.",
+      "mechanism": "Assign each vertex a color from a small palette, with the rule that connected vertices differ. The smallest number of colors that works is the graph's chromatic number. Finding it is NP-hard in general, so practical methods use heuristics such as greedy coloring: give each vertex the first color not used by its neighbors.",
+      "detail": "Map coloring is the classic case: regions are vertices and shared borders are edges. The four-color theorem says any map needs at most four colors. Conjectured in 1852, it was proved in 1976 by Appel and Haken with a computer check of many cases, the first major theorem proved that way.\n\nBeyond maps: exam scheduling (courses sharing students cannot share a time slot), register allocation in compilers (variables alive at the same time need different registers), frequency assignment for radio and cell towers, and Sudoku. A graph with no odd cycles can be colored with two colors (it is bipartite), a fact used to test whether a structure splits into two sides.",
+      "principles": "Many scheduling and allocation problems are the same problem: things that conflict must be kept apart using as few resources as possible. Coloring is the pure form of that constraint.",
+      "example": {
+        "label": "Scheduling exams greedily",
+        "code": "def greedy_color(graph):\n    colors = {}\n    for node in sorted(graph):\n        taken = {colors[n] for n in graph[node] if n in colors}\n        colors[node] = next(c for c in range(len(graph)) if c not in taken)\n    return colors\n\nexams = {                       # an edge joins courses that share a student\n    \"Maths\": [\"Physics\", \"Chem\"], \"Physics\": [\"Maths\", \"Chem\", \"Art\"],\n    \"Chem\": [\"Maths\", \"Physics\"], \"Art\": [\"Physics\"],\n}\nprint(greedy_color(exams))      # {'Art': 0, 'Chem': 0, 'Maths': 1, 'Physics': 2}"
+      },
+      "requires": [
+        "graph-theory"
+      ]
+    },
+    {
+      "id": "small-world-networks",
+      "picture": "A world where nearly everyone is only a few introductions away from anyone else.",
+      "mechanism": "In a small-world network most nodes are not neighbors, yet the number of steps between any two stays very small, growing only with the logarithm of the network's size. It arises from mostly local clustering (my friends know each other) plus a few long-range shortcuts.",
+      "detail": "Stanley Milgram's 1967 letter-forwarding experiment suggested about six steps between strangers in the United States, the origin of six degrees of separation. In 1998 Duncan Watts and Steven Strogatz showed that taking a regular ring of local links and rewiring just a few at random collapses the average distance while keeping the tight clusters. Later, Barabási and Albert found that many networks are also scale-free, with a few hubs and many low-degree nodes.\n\nSmall-world structure appears in the brain's wiring, power grids, the web, food webs, and airline routes. It helps explain why information, innovation, and disease spread quickly through populations, and why removing hubs is the way to slow a spread or to attack a network.",
+      "principles": "A few shortcuts change everything. Local ties give cohesion and long ties give reach, and a network with both is at once tightly knit and small, which is why the world can feel both large and close.",
+      "requires": [
+        "graph-theory",
+        "probability"
+      ]
+    }
+  ]
+}

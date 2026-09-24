@@ -1,0 +1,29 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "intelligence",
+  "description": "Modelling, predicting, and choosing: machine learning, neural networks, language models, and the questions they raise.",
+  "concepts": [
+    {"id":"intelligence","title":"Intelligence","voice":"precise","orb":"searching","parents":["machines"],"wiki":"Artificial intelligence","summary":"The ability to model a situation, predict what comes next, and choose what to do. Machines have imitated slivers of it for decades, and lately the slivers have grown broad enough to be useful and strange."},
+    {"id":"machine-learning","title":"Machine Learning","voice":"precise","orb":"working","parents":["intelligence"],"wiki":"Machine learning","summary":"Instead of writing rules, show a system many examples and let it adjust itself to fit them. The result can spot patterns no one described, and it can also inherit every flaw in the examples."},
+    {"id":"pattern-recognition","title":"Pattern Recognition","voice":"precise","orb":"searching","parents":["machine-learning"],"wiki":"Pattern recognition","summary":"Finding regularity in noise: a face in pixels, a word in sound, a tumor in a scan. It's what brains do effortlessly and what machines had to learn slowly."},
+    {"id":"neural-networks","title":"Neural Networks","voice":"precise","orb":"connecting","parents":["intelligence"],"wiki":"Neural network (machine learning)","summary":"Layers of simple units, each passing a weighted signal to the next. Loosely inspired by neurons, they learn by nudging millions of weights until the output improves."},
+    {"id":"language-models","title":"Language Models","voice":"precise","orb":"listening","parents":["intelligence"],"wiki":"Large language model","summary":"Systems trained on huge amounts of text to predict what comes next in a sentence. From that one task they pick up grammar, facts, and style, along with a habit of sounding sure when they aren't."},
+    {"id":"attention","title":"Attention","voice":"precise","orb":"searching","parents":["intelligence"],"wiki":"Attention (machine learning)","summary":"In machines, a way for a model to weigh which parts of its input matter for each step. In people, the older version: what you attend to is what your world becomes."},
+    {"id":"reasoning","title":"Reasoning","voice":"precise","orb":"solving","parents":["intelligence"],"wiki":"Reason","summary":"Getting from what you know to something you didn't, in steps you could defend. People do it slowly and imperfectly; machines can do it fast, but doing it reliably in open situations is still hard."},
+    {"id":"turing-test","title":"Turing Test","voice":"precise","orb":"shaping","parents":["intelligence"],"wiki":"Turing test","summary":"Turing's proposal: if you can't tell a machine from a person by conversation alone, stop arguing about whether it thinks. It became a landmark, and a reminder that fooling someone and understanding are different things."},
+    {"id":"alignment","title":"Alignment","voice":"precise","orb":"weaving","parents":["intelligence"],"wiki":"AI alignment","summary":"Making sure a capable system does what its makers and users actually want, not just what they literally said. It's partly engineering and partly the old human problem of saying what we mean."},
+    {"id":"automation","title":"Automation","voice":"mechanical","orb":"composing","parents":["intelligence"],"wiki":"Automation","summary":"Handing a repeatable task to a machine so nobody has to do it. It frees time and removes work, and it also changes who has the skill, who gets paid, and what people think is worth learning."}
+  ],
+  "links": [
+    ["intelligence", "consciousness"], ["intelligence", "language"], ["intelligence", "memory"], ["intelligence", "technology-behavior"], ["intelligence", "learning"],
+    ["intelligence", "robots"], ["intelligence", "silicon"], ["machine-learning", "evolution"], ["machine-learning", "patterns"], ["machine-learning", "probability"],
+    ["machine-learning", "statistics"], ["machine-learning", "calculus"], ["machine-learning", "learning"], ["pattern-recognition", "perception"], ["pattern-recognition", "patterns"],
+    ["pattern-recognition", "sensors"], ["neural-networks", "cells"], ["neural-networks", "consciousness"], ["neural-networks", "memory"], ["neural-networks", "neurons"],
+    ["language-models", "language"], ["language-models", "symbols"], ["language-models", "trust"], ["language-models", "writing"], ["language-models", "translation"],
+    ["language-models", "poetry"], ["language-models", "phishing"], ["attention", "consciousness"], ["attention", "technology-behavior"], ["attention", "perception"],
+    ["attention", "meditation"], ["reasoning", "logic"], ["reasoning", "proof"], ["reasoning", "science"], ["turing-test", "consciousness"],
+    ["turing-test", "language"], ["turing-test", "trust"], ["turing-test", "godel"], ["alignment", "care"], ["alignment", "trust"],
+    ["alignment", "feedback"], ["alignment", "consequence"], ["alignment", "law"], ["automation", "money"], ["automation", "trade"],
+    ["automation", "algorithms"], ["automation", "tools"], ["automation", "robots"], ["automation", "industrial-revolution"], ["automation", "technology-behavior"]
+  ]
+}

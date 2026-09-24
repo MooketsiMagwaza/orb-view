@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orb View concept cluster",
+  "type": "object",
+  "required": ["cluster", "concepts"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "cluster": { "type": "string", "description": "Short name of this cluster of ideas." },
+    "description": { "type": "string" },
+    "concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "voice", "orb", "parents", "wiki", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "title": { "type": "string", "maxLength": 24 },
+          "voice": { "enum": ["restless", "precise", "layered", "human", "quiet", "mechanical", "vast", "lucid"] },
+          "orb": { "enum": ["working", "searching", "solving", "listening", "connecting", "weaving", "composing", "breathing", "shaping"] },
+          "parents": { "type": "array", "items": { "type": "string" } },
+          "wiki": { "type": "string", "description": "Exact English Wikipedia article title." },
+          "nasa": { "type": "string", "description": "Search phrase for the NASA Image and Video Library." },
+          "met": { "type": "string", "description": "Search phrase for The Met's public-domain collection." },
+          "summary": { "type": "string", "description": "15–65 words, in the branch's voice." },
+          "sensitive": { "type": "boolean" },
+          "layer": { "const": 2 }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 }
+    }
+  }
+}

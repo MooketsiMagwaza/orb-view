@@ -1,0 +1,176 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Calculus, part five: infinite sequences and series, convergence and its tests, power and Taylor series, Euler's identity, and Fourier series, each in four layers.",
+  "depth": [
+    {
+      "id": "series",
+      "picture": "Adding up infinitely many numbers.",
+      "mechanism": "A series Σ aₙ is the limit of its partial sums Sₙ = a₁ + … + aₙ. If the partial sums approach a number S, the series converges to S; if they do not settle, by growing without bound or oscillating, it diverges.",
+      "detail": "The first question is always convergence. A necessary condition is that the terms shrink to zero, but that is not sufficient, as the harmonic series shows. Some sums are surprising: 1 + 1/2 + 1/4 + … = 2; 1 − 1/3 + 1/5 − … = π/4; 1 + 1/4 + 1/9 + … = π²/6, Euler's solution of the Basel problem in 1734; and 1 + 2 + 3 + … has no ordinary sum, though the regularized value −1/12 appears in physics.\n\nConditionally convergent series can be rearranged to sum to anything (Riemann's rearrangement theorem), while absolutely convergent ones cannot. Power series give functions as infinite polynomials, Fourier series as sums of waves; in numerical work, series compute sines, exponentials, and π. Zeno's paradoxes are series in disguise. Physical uses include multipole expansions, perturbation theory, partition functions, and the present value of a perpetual stream of payments.",
+      "principles": "Infinity does not have to mean unbounded. A series converges when its tail becomes negligible, and deciding whether that happens is where calculus meets the infinite most directly.",
+      "example": {
+        "label": "Four famous sums",
+        "code": "import math\n\npartial = lambda terms, n: sum(terms(k) for k in range(1, n + 1))\nprint(round(partial(lambda k: 1 / 2 ** k, 30), 8))                     # geometric: 1.0\nprint(round(4 * sum((-1) ** k / (2 * k + 1) for k in range(100_000)), 5), round(math.pi, 5))   # Leibniz: pi, slowly\nprint(round(partial(lambda k: 1 / k ** 2, 100_000), 5), round(math.pi ** 2 / 6, 5))         # Basel: pi^2 / 6\nprint(round(partial(lambda k: 1 / k, 100_000), 3), \"...and the harmonic sum keeps growing\")"
+      },
+      "requires": [
+        "sequences"
+      ]
+    },
+    {
+      "id": "sequences",
+      "picture": "An endless list of numbers, and the question of where it is heading.",
+      "mechanism": "A sequence is a function on the whole numbers: a₁, a₂, a₃, and so on. It converges to L if the terms get and stay as close to L as you like: for every ε there is an N beyond which |aₙ − L| < ε. Otherwise it diverges, either to infinity or by oscillating.",
+      "detail": "Examples: 1/n → 0; (−1)ⁿ oscillates and diverges; (1 + 1/n)ⁿ → e; the Fibonacci sequence diverges to infinity, but the ratio of consecutive terms converges to the golden ratio. The monotone convergence theorem says a bounded monotone sequence converges, a formulation of the completeness of the real numbers that guarantees many limits exist without computing them.\n\nSequences can be defined explicitly (aₙ = n²) or recursively (aₙ = aₙ₋₁ + aₙ₋₂, or Newton's iteration, which produces a sequence of better guesses). Every series is a sequence of partial sums, so series questions become sequence questions. Cauchy sequences, those whose terms get close to each other, converge in the reals; the rationals lack this, since a sequence of rationals can converge to √2. The Bolzano–Weierstrass theorem, that every bounded sequence has a convergent subsequence, drives many proofs in analysis.",
+      "principles": "A sequence is a process with a destination. Asking where the terms end up is the elementary form of every limit question, and completeness of the number line is what guarantees that the answer exists.",
+      "example": {
+        "label": "A recursive sequence closing in on sqrt(2)",
+        "code": "import math\n\na = 1.0\nfor n in range(1, 8):\n    a = (a + 2 / a) / 2                     # each term from the last; the limit is sqrt(2)\n    print(n, a)\n\nprint([round((1 + 1 / n) ** n, 4) for n in (1, 10, 100, 1000)], \"->\", round(math.e, 4))"
+      },
+      "requires": [
+        "limits"
+      ]
+    },
+    {
+      "id": "convergence",
+      "picture": "A series converges when its running total settles down to a fixed number.",
+      "mechanism": "Let Sₙ be the sum of the first n terms. The series converges if Sₙ approaches a finite limit. A necessary condition is aₙ → 0, the divergence test: if the terms do not shrink to zero, the series cannot converge. It is not sufficient: the terms of Σ 1/n go to 0, but the sum diverges.",
+      "detail": "Absolute convergence (Σ |aₙ| converges) is stronger than convergence: it implies convergence and lets you rearrange freely. Conditional convergence, as in 1 − 1/2 + 1/3 − …, is fragile: Riemann showed that rearranging the terms can give any sum, or divergence. The Cauchy criterion says a series converges exactly when its tails can be made arbitrarily small.\n\nSpeed of convergence matters in practice: a geometric series with ratio 0.5 gains a bit per term, while the Leibniz series for π needs a million terms for six digits; accelerating methods such as the Euler transform and Aitken's help. Divergent series can still be useful: asymptotic series give good approximations while diverging, with the error smallest at some finite term, and summation methods such as Cesàro, Abel, and Borel assign values to some of them.",
+      "principles": "Convergence separates sums that mean something from those that do not. It says that infinitely many contributions can add to a finite total only if they die away fast enough, and the boundary case is subtler than it looks.",
+      "requires": [
+        "series"
+      ]
+    },
+    {
+      "id": "geometric-series",
+      "picture": "Each term is the previous one times the same ratio: 1 + ½ + ¼ + …",
+      "mechanism": "a + ar + ar² + ar³ + … has partial sum a(1 − rⁿ)/(1 − r). It converges when |r| < 1, to a/(1 − r), and diverges otherwise. For example, 1 + 1/2 + 1/4 + … = 2, and 0.999… = 9/10 + 9/100 + … = 1.",
+      "detail": "It is the simplest infinite sum and the yardstick for others: the ratio test compares a series with a geometric one, and power series are geometric series with a variable ratio (1/(1 − x) = 1 + x + x² + … for |x| < 1).\n\nUses: the present value of a perpetuity (a payment P each year at interest rate i is worth P/i), the multiplier effect in economics (each round of spending is a fraction of the last), drug accumulation with regular doses, repeating decimals, the total distance of a bouncing ball, and Zeno's paradoxes. Finite geometric sums give loan amortization formulas and the count of nodes in a tree. Archimedes summed a geometric series to find the area of a parabolic segment, four thirds of the inscribed triangle, around 250 BCE, the earliest known infinite sum.",
+      "principles": "The one infinite sum with a clean answer, and the one everything else is compared to. When each step is a fixed fraction of the last, infinitely many steps can fit in a finite journey.",
+      "example": {
+        "label": "Partial sums, and a bouncing ball",
+        "code": "r = 0.5\nfor n in (1, 5, 10, 30):\n    print(n, sum(r ** k for k in range(n)))          # approaches 1 / (1 - r) = 2\n\n# a ball dropped from 10 m, bouncing back to 60% of the previous height\ntotal = 10 + 2 * sum(10 * 0.6 ** k for k in range(1, 200))\nprint(round(total, 3), 10 + 2 * 10 * 0.6 / (1 - 0.6))    # total distance: 40 m"
+      },
+      "requires": [
+        "convergence"
+      ]
+    },
+    {
+      "id": "zeno",
+      "picture": "Achilles can never overtake the tortoise, because he must first reach where it was.",
+      "mechanism": "Zeno of Elea, in the fifth century BCE, argued that motion is impossible: to travel any distance you must first go halfway, then half the remaining distance, and so on, an infinite number of tasks. Modern analysis resolves it: infinitely many steps can take a finite total time, since the durations form a convergent geometric series.",
+      "detail": "The four best known are the Dichotomy (you must traverse half the path first, then half of what is left), Achilles and the tortoise, the Arrow (at each instant it is at rest, so it never moves), and the Stadium. If Achilles runs at 10 m/s and the tortoise at 1 m/s with a 100 m head start, Achilles reaches the tortoise's starting point in 10 s, by which time it has moved 10 m, then 1 m, then 0.1 m: 10 + 1 + 0.1 + … = 11.11… s, and he passes at t = 100/9.\n\nAristotle replied that the infinite divisibility of distance is potential, not actual; calculus supplied the sum. Philosophers still debate whether the resolution is complete: is the paradox about the mathematics or about whether space and time are infinitely divisible? The Arrow is answered by defining velocity as a limit, not as something an instant possesses.",
+      "principles": "A paradox that lasted two thousand years dissolves once you can add infinitely many shrinking pieces. Zeno was right that motion contains infinitely many steps, and calculus shows why that does not make it impossible.",
+      "example": {
+        "label": "Infinitely many steps, finite time",
+        "code": "gap, time = 100.0, 0.0          # tortoise's head start (m); Achilles 10 m/s, tortoise 1 m/s\nfor step in range(1, 8):\n    dt = gap / 10               # time for Achilles to cover the gap\n    time += dt\n    gap = dt * 1                # the tortoise moved on in the meantime\n    print(f\"step {step}: elapsed {time:.6f} s, new gap {gap:.6f} m\")\nprint(\"limit:\", 100 / 9, \"s\")"
+      },
+      "requires": [
+        "geometric-series"
+      ]
+    },
+    {
+      "id": "harmonic-divergence",
+      "picture": "1 + ½ + ⅓ + ¼ + … has shrinking terms, yet the sum grows without bound.",
+      "mechanism": "The harmonic series Σ 1/n diverges. Group it: 1 + ½ + (⅓ + ¼) + (⅕ + … + ⅛) + …; each group adds at least ½, so the sum exceeds any number. The partial sum after n terms is about ln n + 0.5772, the second term being the Euler–Mascheroni constant.",
+      "detail": "Nicole Oresme proved it around 1350 by that grouping argument. It grows extremely slowly: reaching 10 takes 12,367 terms, and reaching 100 takes about 1.5 × 10⁴³. The integral test gives the same conclusion, since the integral of 1/x is ln x, unbounded; and it shows that Σ 1/nᵖ converges for p > 1.\n\nRemoving terms can rescue it: Kempner's series, omitting every number containing the digit 9, converges to about 22.92, but the reciprocals of the primes still diverge (Euler). The harmonic numbers appear in the analysis of quicksort and in the coupon collector problem, where collecting n coupons takes n times Hₙ draws on average. In block stacking, n blocks can overhang the table edge by Hₙ/2 block lengths, without limit. It is the standard warning that Σ aₙ with aₙ → 0 need not converge.",
+      "principles": "A sum can keep growing forever while its terms keep shrinking. The harmonic series is the standard example, the reminder that shrinking is not the same as summable, and that the boundary sits exactly at 1/n.",
+      "example": {
+        "label": "Growing like ln n",
+        "code": "import math\n\ngamma = 0.5772156649\nfor n in (10, 1000, 100_000, 1_000_000):\n    h = sum(1 / k for k in range(1, n + 1))\n    print(n, round(h, 4), \"vs ln n + gamma =\", round(math.log(n) + gamma, 4))\n\ntotal, k = 0.0, 0\nwhile total < 10:\n    k += 1\n    total += 1 / k\nprint(k, \"terms to pass 10\")         # 12367"
+      },
+      "requires": [
+        "convergence"
+      ]
+    },
+    {
+      "id": "convergence-tests",
+      "picture": "Tools for deciding whether a series converges without adding it up.",
+      "mechanism": "Compare with something known (comparison test), use the ratio of successive terms (ratio test: converges if the limit of |aₙ₊₁/aₙ| is below 1), the n-th root (root test), the area under a matching curve (integral test), or alternating signs with shrinking terms (alternating series test).",
+      "detail": "Divergence test: if aₙ does not go to 0, the series diverges. p-series: Σ 1/nᵖ converges exactly when p > 1. Geometric: converges exactly when |r| < 1. Comparison: if 0 ≤ aₙ ≤ bₙ and Σ bₙ converges, so does Σ aₙ; if aₙ ≥ bₙ ≥ 0 and Σ bₙ diverges, so does Σ aₙ. Ratio test: a limit below 1 converges absolutely, above 1 diverges, exactly 1 is inconclusive; it is the standard tool for series with factorials and exponentials.\n\nThe alternating series test (Leibniz): terms decreasing to zero and alternating in sign converge, with error less than the first omitted term. Others, such as Raabe's and Dirichlet's, handle delicate cases. Strategy: check the limit of the terms, identify the type, try the ratio test for factorials, comparison for algebraic terms, and the integral test when there is a natural function. Convergence tests give yes or no, not the value of the sum, which is a harder question.",
+      "principles": "You rarely need the sum, only the verdict. Convergence tests turn a question about infinitely many terms into a comparison with something simple, and knowing which test to try is most of the skill.",
+      "example": {
+        "label": "The ratio test on three series",
+        "code": "import math\n\ndef ratio(term, n=60):\n    return abs(term(n + 1) / term(n))\n\nprint(\"sum 10^n / n!  :\", round(ratio(lambda n: 10 ** n / math.factorial(n)), 4), \"< 1: converges\")\nprint(\"sum n! / n^n   :\", round(ratio(lambda n: math.factorial(n) / n ** n), 4), \"< 1: converges (tends to 1/e)\")\nprint(\"sum 1 / n^2    :\", round(ratio(lambda n: 1 / n ** 2), 4), \"-> 1: inconclusive, use the p-test\")"
+      },
+      "requires": [
+        "convergence"
+      ]
+    },
+    {
+      "id": "power-series",
+      "picture": "An infinite polynomial: a₀ + a₁x + a₂x² + a₃x³ + …",
+      "mechanism": "Σ aₙ(x − c)ⁿ. For each x it is an ordinary series; it converges for x within some radius R of the center c, and diverges beyond it. Inside the radius it behaves like a function, and can be added, multiplied, differentiated, and integrated term by term.",
+      "detail": "Examples: 1/(1 − x) = Σ xⁿ for |x| < 1; eˣ = Σ xⁿ/n! for all x; sin x = x − x³/3! + x⁵/5! − …; ln(1 + x) = x − x²/2 + x³/3 − …; arctan x = x − x³/3 + x⁵/5 − …, which at x = 1 gives Leibniz's series for π/4. Term-by-term differentiation gives derivatives: that d/dx eˣ = eˣ is visible from its series.\n\nPower series solve differential equations (assume a series and match coefficients), define special functions such as Bessel and Legendre, and compute functions on calculators and in libraries. A function equal to its power series is called analytic; in complex analysis, differentiable once implies analytic, a startling contrast with real analysis, where smooth functions exist that are not analytic (e^(−1/x²) has all derivatives zero at 0 yet is not zero). Madhava of Sangamagrama in Kerala found series for sine, cosine, and arctangent around 1400.",
+      "principles": "A power series turns a function into something you can compute with only addition and multiplication. Nearly every calculator, and much of theoretical physics, is quietly running on truncated infinite polynomials.",
+      "example": {
+        "label": "e^2 from its series",
+        "code": "import math\n\ndef series_exp(x, terms):\n    return sum(x ** n / math.factorial(n) for n in range(terms))\n\nfor terms in (2, 4, 8, 12):\n    print(terms, round(series_exp(2.0, terms), 6), \"vs\", round(math.exp(2.0), 6))"
+      },
+      "requires": [
+        "convergence-tests",
+        "polynomials"
+      ]
+    },
+    {
+      "id": "radius-of-convergence",
+      "picture": "How far from its center a power series keeps working.",
+      "mechanism": "For Σ aₙ(x − c)ⁿ there is a number R, possibly 0 or infinite, such that the series converges for |x − c| < R and diverges for |x − c| > R. Find R with the ratio test: R = lim |aₙ/aₙ₊₁|. At the boundary points, convergence must be checked separately.",
+      "detail": "For Σ xⁿ, R = 1; for Σ xⁿ/n!, R = ∞; for Σ n! xⁿ, R = 0. Surprisingly, the radius is determined by the function's nearest singularity in the complex plane. Example: 1/(1 + x²) is perfectly smooth for all real x, yet its Taylor series about 0 has R = 1, because the function blows up at x = ±i, at distance 1 from the center. That explains why the series fails at x = 2 for no visible reason on the real line.\n\nInside the circle of convergence the series converges absolutely and can be differentiated and integrated term by term, with the same radius. At the boundary anything can happen: Σ xⁿ diverges at both ends; Σ xⁿ/n converges at −1 but diverges at 1; Σ xⁿ/n² converges at both. The Cauchy–Hadamard formula gives R = 1/limsup |aₙ|^(1/n).",
+      "principles": "A series can fail where the function looks perfectly fine, because the trouble lives in the complex plane. The radius of convergence is the distance to the nearest hidden singularity.",
+      "example": {
+        "label": "A smooth function whose series stops at |x| = 1",
+        "code": "# 1/(1 + x^2) = 1 - x^2 + x^4 - ...   smooth on the real line, but the series only works for |x| < 1\ndef partial(x, n):\n    return sum((-1) ** k * x ** (2 * k) for k in range(n))\n\nfor x in (0.5, 0.9, 1.1):\n    print(x, [round(partial(x, n), 3) for n in (5, 10, 20, 40)], \"target\", round(1 / (1 + x * x), 3))"
+      },
+      "requires": [
+        "power-series"
+      ]
+    },
+    {
+      "id": "taylor-series",
+      "picture": "Rebuild a function near a point from its derivatives at that point.",
+      "mechanism": "f(x) = f(a) + f′(a)(x − a) + f″(a)/2! (x − a)² + f‴(a)/3! (x − a)³ + …. Each term uses one more derivative, matching the function's value, slope, curvature, and so on. Truncating after n terms gives a polynomial approximation, whose error is bounded by the next term (the Lagrange remainder). Centered at a = 0 it is called a Maclaurin series.",
+      "detail": "Standard ones: eˣ = 1 + x + x²/2! + …; sin x = x − x³/3! + x⁵/5! − …; cos x = 1 − x²/2! + x⁴/4! − …; 1/(1 − x) = 1 + x + x² + …; ln(1 + x) = x − x²/2 + x³/3 − …. Brook Taylor published the general result in 1715, though Gregory, Newton, and Madhava had special cases.\n\nTaylor polynomials underlie linear and quadratic approximations, numerical methods (Newton's and Runge–Kutta methods are matched to Taylor expansions), and calculators' function evaluation. Physics uses low-order truncations everywhere: the small-angle sin θ ≈ θ, relativistic energy E ≈ mc² + ½mv², and perturbation theory. Warning: a Taylor series may converge to a different function (e^(−1/x²)) or only within a limited radius. In optimization, second-order Taylor models motivate Newton's method and the Hessian.",
+      "principles": "Any smooth function is, up close, a polynomial in disguise, and its derivatives at one point encode its behavior everywhere the series converges. It is the reason a calculator can compute a sine with nothing but arithmetic.",
+      "example": {
+        "label": "Sine from its derivatives at zero",
+        "code": "import math\n\ndef taylor_sin(x, terms):\n    return sum((-1) ** k * x ** (2 * k + 1) / math.factorial(2 * k + 1) for k in range(terms))\n\nx = 2.0\nfor terms in (1, 2, 3, 5, 8):\n    print(terms, round(taylor_sin(x, terms), 8), \"error\", f\"{abs(taylor_sin(x, terms) - math.sin(x)):.2e}\")"
+      },
+      "requires": [
+        "power-series",
+        "derivatives"
+      ]
+    },
+    {
+      "id": "eulers-identity",
+      "picture": "e^(iπ) + 1 = 0: five of the most important constants in one line.",
+      "mechanism": "Euler's formula says e^(iθ) = cos θ + i sin θ, obtained by substituting iθ into the power series of eˣ and separating real and imaginary parts, which match the series for cosine and sine. Set θ = π: cos π = −1 and sin π = 0, so e^(iπ) = −1, or e^(iπ) + 1 = 0.",
+      "detail": "The five constants are 0, 1, e, i, and π, tied together by addition, multiplication, and exponentiation. Its meaning: raising e to an imaginary power rotates rather than grows; the point e^(iθ) moves around the unit circle. So exponentials and trigonometry are one subject, and multiplying complex numbers adds their angles.\n\nConsequences: de Moivre's formula (cos θ + i sin θ)ⁿ = cos nθ + i sin nθ; trigonometric identities become simple algebra of exponentials; sin θ = (e^(iθ) − e^(−iθ))/2i; and the Fourier transform's kernel e^(−iωt). Roger Cotes found a version in 1714 and Euler published in 1748. Physicists use it for AC circuits and quantum phases, engineers for signals. Feynman called Euler's formula a jewel of mathematics, and in a 1988 reader poll in The Mathematical Intelligencer, the identity was voted the most beautiful theorem.",
+      "principles": "Growth and rotation are the same operation in different directions. Euler's identity says that exponentials, circles, and complex numbers are one structure, and it is the shortest route from calculus to waves.",
+      "example": {
+        "label": "Rotation by an imaginary exponent",
+        "code": "import cmath, math\n\nprint(cmath.exp(1j * math.pi))                     # -1 plus a rounding error of about 1e-16\nz = cmath.exp(1j * math.pi / 3)\nprint(round(z.real, 6), round(z.imag, 6), round(math.cos(math.pi / 3), 6), round(math.sin(math.pi / 3), 6))\nprint(abs(cmath.exp(1j * 0.7)))                    # always on the unit circle: 1.0"
+      },
+      "requires": [
+        "taylor-series",
+        "imaginary-numbers",
+        "euler-number"
+      ]
+    },
+    {
+      "id": "fourier-series",
+      "picture": "Any repeating pattern is a sum of sine waves of different frequencies.",
+      "mechanism": "A function of period 2π can be written f(x) = a₀/2 + Σ (aₙ cos nx + bₙ sin nx), where the coefficients are found by integrals: aₙ = (1/π) ∫ f(x) cos nx dx and bₙ = (1/π) ∫ f(x) sin nx dx over a period. Each term is a pure harmonic; the coefficients say how much of each is present.",
+      "detail": "Joseph Fourier introduced it in 1807 to solve the heat equation. It was so controversial (Lagrange doubted that discontinuous functions could be sums of smooth ones) that his paper was resisted for years. A square wave is 4/π times (sin x + sin 3x/3 + sin 5x/5 + …). Adding more terms improves the fit, except near jumps, where an overshoot of about 9 percent of the jump, the Gibbs phenomenon, persists.\n\nSine and cosine are orthogonal: their product integrates to zero over a period, which is why the coefficient formulas work, and it makes the series an expansion in an orthogonal basis; Parseval's theorem says energy is conserved between the function and its coefficients. Extended to non-periodic functions it becomes the Fourier transform. Uses: audio synthesis and analysis, MP3 and JPEG compression (discarding small coefficients), solving differential equations, X-ray crystallography, radio, MRI, and image filtering. The fast Fourier transform of Cooley and Tukey, 1965, computes it in n log n time.",
+      "principles": "Complicated repeating signals are chords of simple tones. Splitting a wave into its frequencies turns hard problems, such as heat flow, filtering, and compression, into simple arithmetic on the parts.",
+      "example": {
+        "label": "Building a square wave from sines",
+        "code": "import math\n\ndef square_wave(x, harmonics):\n    return 4 / math.pi * sum(math.sin((2 * k + 1) * x) / (2 * k + 1) for k in range(harmonics))\n\nfor harmonics in (1, 3, 10, 50):\n    print(harmonics, [round(square_wave(x, harmonics), 3) for x in (0.5, 1.0, 1.5, 2.0)])   # approaches 1.0\nprint(\"Gibbs overshoot near the jump:\", round(max(square_wave(i * 0.001, 50) for i in range(1, 300)), 3))"
+      },
+      "requires": [
+        "series",
+        "trigonometric-functions",
+        "integrals"
+      ]
+    }
+  ]
+}

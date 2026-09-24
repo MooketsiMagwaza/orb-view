@@ -1,0 +1,24 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "science-cosmos",
+  "group": "Science",
+  "order": 1,
+  "title": "The Universe",
+  "blurb": "From the Big Bang through stars and black holes to the far future.",
+  "orb": "searching",
+  "entry": "cosmos",
+  "path": [
+    "cosmos",
+    "big-bang",
+    "cosmic-expansion",
+    "stars",
+    "nucleosynthesis",
+    "supernovae",
+    "neutron-stars",
+    "black-holes",
+    "event-horizon",
+    "hawking-radiation",
+    "heat-death",
+    "ultimate-fate"
+  ]
+}

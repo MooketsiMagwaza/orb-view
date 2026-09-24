@@ -1,0 +1,32 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "art",
+  "description": "Making things to be seen, told, and felt: story, beauty, painting, architecture, dance, and film. Music has its own cluster.",
+  "concepts": [
+    {"id":"art","title":"Art","voice":"layered","orb":"composing","parents":["culture"],"wiki":"Art","met":"landscape painting","summary":"Making something so that another person feels or notices what you did. Across cultures its purposes vary from devotion to decoration to protest, but the impulse to shape a thing beyond its use is very old."},
+    {"id":"story","title":"Story","voice":"layered","orb":"weaving","parents":["art"],"wiki":"Narrative","met":"handscroll narrative","summary":"The oldest technology for carrying meaning across time. A story tells us what matters, who we are to each other, and what happens if we forget, and it can be retold without ever being written."},
+    {"id":"film","title":"Film","voice":"layered","orb":"working","parents":["story"],"wiki":"Film","summary":"Stories told in moving pictures and sound. Cutting between shots became its own grammar, and a crowd sitting in the dark, feeling together, is closer to ritual than to reading."},
+    {"id":"beauty","title":"Beauty","voice":"layered","orb":"shaping","parents":["art"],"wiki":"Aesthetics","met":"still life flowers","summary":"Something that holds your attention and asks nothing back. Whether it lives in the object, the viewer, or the space between them is an old argument, and symmetry, pattern, and surprise all seem to help."},
+    {"id":"painting","title":"Painting","voice":"layered","orb":"composing","parents":["art"],"wiki":"Painting","met":"painting","summary":"Pigment on a surface, from cave walls to canvas. It has been used to record, to worship, to persuade, and, since the camera, largely to show what a camera can't."},
+    {"id":"color","title":"Color","voice":"layered","orb":"listening","parents":["painting"],"wiki":"Color","summary":"Not a property of objects but of light meeting an eye and a brain. Mixing paint and mixing light follow different rules, and every culture has drawn the lines between hues a little differently."},
+    {"id":"architecture","title":"Architecture","voice":"layered","orb":"solving","parents":["art"],"wiki":"Architecture","summary":"Building for use and for meaning at once. Temples, houses, and cities shape how we move and gather, and they are the largest, slowest art form we have."},
+    {"id":"dance","title":"Dance","voice":"layered","orb":"breathing","parents":["art"],"wiki":"Dance","summary":"The body as the instrument. It's probably as old as music, and in most cultures the two arrive together, turning rhythm into movement that a whole community can share."}
+  ],
+  "links": [
+    ["art", "emotion"], ["art", "symbols"], ["art", "tools"], ["art", "play"], ["art", "religion"],
+    ["art", "grief"], ["art", "empathy"], ["art", "imagination"], ["art", "dreams"], ["art", "history"],
+    ["art", "patterns"], ["art", "symmetry"], ["art", "qualia"], ["art", "buddhism"], ["art", "lithography"],
+    ["story", "memory"], ["story", "identity"], ["story", "money"], ["story", "religion"], ["story", "myth"],
+    ["story", "hope"], ["story", "language"], ["story", "family"], ["story", "death"], ["story", "history"],
+    ["story", "moon"], ["story", "lightning"], ["story", "empathy"], ["story", "courage"], ["story", "milky-way"],
+    ["story", "comets"], ["story", "language-models"], ["story", "cycles"], ["film", "perception"], ["film", "mass-media"],
+    ["film", "illusions"], ["film", "technology-behavior"], ["beauty", "patterns"], ["beauty", "nature"], ["beauty", "symmetry"],
+    ["beauty", "light"], ["beauty", "mathematics"], ["beauty", "wonder"], ["beauty", "sacred"], ["beauty", "golden-ratio"],
+    ["beauty", "fractals"], ["beauty", "harmony"], ["beauty", "love"], ["beauty", "consonance"], ["painting", "perspective"],
+    ["painting", "light"], ["painting", "renaissance"], ["painting", "leonardo"], ["painting", "geometry"], ["color", "light"],
+    ["color", "perception"], ["color", "spectrum"], ["color", "emotion"], ["color", "senses"], ["color", "language"],
+    ["architecture", "geometry"], ["architecture", "cities"], ["architecture", "religion"], ["architecture", "renaissance"], ["architecture", "symmetry"],
+    ["architecture", "gravity"], ["architecture", "ancient-rome"], ["dance", "rhythm"], ["dance", "body"], ["dance", "ritual"],
+    ["dance", "joy"], ["dance", "cooperation"], ["dance", "festivals"], ["dance", "story"]
+  ]
+}

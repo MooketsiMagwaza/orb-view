@@ -1,0 +1,255 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Data structures, part two: hash tables and trees, from search trees and balancing to heaps, tries, and spatial trees, each in four layers.",
+  "depth": [
+    {
+      "id": "hash-tables",
+      "picture": "A cabinet of numbered drawers, and a rule that tells you which drawer any name belongs in.",
+      "mechanism": "Take the key, run it through a hash function to get a big number, reduce it to a drawer number (modulo the table size), and store the value there. To look something up, compute the same drawer number and go straight to it. No searching.",
+      "detail": "Average cost of insert, lookup, and delete is O(1). The worst case is O(n) when many keys crowd into one drawer, which good hash functions and resizing make rare. When the table gets too full, measured by the load factor (items divided by drawers), it is rebuilt with more drawers, keeping the average cost constant.\n\nThere is no useful order to the items, and keys must be hashable, meaning their value does not change. Collisions are handled by separate chaining (each drawer holds a small list) or open addressing (on a clash, probe for the next free drawer). Python's dict and set, Java's HashMap, and JavaScript's Map all work this way, and hash tables underlie deduplication, caches, compiler symbol tables, and counting how often each word appears.",
+      "principles": "Turning a key into an address by computation is the trick behind nearly instant lookup. The constant time is bought by giving up order, and by relying on good scrambling to keep the drawers evenly filled.",
+      "example": {
+        "label": "A hash table with chaining",
+        "code": "class HashTable:\n    def __init__(self, size=8):\n        self.buckets = [[] for _ in range(size)]\n\n    def _bucket(self, key):\n        return self.buckets[hash(key) % len(self.buckets)]\n\n    def put(self, key, value):\n        b = self._bucket(key)\n        for pair in b:\n            if pair[0] == key:\n                pair[1] = value\n                return\n        b.append([key, value])\n\n    def get(self, key):\n        for k, v in self._bucket(key):\n            if k == key:\n                return v\n        raise KeyError(key)\n\nt = HashTable()\nt.put(\"apple\", 3); t.put(\"pear\", 5); t.put(\"apple\", 4)\nprint(t.get(\"apple\"), t.get(\"pear\"))   # 4 5"
+      },
+      "requires": [
+        "arrays",
+        "hash-functions"
+      ]
+    },
+    {
+      "id": "hash-functions",
+      "picture": "A blender for data: any input goes in, a fixed-size number comes out, and similar inputs come out looking unrelated.",
+      "mechanism": "A hash function reads the input and mixes it through steps such as multiplying, shifting, and XOR-ing so that every input bit affects the output. The same input always gives the same output, and outputs are spread evenly over the range.",
+      "detail": "There are two families. Non-cryptographic hashes (FNV, MurmurHash, xxHash, SipHash) are built for speed and even spread, for hash tables, checksums, and deduplication. Cryptographic hashes (SHA-256, SHA-3, BLAKE3) add hard guarantees: you cannot recover an input from its output, cannot find a second input with the same output, and cannot find any two that collide. MD5 and SHA-1 are broken for security.\n\nBecause the output is smaller than the input, collisions must exist; the question is whether anyone can find them. Attackers can exploit weak table hashes by sending many keys that collide to slow a server, so languages randomize their hash seeds. A good function has the avalanche property: flip one input bit and about half the output bits change.",
+      "principles": "A hash function trades information for fixed size and speed. What you ask of it, even spread for tables or unforgeability for security, decides how much work goes into it.",
+      "example": {
+        "label": "Similar inputs, unrelated outputs",
+        "code": "import hashlib\n\ndef fnv1a(text):\n    h = 0xcbf29ce484222325                      # 64-bit FNV-1a\n    for byte in text.encode():\n        h ^= byte\n        h = (h * 0x100000001b3) % 2**64\n    return h\n\nprint(fnv1a(\"hello\") % 16, fnv1a(\"hellp\") % 16)   # neighbors in text, far apart in buckets\nprint(hashlib.sha256(b\"hello\").hexdigest()[:16])\nprint(hashlib.sha256(b\"hellp\").hexdigest()[:16])"
+      },
+      "requires": [
+        "binary",
+        "arrays"
+      ]
+    },
+    {
+      "id": "collisions",
+      "picture": "Two different names assigned the same drawer.",
+      "mechanism": "There are more possible keys than drawers, so some keys must share. When they do, the table needs a policy: keep a list of everything in that drawer (chaining), or probe onward to another free drawer (open addressing).",
+      "detail": "By the birthday paradox, collisions arrive sooner than intuition expects: with 23 people the chance that two share a birthday already exceeds 50 percent, and in a table with m drawers you should expect the first collision after about the square root of m insertions.\n\nChaining is simple and degrades gracefully as the table fills. Open addressing (linear probing, quadratic probing, double hashing, Robin Hood hashing) stores everything in the array itself, which is cache-friendly but slows sharply as the load factor nears 1, so tables resize around 50 to 75 percent full. Deleting in open addressing needs tombstones. Cuckoo hashing gives each key two possible homes for guaranteed O(1) lookup. In cryptography collisions are an enemy in a different sense: a hash for which one can be found on purpose is broken.",
+      "principles": "Collisions are guaranteed by counting, not by bad luck. Good design assumes them, makes them cheap to handle, and keeps them rare with room to spare.",
+      "example": {
+        "label": "How soon does the first collision come?",
+        "code": "import random\n\ndef first_collision(buckets):\n    seen, n = set(), 0\n    while True:\n        n += 1\n        slot = random.randrange(buckets)\n        if slot in seen:\n            return n\n        seen.add(slot)\n\ntrials = [first_collision(1000) for _ in range(2000)]\nprint(sum(trials) / len(trials))   # about 40, near sqrt(pi/2 * 1000)"
+      },
+      "requires": [
+        "hash-tables",
+        "probability"
+      ]
+    },
+    {
+      "id": "bloom-filter",
+      "picture": "A very small memory that can say \"definitely not seen\" or \"probably seen\".",
+      "mechanism": "Start with a row of bits, all zero. To add an item, hash it with several different functions and set those bits. To ask, hash again: if any of those bits is zero, the item was never added; if all are one, it probably was, since other items may have set them.",
+      "detail": "It has no false negatives, only false positives, at a rate you can tune: with m bits, n items, and k hashes, the false-positive rate is about (1 − e^(−kn/m))^k. Roughly 10 bits per item with 7 hashes gives about 1 percent. It cannot delete (a counting variant can) and cannot list its contents. Burton Bloom invented it in 1970.\n\nUses: browsers have checked URLs against lists of malicious sites before asking a server; databases such as Cassandra, HBase, and LevelDB skip disk reads for keys that are certainly absent; content networks avoid caching one-hit wonders. A cuckoo filter is a modern alternative that supports deletion.",
+      "principles": "Accepting a small, controlled chance of a wrong \"yes\" can shrink memory by an order of magnitude. Probabilistic structures pay off when a cheap \"definitely not\" saves an expensive lookup.",
+      "example": {
+        "label": "A tiny Bloom filter",
+        "code": "import hashlib\n\nclass Bloom:\n    def __init__(self, bits=1024, hashes=3):\n        self.bits, self.hashes, self.array = bits, hashes, bytearray(bits)\n\n    def _positions(self, item):\n        for i in range(self.hashes):\n            digest = hashlib.sha256(f\"{i}:{item}\".encode()).digest()\n            yield int.from_bytes(digest[:8], \"big\") % self.bits\n\n    def add(self, item):\n        for p in self._positions(item):\n            self.array[p] = 1\n\n    def might_contain(self, item):\n        return all(self.array[p] for p in self._positions(item))\n\nb = Bloom()\nfor word in [\"red\", \"green\", \"blue\"]:\n    b.add(word)\nprint(b.might_contain(\"red\"), b.might_contain(\"purple\"))   # True False"
+      },
+      "requires": [
+        "hash-functions",
+        "probability"
+      ]
+    },
+    {
+      "id": "consistent-hashing",
+      "picture": "Servers placed around a clock face; each key belongs to the next server clockwise.",
+      "mechanism": "Hash both servers and keys onto the same circle of numbers. A key is stored on the first server you meet going clockwise from the key's position. Add a server and it takes over only the keys between it and its predecessor; remove one and its keys pass to its neighbor.",
+      "detail": "With simple hash-mod-N placement, changing N reshuffles almost every key, wiping caches and stampeding the databases behind them. On a ring only about 1/N of the keys move. To even out load, each server is placed at many points on the ring (virtual nodes), so each owns many small arcs, and bigger servers can be given more points.\n\nKarger and colleagues at MIT introduced it in 1997 for web caches, and it underlay Akamai's content network. It appears in Amazon's Dynamo, Cassandra, and memcached client libraries. Rendezvous hashing and jump consistent hash reach the same goal with different trade-offs.",
+      "principles": "Change one part of a distributed system without disturbing the rest. Consistent hashing makes membership changes local, so growth and failure cost a fraction of the data instead of all of it.",
+      "example": {
+        "label": "Adding a fourth server moves about a quarter of the keys",
+        "code": "import bisect, hashlib\n\ndef h(x):\n    return int(hashlib.md5(str(x).encode()).hexdigest(), 16)\n\nclass Ring:\n    def __init__(self, servers, replicas=50):\n        self.points = sorted((h(f\"{s}#{i}\"), s) for s in servers for i in range(replicas))\n        self.keys = [p for p, _ in self.points]\n\n    def server_for(self, key):\n        i = bisect.bisect(self.keys, h(key)) % len(self.points)\n        return self.points[i][1]\n\nkeys = [f\"user{i}\" for i in range(1000)]\nbefore = Ring([\"A\", \"B\", \"C\"])\nafter = Ring([\"A\", \"B\", \"C\", \"D\"])\nmoved = sum(before.server_for(k) != after.server_for(k) for k in keys)\nprint(moved, \"of 1000 keys moved\")     # roughly 250, where hash-mod-N would move about 750"
+      },
+      "requires": [
+        "hash-tables",
+        "servers"
+      ]
+    },
+    {
+      "id": "trees",
+      "picture": "A family tree turned upside down: one root at the top, branches below, and no loops.",
+      "mechanism": "Each node holds a value and links to its children. The topmost node is the root; nodes with no children are leaves. Every node except the root has exactly one parent, so there is exactly one path from the root to any node.",
+      "detail": "Terms: depth is steps from the root, height is the longest path down, a subtree is a node and everything beneath it, and the branching factor is children per node. A tree with branching factor b and height h can hold about b^h nodes, so a balanced binary tree with a million nodes is only about 20 levels deep, which is why descending it is logarithmic.\n\nTrees model hierarchies: file systems, HTML and the DOM, JSON, organization charts, taxonomies, grammar parse trees, decision trees in machine learning, and the branching of games. Many structures are trees with extra rules: search trees, heaps, tries. A tree is a special graph: connected, with no cycles, and n − 1 edges for n nodes.",
+      "principles": "Hierarchy is how people manage complexity, and trees are how machines hold it. Each step down discards a whole branch of possibilities, which is why trees turn huge collections into short paths.",
+      "example": {
+        "label": "A folder tree, printed by recursion",
+        "code": "class Node:\n    def __init__(self, name, *children):\n        self.name, self.children = name, children\n\ntree = Node(\"src\", Node(\"app\", Node(\"main.py\")), Node(\"lib\", Node(\"util.py\"), Node(\"db.py\")))\n\ndef show(node, depth=0):\n    print(\"  \" * depth + node.name)\n    for child in node.children:\n        show(child, depth + 1)\n\nshow(tree)"
+      },
+      "requires": [
+        "data-structures",
+        "pointers"
+      ]
+    },
+    {
+      "id": "binary-trees",
+      "picture": "A tree where every node has at most two children: a left and a right.",
+      "mechanism": "Each node stores a value and two links, left and right, either of which may be empty. Rules added on top give different structures: order the values (search tree), put parents above children (heap), or store operators and operands (expression tree).",
+      "detail": "Shapes matter. A full tree has zero or two children at each node; a complete tree fills every level except maybe the last, left to right, which lets it be stored in a plain array, with the children of index i at 2i+1 and 2i+2; a perfect tree has all levels full; a degenerate tree is really a linked list.\n\nA perfect tree with n nodes has height log₂ n; a degenerate one has height n, which is the difference between fast and slow. Beyond search, binary trees serve as expression trees for compilers (evaluate by walking), Huffman trees for compression, decision trees for classification, and tournament brackets.",
+      "principles": "Two children are enough to build almost everything: a binary choice at every step is the smallest branching that still halves the problem, and deciding between two things is the simplest decision there is.",
+      "example": {
+        "label": "An expression tree for (3 + 4) * 5",
+        "code": "class Node:\n    def __init__(self, value, left=None, right=None):\n        self.value, self.left, self.right = value, left, right\n\nexpr = Node(\"*\", Node(\"+\", Node(3), Node(4)), Node(5))\n\ndef evaluate(n):\n    if isinstance(n.value, int):\n        return n.value\n    a, b = evaluate(n.left), evaluate(n.right)\n    return a + b if n.value == \"+\" else a * b\n\nprint(evaluate(expr))   # 35"
+      },
+      "requires": [
+        "trees"
+      ]
+    },
+    {
+      "id": "binary-search-trees",
+      "picture": "Everything smaller goes left, everything larger goes right, at every node.",
+      "mechanism": "To find a value, compare it with the root: if smaller, go left; if larger, go right; repeat until you find it or reach an empty spot. Inserting does the same walk and attaches the new node where the search ended.",
+      "detail": "Search, insert, and delete take time proportional to the tree's height h: O(log n) when balanced, but O(n) if items arrive in sorted order and the tree degenerates into a chain. An in-order walk (left, node, right) visits the values in sorted order, a real advantage over hash tables: you can also find the minimum, maximum, predecessor, successor, and all values in a range.\n\nDeleting a node with two children replaces it with its in-order successor. Plain BSTs are rarely used as they are; balanced variants (AVL, red-black) or randomization (treaps) prevent the bad cases.",
+      "principles": "Order plus a binary choice gives search in the time of the height. The whole design question that follows is how to keep the height small, which is what balanced trees are for.",
+      "example": {
+        "label": "Insert keys, read them back in order",
+        "code": "class BST:\n    def __init__(self):\n        self.root = None\n\n    def insert(self, key):\n        def go(node):\n            if node is None:\n                return [key, None, None]\n            side = 1 if key < node[0] else 2\n            node[side] = go(node[side])\n            return node\n        self.root = go(self.root)\n\n    def in_order(self, node=\"root\"):\n        node = self.root if node == \"root\" else node\n        if node:\n            yield from self.in_order(node[1])\n            yield node[0]\n            yield from self.in_order(node[2])\n\nt = BST()\nfor k in [50, 30, 70, 20, 40, 60, 80]:\n    t.insert(k)\nprint(list(t.in_order()))    # [20, 30, 40, 50, 60, 70, 80]"
+      },
+      "requires": [
+        "binary-trees"
+      ]
+    },
+    {
+      "id": "balanced-trees",
+      "picture": "Search trees that straighten themselves so they never grow lopsided.",
+      "mechanism": "After each insert or delete, the tree checks a balance rule and, if it is broken, repairs it with a few rotations: local rearrangements that keep the sorted order but shorten a long branch.",
+      "detail": "The guarantee is a height of O(log n), so search, insert, and delete are all O(log n) in the worst case, however adversarial the input. AVL trees keep the heights of siblings within one of each other, so they are the most tightly balanced and fastest for lookups. Red-black trees allow looser balance, the longest path at most twice the shortest, needing fewer rotations on updates. B-trees balance by keeping every leaf at the same depth, using wide nodes.\n\nOther approaches: splay trees (rotate what you touch to the root, giving good amortized behavior), treaps (random priorities), and scapegoat trees (rebuild subtrees when too lopsided). In most languages the ordered map or set in the standard library is a balanced tree: C++'s std::map, Java's TreeMap.",
+      "principles": "Worst-case guarantees have to be enforced. Balanced trees spend a little effort on every update to be able to promise a lot on every lookup, the same trade as tidying as you go instead of in a panic.",
+      "requires": [
+        "binary-search-trees",
+        "tree-rotations"
+      ]
+    },
+    {
+      "id": "avl-trees",
+      "picture": "A search tree that keeps every pair of sibling branches within one level of each other.",
+      "mechanism": "Each node stores a balance factor: the height of its left subtree minus its right, which must stay at −1, 0, or 1. After an insert or delete, walk back up; the first node whose balance factor reaches ±2 is fixed with one or two rotations.",
+      "detail": "There are four cases: left-left (fix with a single right rotation), right-right (a single left), left-right (left rotation on the child, then right on the node), and right-left (the mirror). An AVL tree of n nodes has height at most about 1.44 log₂ n, close to the ideal log₂ n. An insert needs at most two rotations; a delete may need O(log n) rotations along the path.\n\nGeorgy Adelson-Velsky and Evgenii Landis published it in 1962, the first self-balancing tree. Compared with red-black trees, AVL trees are more rigidly balanced, so lookups are slightly faster and updates slightly slower: choose AVL for read-heavy data.",
+      "principles": "A simple local rule, keep each pair of branches within one, is enough to guarantee a globally short tree. Local repairs that preserve a global invariant is a pattern that recurs across data structures.",
+      "requires": [
+        "balanced-trees"
+      ]
+    },
+    {
+      "id": "red-black-trees",
+      "picture": "A search tree whose nodes are colored red or black, following rules that keep it roughly even.",
+      "mechanism": "The root is black; a red node never has a red child; and every path from the root down to an empty spot passes through the same number of black nodes. Together these force the longest path to be no more than twice the shortest. Inserts and deletes fix violations by recoloring and rotating.",
+      "detail": "Height is at most 2 log₂(n + 1), so all operations are O(log n). It needs at most two rotations per insert and three per delete, with most fixes being just recolorings, which is why standard libraries prefer it: Java's TreeMap, C++'s std::map, and the Linux kernel's scheduler and memory mappings.\n\nIts structure is equivalent to a 2-3-4 tree (a B-tree of order 4) in which red links glue nodes into bigger ones, which is a good way to understand the rules. Left-leaning red-black trees, due to Sedgewick, simplify the code. It is famously fiddly to implement from scratch, especially deletion.",
+      "principles": "Coloring is bookkeeping that encodes a balance rule in one extra bit per node. Looser balance means less repair work per update, a common trade of strictness for speed.",
+      "requires": [
+        "balanced-trees"
+      ]
+    },
+    {
+      "id": "tree-rotations",
+      "picture": "A small twist that lifts one node above its parent without changing the left-to-right order.",
+      "mechanism": "In a right rotation the left child becomes the new top; the old top becomes its right child; and the child's former right subtree becomes the old top's left subtree. A left rotation is the mirror image. Only three links change.",
+      "detail": "A search tree obeys \"left < node < right\", and a rotation preserves the in-order sequence, so it can be applied anywhere without breaking the search property. It shortens one side and lengthens the other by one, which is how trees rebalance, and it takes O(1) time.\n\nDouble rotations combine two, for zig-zag shapes. Splay trees use rotations to bring accessed nodes to the root; treaps use them to restore heap order among random priorities. Understanding rotations is the key to reading AVL and red-black implementations.",
+      "principles": "Rotations change the shape but not the meaning. Being able to reshape a structure while preserving what it says is what lets a tree repair itself in constant time.",
+      "example": {
+        "label": "Rotate a lopsided chain",
+        "code": "class Node:\n    def __init__(self, key, left=None, right=None):\n        self.key, self.left, self.right = key, left, right\n\ndef rotate_right(top):\n    new_top = top.left\n    top.left, new_top.right = new_top.right, top\n    return new_top\n\ndef in_order(n):\n    return in_order(n.left) + [n.key] + in_order(n.right) if n else []\n\ntree = Node(3, Node(2, Node(1)))          # a left-leaning chain\nprint(in_order(tree))                     # [1, 2, 3]\ntree = rotate_right(tree)\nprint(tree.key, in_order(tree))           # 2 [1, 2, 3]: same order, better shape"
+      },
+      "requires": [
+        "binary-search-trees"
+      ]
+    },
+    {
+      "id": "b-trees",
+      "picture": "A tree with fat nodes, so only a few levels are needed even for billions of records.",
+      "mechanism": "Each node holds many sorted keys, often hundreds, and has one more child than keys. To search, scan the keys in a node to see which child to descend into. Nodes are sized to a disk page, and all leaves sit at the same depth. When a node overflows it splits, sending its middle key up.",
+      "detail": "Reading a disk page takes about the same time whether you use a byte of it or all of it, so packing hundreds of keys into a node cuts the number of levels: a B-tree with 500 keys per node holds 125 million keys in three levels. Search, insert, and delete are O(log n) with a huge base, and every node except the root stays at least half full.\n\nRudolf Bayer and Edward McCreight invented it in 1970 at Boeing. The B+ tree variant keeps all data in the leaves, linked as a list for fast range scans, with internal nodes holding only keys; it is what most databases (PostgreSQL, MySQL's InnoDB, SQLite) use for indexes, and file systems such as NTFS, APFS, and Btrfs use variants. Log-structured merge trees are a write-optimized alternative.",
+      "principles": "Design the structure around the cost that dominates. When the expensive step is fetching a block, the right tree is the one that makes each fetch tell you the most: fat nodes and shallow depth.",
+      "requires": [
+        "binary-search-trees"
+      ]
+    },
+    {
+      "id": "tries",
+      "picture": "A tree that spells words out letter by letter, sharing the beginnings.",
+      "mechanism": "Each edge is labeled with a character, and a path from the root spells a prefix. Words with the same beginning share the same path until they diverge, and a marker on a node says a word ends here. To look up a word, follow its letters: the cost depends on the word's length, not on how many words are stored.",
+      "detail": "Lookup, insert, and delete are O(k) for a key of length k. Prefix queries are the strength: all words starting with \"pre\" are the subtree under that path, which is what autocomplete does. Also spell checkers, IP routing (longest-prefix match), predictive text, and word-game dictionaries.\n\nThe cost is memory, since each node may hold an array or map of children. Compressed variants, radix trees and Patricia tries, merge chains of single-child nodes. Suffix trees index all suffixes of a text for fast substring search. The name comes from retrieval, pronounced like \"try\".",
+      "principles": "When keys share structure, so can their storage. By spending its levels on the key's own characters, a trie makes the cost depend on how long the question is, not on how big the library is.",
+      "example": {
+        "label": "Autocomplete from a prefix",
+        "code": "class Trie:\n    def __init__(self):\n        self.children, self.end = {}, False\n\n    def add(self, word):\n        node = self\n        for ch in word:\n            node = node.children.setdefault(ch, Trie())\n        node.end = True\n\n    def with_prefix(self, prefix):\n        node = self\n        for ch in prefix:\n            if ch not in node.children:\n                return []\n            node = node.children[ch]\n        out = []\n        def walk(n, acc):\n            if n.end:\n                out.append(prefix + acc)\n            for c, child in sorted(n.children.items()):\n                walk(child, acc + c)\n        walk(node, \"\")\n        return out\n\nt = Trie()\nfor w in [\"car\", \"card\", \"care\", \"cat\", \"dog\"]:\n    t.add(w)\nprint(t.with_prefix(\"car\"))    # ['car', 'card', 'care']"
+      },
+      "requires": [
+        "trees",
+        "strings"
+      ]
+    },
+    {
+      "id": "heaps",
+      "picture": "A tree where every parent beats its children, so the champion is always on top.",
+      "mechanism": "In a min-heap each node is smaller than or equal to its children, so the smallest sits at the root. To insert, put the new item at the bottom and swap it upward while it beats its parent. To remove the top, move the last item to the root and swap it downward with its smaller child.",
+      "detail": "Both operations take O(log n), and reading the minimum is O(1). A heap is a complete binary tree, so it fits in an array with no pointers: the children of index i are 2i+1 and 2i+2, and the parent is (i−1)//2. Building a heap from n items can be done in O(n) by sifting down from the middle.\n\nHeaps are the standard engine for priority queues, heapsort, top-k problems, and merging sorted streams. A heap is only partially ordered: you cannot search it quickly, or list it in order without removing everything. Variants include d-ary heaps, pairing heaps, and Fibonacci heaps. Not to be confused with the heap area of memory, which shares only the name.",
+      "principles": "A heap keeps just enough order to answer \"what is best?\" and nothing more. Not sorting the rest is what makes it cheap: a small lesson in doing the least work that answers the question.",
+      "example": {
+        "label": "The smallest is always at the top",
+        "code": "import heapq\n\nheap = []\nfor x in [7, 2, 9, 4, 1, 8]:\n    heapq.heappush(heap, x)\nprint(heap[0])                                  # 1\nprint([heapq.heappop(heap) for _ in range(3)])  # [1, 2, 4]\nprint(heapq.nlargest(2, [7, 2, 9, 4, 1, 8]))    # [9, 8], top-k without a full sort"
+      },
+      "requires": [
+        "binary-trees",
+        "arrays"
+      ]
+    },
+    {
+      "id": "segment-trees",
+      "picture": "A tree that remembers the total for every stretch of an array.",
+      "mechanism": "The leaves are the array's items; each internal node stores a summary (sum, minimum, maximum) of its two children, so it covers a range. To answer a range query, combine the few nodes that exactly cover the range. To update one item, recompute the summaries on the path up to the root.",
+      "detail": "Both range queries and point updates take O(log n), whereas a plain array needs O(n) for one of them (prefix sums give fast queries but slow updates). Any associative operation works: sum, min, max, gcd, string concatenation.\n\nLazy propagation extends it to range updates, such as adding 5 to every element from i to j, in O(log n), by postponing work at nodes until needed. The Fenwick tree (binary indexed tree) is a smaller, simpler cousin for prefix sums. Segment trees are staples of competitive programming, and they appear in geometry, games, and database aggregation.",
+      "principles": "Precomputing summaries at every scale turns a range question into a handful of lookups. It is a general recipe: store answers for pieces of a problem so that any combination of pieces is cheap.",
+      "example": {
+        "label": "Range sums with point updates",
+        "code": "class SegTree:\n    def __init__(self, data):\n        self.n = len(data)\n        self.t = [0] * self.n + list(data)\n        for i in range(self.n - 1, 0, -1):\n            self.t[i] = self.t[2 * i] + self.t[2 * i + 1]\n\n    def update(self, i, value):\n        i += self.n\n        self.t[i] = value\n        while i > 1:\n            i //= 2\n            self.t[i] = self.t[2 * i] + self.t[2 * i + 1]\n\n    def query(self, lo, hi):            # sum of data[lo:hi]\n        total, lo, hi = 0, lo + self.n, hi + self.n\n        while lo < hi:\n            if lo & 1:\n                total += self.t[lo]; lo += 1\n            if hi & 1:\n                hi -= 1; total += self.t[hi]\n            lo //= 2; hi //= 2\n        return total\n\ns = SegTree([5, 3, 8, 6, 2, 7])\nprint(s.query(1, 5))     # 3+8+6+2 = 19\ns.update(2, 10)\nprint(s.query(1, 5))     # 21"
+      },
+      "requires": [
+        "binary-trees",
+        "arrays"
+      ]
+    },
+    {
+      "id": "tree-traversal",
+      "picture": "Visiting every node of a tree in a planned order.",
+      "mechanism": "Depth-first traversals go down before across, in three flavors depending on when you visit the node relative to its children: pre-order (node, left, right), in-order (left, node, right), and post-order (left, right, node). Breadth-first, or level-order, visits everything at one depth before the next, using a queue.",
+      "detail": "Each order suits different needs. In-order on a search tree gives sorted output. Pre-order copies or serializes a tree (parents before children). Post-order deletes or evaluates it (children before parents), and is how an expression tree is computed. Level-order finds the shallowest match and prints a tree row by row.\n\nDepth-first can be written recursively, using the call stack, or iteratively with an explicit stack; breadth-first uses a queue. All take O(n) time. Recursion depth equals the tree's height, so a very deep tree can overflow the stack. Morris traversal visits in-order with O(1) extra memory by temporarily threading pointers.",
+      "principles": "A traversal is a promise about order. Which order you choose decides what information is available at each step, whether a node has already seen its children, and so what can be computed in one pass.",
+      "example": {
+        "label": "Four orders over one tree",
+        "code": "from collections import deque\n\ntree = (\"A\", (\"B\", (\"D\", None, None), (\"E\", None, None)), (\"C\", None, (\"F\", None, None)))\n\ndef pre(n):     return [] if not n else [n[0]] + pre(n[1]) + pre(n[2])\ndef inorder(n): return [] if not n else inorder(n[1]) + [n[0]] + inorder(n[2])\ndef post(n):    return [] if not n else post(n[1]) + post(n[2]) + [n[0]]\n\ndef level(root):\n    out, q = [], deque([root])\n    while q:\n        n = q.popleft()\n        if n:\n            out.append(n[0]); q.extend([n[1], n[2]])\n    return out\n\nprint(\"pre  \", pre(tree))       # ['A', 'B', 'D', 'E', 'C', 'F']\nprint(\"in   \", inorder(tree))   # ['D', 'B', 'E', 'A', 'C', 'F']\nprint(\"post \", post(tree))      # ['D', 'E', 'B', 'F', 'C', 'A']\nprint(\"level\", level(tree))     # ['A', 'B', 'C', 'D', 'E', 'F']"
+      },
+      "requires": [
+        "trees",
+        "recursion",
+        "stacks",
+        "queues"
+      ]
+    },
+    {
+      "id": "kd-trees",
+      "picture": "A tree that cuts space with alternating vertical and horizontal lines.",
+      "mechanism": "Split the points at the median of one coordinate, say x, with smaller on the left and larger on the right; then split each half on the next coordinate, y; and so on, cycling through the dimensions. To find a nearest neighbor, descend to where the query point would land, then back up, checking other branches only if they could hold something closer.",
+      "detail": "Building takes O(n log n); a nearest-neighbor query takes about O(log n) in low dimensions. It works well from two to about ten dimensions and degrades in high dimensions (the curse of dimensionality), where nearly everything is a possible neighbor, so approximate methods such as locality-sensitive hashing and HNSW graphs take over.\n\nUses: nearest-neighbor search, range queries (\"all points in this box\"), ray tracing, collision detection, and k-nearest-neighbor classification. Jon Bentley introduced it in 1975. Related structures include quadtrees and octrees (split space into 4 or 8 equal cells) and R-trees (nested rectangles, used in geographic databases).",
+      "principles": "Splitting space rather than data lets a search rule out whole regions at once. It is binary search generalized beyond one dimension, and it shows how quickly that generalization runs into the limits of geometry.",
+      "example": {
+        "label": "Nearest neighbor in a 2-d tree",
+        "code": "def build(points, depth=0):\n    if not points:\n        return None\n    axis = depth % 2\n    points = sorted(points, key=lambda p: p[axis])\n    mid = len(points) // 2\n    return (points[mid], build(points[:mid], depth + 1), build(points[mid + 1:], depth + 1))\n\ndef nearest(node, target, depth=0, best=None):\n    if node is None:\n        return best\n    point, left, right = node\n    d = lambda p: (p[0] - target[0]) ** 2 + (p[1] - target[1]) ** 2\n    if best is None or d(point) < d(best):\n        best = point\n    axis = depth % 2\n    near, far = (left, right) if target[axis] < point[axis] else (right, left)\n    best = nearest(near, target, depth + 1, best)\n    if (target[axis] - point[axis]) ** 2 < d(best):     # could the far side hold something closer?\n        best = nearest(far, target, depth + 1, best)\n    return best\n\npts = [(2, 3), (5, 4), (9, 6), (4, 7), (8, 1), (7, 2)]\nprint(nearest(build(pts), (9, 2)))    # (8, 1)"
+      },
+      "requires": [
+        "binary-search-trees"
+      ]
+    }
+  ]
+}

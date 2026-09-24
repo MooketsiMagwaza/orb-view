@@ -1,0 +1,22 @@
+{
+  "$schema": "../category.schema.json",
+  "id": "me-how-machines-work",
+  "group": "Me",
+  "order": 3,
+  "title": "How Machines Work",
+  "blurb": "Engines, clocks, and mechanisms: energy shaped into repeatable motion.",
+  "orb": "solving",
+  "entry": "machines",
+  "path": [
+    "machines",
+    "engines",
+    "efficiency",
+    "thermodynamics",
+    "clocks",
+    "escapement",
+    "mechanisms",
+    "gears",
+    "feedback",
+    "firearms"
+  ]
+}

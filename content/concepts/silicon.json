@@ -1,0 +1,32 @@
+{
+  "$schema": "../concept.schema.json",
+  "cluster": "silicon",
+  "description": "From stone to a thought a machine can hold: refinement, crystals, patterning, switches, memory, and the processor that runs it all.",
+  "concepts": [
+    {"id":"silicon","title":"Silicon","voice":"precise","orb":"connecting","parents":["entropy"],"wiki":"Silicon","summary":"Ordinary stone, refined until almost nothing is left but silicon. Each step removes a little more chance: purify, grow the crystal, slice, pattern, layer. What comes out is rock that can hold a thought for a machine."},
+    {"id":"stone","title":"Stone","voice":"precise","orb":"breathing","parents":["silicon"],"wiki":"Quartz","summary":"Quartz sand and rock: silicon and oxygen, tangled together and common enough to walk on. Nothing here suggests a computer. That is the point."},
+    {"id":"refinement","title":"Refinement","voice":"precise","orb":"solving","parents":["silicon","stone"],"wiki":"Polycrystalline silicon","summary":"Heat and chemistry strip away the oxygen, then impurity after impurity, until the silicon is purer than almost anything else people make: fewer than one foreign atom in a billion."},
+    {"id":"crystal-ingot","title":"Crystal Ingot","voice":"precise","orb":"weaving","parents":["refinement"],"wiki":"Czochralski method","summary":"Molten silicon is touched with a seed crystal and drawn slowly upward. Atom by atom, the melt copies the seed's pattern, and one flawless crystal grows into a long cylinder."},
+    {"id":"wafers","title":"Wafers","voice":"precise","orb":"shaping","parents":["silicon","crystal-ingot"],"wiki":"Wafer (electronics)","summary":"The ingot is sliced into thin discs and polished flatter and smoother than any mirror you own. Each wafer is a blank stage waiting for billions of tiny structures."},
+    {"id":"lithography","title":"Lithography","voice":"precise","orb":"composing","parents":["wafers"],"wiki":"Photolithography","summary":"Light is projected through a mask onto a coated wafer, printing a pattern finer than the light seems to allow. Deposit, expose, etch, repeat: hundreds of steps, layer over layer."},
+    {"id":"transistors","title":"Transistors","voice":"precise","orb":"connecting","parents":["silicon","lithography"],"wiki":"Transistor","summary":"A switch with no moving parts. A small voltage decides whether current may pass. Billions of them, some only tens of atoms across, agree on zeros and ones."},
+    {"id":"memory-cell","title":"Memory Cell","voice":"precise","orb":"breathing","parents":["transistors"],"wiki":"Memory cell (computing)","summary":"One transistor guarding one tiny capacitor. Charge means one; no charge means zero. The charge leaks away, so the cell has to be reminded again and again."},
+    {"id":"ram","title":"RAM","voice":"precise","orb":"searching","parents":["silicon","memory-cell"],"wiki":"Random-access memory","summary":"Billions of those cells laid out in a grid, refreshed many times every second. It forgets the moment the power goes, which is exactly why it feels so alive while it lasts."},
+    {"id":"semiconductors","title":"Semiconductors","voice":"precise","orb":"listening","parents":["silicon"],"wiki":"Semiconductor","summary":"Materials that sit between conductors and insulators, and whose behavior you can tune. That in-between nature is what lets a tiny signal switch a large current on and off."},
+    {"id":"doping","title":"Doping","voice":"precise","orb":"working","parents":["semiconductors"],"wiki":"Doping (semiconductor)","summary":"Add a few foreign atoms to pure silicon, one in millions, and it becomes a good carrier of extra electrons or of missing ones. Where the two kinds meet, a diode or transistor is born."},
+    {"id":"band-gap","title":"Band Gap","voice":"precise","orb":"shaping","parents":["semiconductors"],"wiki":"Band gap","summary":"The energy an electron must gain to start carrying current. Quantum mechanics sets it, and its size decides whether a material is a metal, a semiconductor, or an insulator."},
+    {"id":"integrated-circuits","title":"Integrated Circuits","voice":"precise","orb":"weaving","parents":["silicon"],"wiki":"Integrated circuit","summary":"Instead of wiring separate parts together, build all of them, and their connections, in one piece of silicon. It turned rooms of electronics into something the size of a fingernail."},
+    {"id":"moores-law","title":"Moore's Law","voice":"precise","orb":"composing","parents":["integrated-circuits"],"wiki":"Moore's law","summary":"The observation that the number of transistors on a chip roughly doubles every couple of years. It was more a target than a law, and it has been slowing as parts approach the size of atoms."},
+    {"id":"cpu","title":"Processor","voice":"precise","orb":"working","parents":["integrated-circuits"],"wiki":"Central processing unit","summary":"The part that follows instructions: fetch one, decode it, do it, move on, billions of times a second. All of software is ultimately a very long list of tiny steps like these."},
+    {"id":"binary","title":"Binary","voice":"precise","orb":"listening","parents":["cpu"],"wiki":"Binary number","summary":"Numbers written with two symbols. It suits hardware, since a switch is either on or off, and any information at all can be encoded as a long enough string of them."},
+    {"id":"clock-rate","title":"Clock Rate","voice":"precise","orb":"breathing","parents":["cpu"],"wiki":"Clock rate","summary":"A processor's metronome: a signal that ticks billions of times a second so every part moves in step. Faster ticks mean more work per second, and also more heat."}
+  ],
+  "links": [
+    ["silicon", "earth"], ["silicon", "money"], ["stone", "oscillation"], ["stone", "water"], ["stone", "tools"],
+    ["refinement", "energy"], ["wafers", "symmetry"], ["lithography", "patterns"], ["lithography", "printing-press"], ["transistors", "circuits"],
+    ["transistors", "electricity"], ["transistors", "neural-networks"], ["transistors", "cells"], ["semiconductors", "electricity"], ["semiconductors", "batteries"],
+    ["semiconductors", "sun"], ["doping", "electricity"], ["doping", "refinement"], ["band-gap", "light"], ["band-gap", "quantum-mechanics"],
+    ["integrated-circuits", "circuits"], ["moores-law", "automation"], ["moores-law", "machine-learning"], ["cpu", "clocks"], ["cpu", "algorithms"],
+    ["binary", "logic"], ["clock-rate", "oscillation"], ["clock-rate", "time"], ["clock-rate", "frequency"], ["clock-rate", "waste-heat"]
+  ]
+}

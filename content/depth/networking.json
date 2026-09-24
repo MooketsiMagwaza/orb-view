@@ -1,0 +1,90 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Four layers for the networking slice, from the glass and copper at the bottom to curl at the top. Each entry says what it is built on, so a reader can be walked down to anything they are missing.",
+  "depth": [
+    {
+      "id": "curl",
+      "picture": "curl is a command that asks another computer for something and prints what it says back. It's the way a browser talks to a website, with the words showing instead of hidden.",
+      "mechanism": "You give curl an address. It looks the name up to find a machine, opens a connection to it, sets up encryption if the address starts with https, sends a request, and prints the reply. Every one of those steps is a card underneath this one.",
+      "detail": "Run with -v and curl narrates each stage: the address the name resolved to, the TLS handshake and the server's certificate, the request it sent (the request line, then headers such as Host, User-Agent and Accept), and the response status and headers before the body. -I sends HEAD and shows only the headers. -L follows redirects. -X POST with -d sends data. --resolve forces a name to a chosen address, which lets you test a new server before DNS points at it.\n\nEach stage can fail on its own, and curl's exit code and error text tell you which: a name that won't resolve, a connection refused, a certificate that doesn't match, or a server that answered with an error status.",
+      "principles": "curl can be pointed at almost anything because each layer is a separate agreement that only cares about its neighbors: names, connections, encryption, and requests can each be swapped without touching the others. That separation is why the same tool speaks HTTP, FTP, and dozens of other protocols, and why debugging a web problem usually means finding which one layer disagrees.",
+      "example": { "label": "See every stage of a request", "code": "curl -v https://example.com" },
+      "requires": ["urls", "dns", "tcp", "tls", "http", "https"]
+    },
+    {
+      "id": "http",
+      "picture": "A polite exchange: the client asks for something by name, and the server answers with a status and the thing itself.",
+      "mechanism": "The client sends a request: what it wants, how (a method such as GET or POST), and some headers describing itself. The server sends back a response: a status code saying how it went, some headers, and the content. Then the exchange is over and neither side is required to remember it.",
+      "detail": "A request starts with a line like GET /index.html HTTP/1.1, then headers such as Host and Accept, then a blank line and an optional body. A response starts with a status: 200 OK, 301 moved, 404 not found, 500 server error. It carries headers such as Content-Type and Cache-Control, then the body. HTTP/1.1 handles one request at a time per connection; HTTP/2 multiplexes many over one connection; HTTP/3 does the same over QUIC, which runs on UDP.",
+      "principles": "HTTP is stateless on purpose. Every request carries everything the server needs, so any machine in a fleet can answer it and any cache in between can reuse the answer. Memory was added later on top, with cookies and sessions, because the base protocol refuses to remember.",
+      "example": { "label": "Show only the response headers", "code": "curl -I https://example.com" },
+      "requires": ["tcp", "urls", "dns"]
+    },
+    {
+      "id": "https",
+      "picture": "The same conversation as HTTP, sealed in an envelope that nobody along the way can read or change.",
+      "mechanism": "Before any request is sent, the browser and server set up TLS: they agree on secret keys and the browser checks the server's certificate. Then ordinary HTTP travels inside the encrypted channel.",
+      "detail": "HTTPS uses port 443. The certificate has to name the site and chain up to an authority the browser trusts. A header called HSTS tells browsers to refuse plain HTTP for a site from then on. Mixed content, an HTTPS page loading a script over HTTP, is blocked because it would undo the protection. HTTPS hides the content and the request details, but not the fact of which server you contacted.",
+      "principles": "It delivers three separate guarantees, each with a different tool: secrecy from encryption, tamper detection from message authentication, and identity from certificates. Dropping any one leaves a specific attack open, which is why the padlock stands for all three at once.",
+      "requires": ["http", "tls", "certificates"]
+    },
+    {
+      "id": "tls",
+      "picture": "Two strangers on a public street agree on a private language, and one proves who they are, before saying anything important.",
+      "mechanism": "The client says hello and lists the encryption it supports. The server picks one and sends a certificate proving its identity. They then run a key exchange that lets both work out the same secret without ever sending it. From then on, everything is scrambled with that secret using fast symmetric encryption.",
+      "detail": "In TLS 1.3 the client's first message already carries its half of a key exchange, so the handshake takes one round trip. The server replies with its half, and everything after that is encrypted: its certificate, a signature proving it holds the matching private key, and a Finished message that covers the whole handshake. The exchange is usually elliptic-curve Diffie–Hellman with fresh keys each time, so recording traffic today doesn't let anyone decrypt it after a key leaks later (forward secrecy). Data is protected with authenticated ciphers such as AES-GCM or ChaCha20-Poly1305.",
+      "principles": "Public-key cryptography is slow but solves who shares a secret with whom; symmetric encryption is fast but needs a shared key. TLS uses the first only to bootstrap the second. Its security rests on two things: math problems believed to be hard to reverse, and trust in certificate authorities to bind names to keys.",
+      "example": { "label": "Watch a handshake", "code": "openssl s_client -connect example.com:443 -brief" },
+      "requires": ["tcp", "public-key", "key-exchange", "symmetric-encryption", "certificates", "digital-signatures", "hashing"]
+    },
+    {
+      "id": "dns",
+      "picture": "The internet's phone book. It turns a name a person can remember into the number a machine can dial.",
+      "mechanism": "Your device asks a resolver. If the resolver doesn't know, it asks a root server, which points it to the servers for the top-level domain, which point it to the site's own name servers, which give the address. The answer is remembered along the way for a while.",
+      "detail": "Answers come as records: A for an IPv4 address, AAAA for IPv6, CNAME for an alias, MX for mail, NS for delegation, TXT for arbitrary text. Each carries a TTL, in seconds, saying how long it may be cached. Queries usually go over UDP on port 53, falling back to TCP for large answers; DoH and DoT wrap them in encryption.",
+      "principles": "DNS is a distributed hierarchical database. No server holds everything; delegation splits responsibility along the dots in a name, and caching trades freshness for speed. Its original weakness is that answers were not authenticated, which is what DNSSEC and encrypted transports were added to fix.",
+      "example": { "label": "Follow a name from the root down", "code": "dig +trace example.com" },
+      "requires": ["ip", "domain-names", "udp"]
+    },
+    {
+      "id": "tcp",
+      "picture": "A phone call instead of postcards: both ends confirm they are there, and everything arrives complete and in order.",
+      "mechanism": "The two ends open with a three-step greeting. Then the sender numbers the bytes it sends, the receiver confirms what arrived, and anything unconfirmed is sent again. The receiver also says how much it can take at once, so the sender doesn't drown it.",
+      "detail": "The greeting is SYN, SYN-ACK, ACK. Sequence numbers count bytes, and the window says how much may be in flight unacknowledged. A retransmission timer follows the measured round-trip time. Congestion control starts slowly, grows the rate while things go well, and halves it when packets go missing. Ports identify the program at each end, and a segment carries about 1,460 bytes of data on Ethernet.",
+      "principles": "Reliability is built at the ends from an unreliable middle: IP promises nothing, so TCP checks. Congestion control is a distributed feedback system where each sender infers the state of the network from loss and delay and backs off, which is how millions of strangers share links without a coordinator.",
+      "requires": ["ip", "packets", "ports"]
+    },
+    {
+      "id": "ip",
+      "picture": "The address written on every packet, so that any machine along the way can tell where it is headed.",
+      "mechanism": "Every device on the network has an address. Each packet carries the address it came from and the address it is going to. Routers along the way read the destination, look in a table for the best next hop, and pass the packet on. No router knows the whole route.",
+      "detail": "IPv4 addresses are 32 bits, written as four numbers, giving about 4.3 billion; IPv6 addresses are 128 bits. The header is about 20 bytes and includes a time-to-live that drops by one at every hop, so a packet caught in a loop eventually dies. Ranges such as 10.0.0.0/8 and 192.168.0.0/16 are private and reused inside homes and offices behind NAT.",
+      "principles": "IP does the minimum: address the packet and forward it, best effort. Everything that needs reliability is left to the machines at the ends. That restraint, intelligence at the edges and simple pipes in the middle, is the end-to-end principle, and it is why IP runs on nearly every kind of link and scales to the whole planet.",
+      "requires": ["packets", "binary"]
+    },
+    {
+      "id": "packets",
+      "picture": "Cutting a letter into numbered postcards so they can travel separately and be put back together.",
+      "mechanism": "Data is split into small chunks. Each chunk gets a header saying where it came from, where it is going, and where it fits. The chunks are sent independently and reassembled at the far end.",
+      "detail": "On Ethernet a packet carries at most 1,500 bytes of payload (the MTU). Routers use store-and-forward: they receive a whole packet, read its header, queue it for the outgoing link, and send it on. When a queue overflows, packets are dropped, and that loss is the signal the ends use to slow down.",
+      "principles": "Packet switching shares a wire statistically among many conversations, while the old telephone network used circuit switching to reserve a path for each call. Sharing is far more efficient for bursty traffic and survives the loss of any single link, at the price of variable delay.",
+      "requires": ["binary"]
+    },
+    {
+      "id": "fiber-optics",
+      "picture": "A hair-thin strand of glass that carries light for miles. A flash is a 1 and no flash is a 0.",
+      "mechanism": "A laser at one end is switched on and off to send data. The light enters the glass and keeps bouncing off the boundary between the core and the outer layer, so it can't escape and follows the strand, even around bends. A sensor at the far end turns the flashes back into an electrical signal.",
+      "detail": "Long-distance fiber is single-mode with a core of about 9 micrometers. Signals use infrared light near 1310 or 1550 nanometers, where glass is clearest, losing about 0.2 decibels per kilometer. Wavelength-division multiplexing sends dozens of colors down one strand at once. Undersea cables cross oceans with amplifiers every 50 to 100 kilometers, powered by a current sent along the cable from shore. Light travels in glass at about two thirds of its speed in a vacuum, roughly 5 microseconds per kilometer.",
+      "principles": "The trapping is total internal reflection: light passing from dense glass toward less dense glass at a shallow angle is reflected entirely. The engineering breakthrough was purity: by 1970 Corning made glass clear enough that light survived kilometers. Capacity is enormous because optical frequencies are around 200 terahertz, and the limit is set by noise and bandwidth, not by the glass.",
+      "requires": ["light", "waves"]
+    },
+    {
+      "id": "first-call",
+      "picture": "A voice, turned into a wobble in an electric current and back into sound in the next room.",
+      "mechanism": "Speech makes a thin metal sheet vibrate. The vibration varies an electric current in a wire. At the other end that varying current moves a small piece of iron near a magnet, which shakes another sheet and reproduces the sound.",
+      "detail": "Alexander Graham Bell was granted his patent on 7 March 1876, and on 10 March he spoke to his assistant, Thomas Watson, in another room: \"Mr. Watson, come here, I want to see you.\" His first transmitter used a needle attached to a diaphragm, dipping into acidulated water so that the sound made the electrical resistance change. Another inventor, Elisha Gray, filed a similar claim the same day, and the priority dispute lasted years.",
+      "principles": "This was analog transmission: the electrical signal is an analogy of the pressure wave of the sound, varying continuously in step with it. Everything since, digital telephony, packet networks, internet calls, replaced the analogy with numbers, which can be copied and relayed without accumulating noise.",
+      "requires": ["telephone-network", "electricity", "sound"]
+    }
+  ]
+}

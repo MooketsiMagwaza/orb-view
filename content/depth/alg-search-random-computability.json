@@ -1,0 +1,236 @@
+{
+  "$schema": "../depth.schema.json",
+  "description": "Algorithms, part four: backtracking and constraint solving, randomized algorithms, and the theory of what can be computed at all, each in four layers.",
+  "depth": [
+    {
+      "id": "backtracking",
+      "picture": "Try a choice; if it leads nowhere, undo it and try another.",
+      "mechanism": "Build a solution one decision at a time. After each decision check whether it can still lead to a valid solution; if not, abandon (prune) that branch, undo the last decision, and try the next option. It is depth-first search through the tree of partial solutions.",
+      "detail": "The template is choose, explore, un-choose. Typical problems: N-queens, Sudoku, generating permutations, combinations, and subsets, solving mazes, word search, graph coloring, parsing ambiguous grammars, and satisfiability, where the DPLL algorithm underlies SAT solvers.\n\nThe number of complete candidates may be astronomical, but pruning cuts most of them: a partial placement in which two queens already attack each other kills every board that extends it. The worst case is still exponential, so power comes from good pruning: check constraints early, choose the most constrained variable first, and order choices to fail fast. Prolog is a language built around backtracking. D. H. Lehmer coined the term in the 1950s, and Golomb and Baumert made the technique systematic in 1965.",
+      "principles": "Systematic trial with the courage to undo. Backtracking makes exhaustive search feasible by noticing early that a path is doomed, so most of the tree is never visited.",
+      "example": {
+        "label": "Subsets that add up to a target",
+        "code": "def subsets_with_sum(nums, target):\n    results, chosen = [], []\n    def explore(i, remaining):\n        if remaining == 0:\n            results.append(chosen[:])\n            return\n        if i == len(nums) or remaining < 0:\n            return                                # dead end: prune\n        chosen.append(nums[i])                    # choose\n        explore(i + 1, remaining - nums[i])       # explore\n        chosen.pop()                              # un-choose\n        explore(i + 1, remaining)                 # try without it\n    explore(0, target)\n    return results\n\nprint(subsets_with_sum([3, 34, 4, 12, 5, 2], 9))   # [[3, 4, 2], [4, 5]]"
+      },
+      "requires": [
+        "recursion",
+        "dfs"
+      ]
+    },
+    {
+      "id": "eight-queens",
+      "picture": "Place eight queens on a chessboard so that none can capture another.",
+      "mechanism": "Place one queen per row, going down the rows. For each row try each column; if the square is attacked by an earlier queen (same column or diagonal), skip it. If no column works, backtrack to the previous row and move its queen. When all eight rows are filled, that is a solution.",
+      "detail": "There are 92 solutions on the standard board, 12 distinct up to rotation and reflection. Brute force over all ways to place eight queens would check about 4.4 billion arrangements; placing one per row cuts that to 16.7 million, and backtracking visits only a couple of thousand partial boards. Checking an attack is O(1) with three sets: occupied columns and the two diagonals (row − col and row + col).\n\nThe chess composer Max Bezzel proposed the puzzle in 1848 and Gauss studied it; Dijkstra used it in 1972 to demonstrate structured programming. It generalizes to n × n boards, where solutions exist for every n of 4 or more, and counting them is a benchmark for search programs: there are 14,772,512 solutions for n = 14. It is a prototypical constraint satisfaction problem.",
+      "principles": "The fewer possibilities you need to look at, the more you must use what you know. Recognizing that a partial arrangement is already doomed is what turns billions of boards into thousands.",
+      "example": {
+        "label": "All 92 solutions",
+        "code": "def queens(n):\n    solutions = []\n    cols, diag1, diag2, placement = set(), set(), set(), []\n    def place(row):\n        if row == n:\n            solutions.append(placement[:])\n            return\n        for c in range(n):\n            if c in cols or row - c in diag1 or row + c in diag2:\n                continue\n            cols.add(c); diag1.add(row - c); diag2.add(row + c); placement.append(c)\n            place(row + 1)\n            cols.remove(c); diag1.remove(row - c); diag2.remove(row + c); placement.pop()\n    place(0)\n    return solutions\n\nsols = queens(8)\nprint(len(sols), sols[0])        # 92 [0, 4, 7, 5, 2, 6, 1, 3]"
+      },
+      "requires": [
+        "backtracking"
+      ]
+    },
+    {
+      "id": "sudoku-solving",
+      "picture": "Fill in a cell, check the rules, and back up when stuck.",
+      "mechanism": "Find an empty cell and try each digit from 1 to 9 that does not already appear in its row, column, or box. Recurse on the rest; if a dead end is reached, undo and try the next digit. Choosing the cell with the fewest legal digits first cuts the search drastically.",
+      "detail": "Plain backtracking solves most puzzles in milliseconds, though a deliberately adversarial grid can take much longer. Human-style solving applies logic: naked and hidden singles, pairs and triples, X-wings, and chains, each eliminating candidates without guessing.\n\nConstraint propagation keeps a set of possible digits for each cell, and every placement removes that digit from the peers in its row, column, and box; Peter Norvig's well-known short solver combines propagation with search. Sudoku can also be encoded as an exact cover problem and solved by Knuth's Algorithm X with dancing links, or as a SAT problem. Generalized n² × n² Sudoku is NP-complete, though the 9 × 9 case is small. The number of valid completed grids is about 6.67 × 10²¹, or 5.5 × 10⁹ essentially different ones.",
+      "principles": "Puzzles are constraint systems, and solving is a dialogue between guessing and deducing. The most powerful move is not more guessing but propagating consequences, which is why humans and programs both prefer logic first and search last.",
+      "example": {
+        "label": "A backtracking Sudoku solver",
+        "code": "def solve(board):\n    for r in range(9):\n        for c in range(9):\n            if board[r][c] == 0:\n                for d in range(1, 10):\n                    if ok(board, r, c, d):\n                        board[r][c] = d\n                        if solve(board):\n                            return True\n                        board[r][c] = 0            # undo and try the next digit\n                return False                       # no digit fits: backtrack\n    return True\n\ndef ok(board, r, c, d):\n    if any(board[r][i] == d or board[i][c] == d for i in range(9)):\n        return False\n    br, bc = 3 * (r // 3), 3 * (c // 3)\n    return all(board[br + i][bc + j] != d for i in range(3) for j in range(3))\n\npuzzle = [\"530070000\", \"600195000\", \"098000060\", \"800060003\", \"400803001\",\n          \"700020006\", \"060000280\", \"000419005\", \"000080079\"]\nboard = [[int(ch) for ch in row] for row in puzzle]\nsolve(board)\nprint(\"\".join(map(str, board[0])), \"\".join(map(str, board[8])))   # 534678912 345286179"
+      },
+      "requires": [
+        "constraint-satisfaction"
+      ]
+    },
+    {
+      "id": "constraint-satisfaction",
+      "picture": "Variables, their possible values, and rules about which combinations are allowed.",
+      "mechanism": "A constraint satisfaction problem has variables (cells, courses, regions), a domain of values for each, and constraints between them (must differ, must sum to, cannot overlap). A solution assigns a value to every variable satisfying all constraints. Solvers search, but at each step propagate the consequences of a choice to shrink other variables' domains.",
+      "detail": "Techniques: backtracking with the most-constrained variable first and the least-constraining value first; forward checking (remove conflicting values from neighbors); arc consistency (AC-3: repeatedly remove values that have no compatible partner in a neighbor's domain); learning constraints from failures; and local search (min-conflicts), which repairs a full but flawed assignment and solves huge instances such as scheduling a telescope.\n\nClassic instances: map coloring, Sudoku, N-queens, crosswords, timetabling, nurse rostering, configuring products (which options are compatible), and circuit layout. Industrial solvers such as Google's OR-Tools CP-SAT, Gecode, and MiniZinc, and SAT solvers, handle problems with millions of constraints. Prolog and later constraint logic programming languages make declaring the constraints the whole program.",
+      "principles": "Describe what a solution must satisfy, and let a general engine find one. Separating the what from the how is the promise of declarative programming, and constraint solvers are among the places where it works at industrial scale.",
+      "requires": [
+        "backtracking"
+      ]
+    },
+    {
+      "id": "branch-and-bound",
+      "picture": "Search, but give up on any branch that cannot beat the best answer found so far.",
+      "mechanism": "Explore a tree of choices. At each node compute a bound: the best result any completion of the partial solution could possibly achieve. If that bound is no better than the best complete solution already found, prune the branch. Otherwise branch further.",
+      "detail": "It is backtracking for optimization rather than mere feasibility. Bounds come from relaxations: drop a hard requirement and solve the easier problem to see how good the answer could conceivably be. For knapsack a bound is the fractional knapsack solution; for the traveling salesman problem, a minimum spanning tree or assignment relaxation; for integer programming, the linear-programming relaxation, which underlies commercial solvers such as CPLEX and Gurobi via branch and cut.\n\nSearch order matters: exploring the most promising branches first finds good solutions early and prunes more. Ailsa Land and Alison Doig introduced it in 1960 for integer programming. Worst-case time remains exponential, but in practice it solves large scheduling, routing, and packing problems exactly, where brute force never could.",
+      "principles": "Knowing how good an answer could possibly be lets you skip whole regions of the search. The quality of the bound is everything: a tight one turns an impossible search into a routine one.",
+      "requires": [
+        "backtracking",
+        "np-completeness"
+      ]
+    },
+    {
+      "id": "minimax",
+      "picture": "Assume your opponent plays the best reply, and choose the move that leaves you best off.",
+      "mechanism": "Build the game tree of moves. At the leaves, or after a fixed depth, score the position from your point of view. At your turns choose the child with the maximum score; at the opponent's turns assume they choose the minimum. Values propagate upward, and the root's best child is your move.",
+      "detail": "John von Neumann proved the minimax theorem in 1928 for zero-sum games. Search cost is b^d for branching factor b and depth d: chess has b of about 35, so looking ten moves ahead means about 3 × 10¹⁵ positions. Alpha–beta pruning skips branches that cannot affect the result, roughly doubling the reachable depth in the best case.\n\nAdd-ons include a heuristic evaluation at the depth limit (material count, mobility, king safety), iterative deepening, move ordering, and transposition tables. Deep Blue beat the world chess champion Garry Kasparov in 1997 with alpha–beta search on custom hardware. Go's branching factor of about 250 defeated this approach until Monte Carlo tree search and neural networks arrived with AlphaGo in 2016. Minimax assumes a perfect adversary, which may be pessimistic against real ones, and it applies to games of perfect information.",
+      "principles": "Plan against the best opposition, not the hoped-for one. Minimax is the formal version of thinking a few moves ahead, and its limit, the explosion of the tree, is what forced the field to invent heuristics and learning.",
+      "example": {
+        "label": "Take 1, 2 or 3; taking the last wins",
+        "code": "def minimax(pile, my_turn):\n    if pile == 0:\n        return -1 if my_turn else 1        # the previous player took the last item and won\n    scores = [minimax(pile - take, not my_turn) for take in (1, 2, 3) if take <= pile]\n    return max(scores) if my_turn else min(scores)\n\ndef best_move(pile):\n    return max((t for t in (1, 2, 3) if t <= pile), key=lambda t: minimax(pile - t, False))\n\nprint([minimax(n, True) for n in range(1, 9)])   # [1, 1, 1, -1, 1, 1, 1, -1]\nprint(best_move(6))                              # 2, leaving the opponent a multiple of 4"
+      },
+      "requires": [
+        "backtracking",
+        "tree-traversal"
+      ]
+    },
+    {
+      "id": "randomized-algorithms",
+      "picture": "Algorithms that flip coins as they go.",
+      "mechanism": "The algorithm makes random choices, such as picking a random pivot or a random hash function, so its behavior varies from run to run even on the same input. Analysis then speaks of expected running time or probability of error, over the algorithm's own coin flips, not over a hoped-for distribution of inputs.",
+      "detail": "Two kinds: Las Vegas algorithms always give the correct answer but their running time varies (randomized quicksort); Monte Carlo algorithms run in bounded time but may give a wrong answer with small probability (Miller–Rabin primality testing), and repeating them drives the error down exponentially.\n\nWhy use randomness: it defeats adversarial inputs (no fixed input is bad for randomized quicksort), it breaks symmetry (in distributed systems, random back-off avoids collisions, as in Ethernet), it simplifies designs (skip lists, treaps), and it can make problems faster (minimum cuts, sampling). Hash tables, Bloom filters, and cryptography lean on it. Whether randomness gives real extra power is an open question, BPP versus P; many believe every randomized algorithm can be derandomized. Real computers use pseudorandom generators, and hardware sources for cryptography.",
+      "principles": "Randomness is a tool for turning worst cases into unlikely cases. Because the coin flips belong to the algorithm and not to the adversary, no particular input can be reliably bad, which changes what guarantee is even possible.",
+      "requires": [
+        "algorithms",
+        "probability"
+      ]
+    },
+    {
+      "id": "monte-carlo",
+      "picture": "Estimate something by running many random trials and averaging.",
+      "mechanism": "Describe the quantity as an expected value or a probability, then sample: simulate random outcomes many times and take the average. To estimate pi, throw random points into a unit square and count the fraction landing inside the quarter circle; four times that fraction approaches pi.",
+      "detail": "Error shrinks as 1/√N regardless of the number of dimensions, which is the great virtue: grid-based integration suffers exponentially as dimensions grow, while Monte Carlo does not. So it is the method of choice for high-dimensional integrals, particle transport, and financial derivatives. Ten times the accuracy needs a hundred times the samples, so variance-reduction techniques matter: importance sampling, antithetic variables, stratification, and quasi-random sequences.\n\nStanislaw Ulam, John von Neumann, and Nicholas Metropolis developed it at Los Alamos in the 1940s for neutron diffusion; the name is a code word, after the casino where Ulam's uncle gambled. Modern uses include physics and chemistry simulation, risk analysis, Bayesian inference (Markov chain Monte Carlo), path tracing in computer graphics, and Monte Carlo tree search in game-playing programs.",
+      "principles": "When you cannot calculate it, simulate it. Averaging enough random samples buys accuracy that does not depend on how complicated the problem is, only on how many trials you can afford.",
+      "example": {
+        "label": "Estimating pi by throwing darts",
+        "code": "import random\n\ndef estimate_pi(samples):\n    inside = sum(random.random() ** 2 + random.random() ** 2 <= 1 for _ in range(samples))\n    return 4 * inside / samples\n\nfor n in (1_000, 100_000, 1_000_000):\n    print(n, round(estimate_pi(n), 4))     # approaches 3.1416, slowly (error ~ 1/sqrt(n))"
+      },
+      "requires": [
+        "randomized-algorithms",
+        "statistics"
+      ]
+    },
+    {
+      "id": "las-vegas",
+      "picture": "Always right, but how long it takes depends on luck.",
+      "mechanism": "A Las Vegas algorithm uses random choices but never returns a wrong answer. If its random choices go badly it simply takes longer, or retries. Its running time is a random variable, and analysis gives the expected time.",
+      "detail": "Randomized quicksort is the standard example: choosing a random pivot makes the expected time O(n log n) on any input, though a rare unlucky run may take longer, and the answer is always correctly sorted. Others include randomized selection (quickselect), the randomized incremental construction of convex hulls, and treaps.\n\nA generic recipe converts Las Vegas to Monte Carlo: stop after a time limit and guess. The reverse works if you can verify the answer: repeat the Monte Carlo algorithm until a check succeeds. Bounds usually come with high probability: the chance that it takes more than c times the expected time falls off exponentially. László Babai coined the name in 1979 as a counterpart to Monte Carlo: both gamble, but only the Las Vegas kind never lies about the result.",
+      "principles": "Luck can cost time but never truth. A guarantee about correctness, with only the running time left to chance, is the safest way to use randomness when a wrong answer is unacceptable.",
+      "example": {
+        "label": "Quickselect: the k-th smallest, always correct",
+        "code": "import random\n\ndef quickselect(a, k):\n    pivot = random.choice(a)\n    smaller = [x for x in a if x < pivot]\n    equal = [x for x in a if x == pivot]\n    if k < len(smaller):\n        return quickselect(smaller, k)\n    if k < len(smaller) + len(equal):\n        return pivot\n    return quickselect([x for x in a if x > pivot], k - len(smaller) - len(equal))\n\ndata = [random.randrange(10**6) for _ in range(10_001)]\nprint(quickselect(data, 5000) == sorted(data)[5000])   # True, every time"
+      },
+      "requires": [
+        "randomized-algorithms",
+        "quicksort"
+      ]
+    },
+    {
+      "id": "simulated-annealing",
+      "picture": "Wander around looking for a low point, willing to go uphill at first and less so as it cools.",
+      "mechanism": "Start with a random solution and a high temperature. Repeatedly propose a small random change. If it improves the result, accept it; if it worsens it by Δ, accept it anyway with probability e^(−Δ/T). Slowly lower T. Early on it moves freely and explores; late it settles into a good valley.",
+      "detail": "Inspired by annealing in metallurgy, where heating and then slowly cooling a metal lets its atoms find a low-energy crystal arrangement, while quenching leaves defects. It was introduced by Kirkpatrick, Gelatt, and Vecchi in 1983, and independently by Černý in 1985, building on the Metropolis algorithm of 1953. Its strength is escaping local minima that trap plain hill climbing. With a sufficiently slow cooling schedule it converges to the global optimum, though sufficiently slow can be impractical.\n\nDesign choices: the neighborhood (which changes to propose), the cooling schedule (for example multiplying T by 0.99 each step), and restarts. Uses: chip placement and routing, timetabling, the traveling salesman problem, protein folding, and image restoration. The tie to physics is exact: it samples the Boltzmann distribution, the probability law statistical mechanics uses for thermal systems.",
+      "principles": "Accepting worse moves on purpose sounds foolish, but it is what lets a search climb out of a merely good valley to find a better one. The physical analogy is real: temperature is a dial from exploring to exploiting.",
+      "example": {
+        "label": "Shortening a tour of 30 random cities",
+        "code": "import math, random\n\ndef anneal(cities, steps=20000):\n    def length(t):\n        return sum(math.dist(cities[t[i]], cities[t[(i + 1) % len(t)]]) for i in range(len(t)))\n    tour = list(range(len(cities)))\n    cur, temp = length(tour), 10.0\n    for _ in range(steps):\n        i, j = sorted(random.sample(range(len(tour)), 2))\n        new = tour[:i] + tour[i:j + 1][::-1] + tour[j + 1:]      # reverse a segment (2-opt)\n        delta = length(new) - cur\n        if delta < 0 or random.random() < math.exp(-delta / temp):\n            tour, cur = new, cur + delta\n        temp *= 0.9995\n    return tour, cur\n\nrandom.seed(1)\ncities = [(random.random() * 100, random.random() * 100) for _ in range(30)]\nstart = sum(math.dist(cities[i], cities[(i + 1) % 30]) for i in range(30))\nprint(round(start, 1), \"->\", round(anneal(cities)[1], 1))      # much shorter than the random tour"
+      },
+      "requires": [
+        "randomized-algorithms",
+        "optimization"
+      ]
+    },
+    {
+      "id": "genetic-algorithms",
+      "picture": "Evolve solutions: keep the fittest, mix them, mutate them, repeat.",
+      "mechanism": "Keep a population of candidate solutions, each encoded as a string of genes. Score each by fitness. Select the better ones as parents, combine pairs (crossover: swap parts of their genes), randomly alter some genes (mutation), and form the next generation. Repeat for many generations.",
+      "detail": "John Holland developed it at Michigan in the 1960s and 1970s, inspired by natural selection. It suits problems with huge, rugged search spaces and no useful gradient: designing antenna shapes (an evolved antenna flew on NASA's ST5 mission in 2006), scheduling, circuit and neural-network structure search, and game strategies.\n\nChoices: how to encode a candidate, the fitness function (the hard part), selection (tournament, roulette wheel), crossover and mutation rates, population size, and elitism, keeping the best. Pitfalls: premature convergence, when the population loses diversity; fitness functions that reward loopholes, which evolution will find; and the lack of guarantees. Related methods: genetic programming (evolving programs), evolution strategies, and differential evolution. It is often outperformed by problem-specific methods, but works when you have little insight into the problem.",
+      "principles": "Selection plus variation is a search algorithm that nature discovered first. It needs no understanding of the problem, only a way to score candidates, which is both its power and its weakness.",
+      "example": {
+        "label": "Evolving a phrase from noise",
+        "code": "import random\n\nrandom.seed(7)\nTARGET = \"hello world\"\nLETTERS = \"abcdefghijklmnopqrstuvwxyz \"\n\ndef fitness(s):\n    return sum(a == b for a, b in zip(s, TARGET))\n\ndef mutate(s):\n    i = random.randrange(len(s))\n    return s[:i] + random.choice(LETTERS) + s[i + 1:]\n\ndef crossover(a, b):\n    cut = random.randrange(len(a))\n    return a[:cut] + b[cut:]\n\npop = [\"\".join(random.choice(LETTERS) for _ in TARGET) for _ in range(100)]\nfor gen in range(500):\n    pop.sort(key=fitness, reverse=True)\n    if pop[0] == TARGET:\n        break\n    parents = pop[:20]\n    pop = parents + [mutate(crossover(random.choice(parents), random.choice(parents))) for _ in range(80)]\nprint(gen, pop[0])      # the generation count and the evolved phrase"
+      },
+      "requires": [
+        "randomized-algorithms",
+        "natural-selection"
+      ]
+    },
+    {
+      "id": "computability",
+      "picture": "What can be computed at all, whatever the time and memory.",
+      "mechanism": "Instead of asking how fast, ask whether an algorithm can exist. Formal models of computation, Turing machines, lambda calculus, and recursive functions, turn the question into mathematics. Some perfectly well-defined problems provably have no algorithm that answers correctly on every input.",
+      "detail": "In the 1930s Gödel, Church, Turing, Kleene, and Post each defined effectively calculable and found their definitions equivalent, which supports the Church–Turing thesis. Key results: the halting problem is undecidable (Turing, 1936); so is deciding whether a program does anything in particular (Rice's theorem: every non-trivial question about what a program computes is undecidable); Hilbert's Entscheidungsproblem has no algorithm (Church and Turing); and Hilbert's tenth problem, solving Diophantine equations, is undecidable (Matiyasevich, 1970).\n\nConsequences for practice: no perfect virus detector, no general program verifier, no tool that finds all bugs, so real tools approximate. It connects to Gödel's incompleteness theorems and to Kolmogorov complexity, and it delimits what any computer, including a quantum one, can do at all.",
+      "principles": "There is a boundary to what can be mechanized, and it can be proved. Knowing where it lies explains why some tools will never be perfect, and why every real analysis tool must be content with being right most of the time.",
+      "requires": [
+        "algorithms",
+        "logic"
+      ]
+    },
+    {
+      "id": "turing-machine",
+      "picture": "A tape, a head, and a table of rules: the simplest machine that can compute anything computable.",
+      "mechanism": "An unbounded tape of cells holds symbols. A head reads the symbol under it and, according to a finite table keyed on the current state and symbol, writes a symbol, moves left or right, and changes state. It halts when it reaches a halting state. The input is the starting tape; the output is what remains.",
+      "detail": "Alan Turing introduced it in 1936 in On Computable Numbers, to give a precise meaning to a step-by-step procedure, modeling a human clerk with pencil and paper. Simple as it is, it can compute anything a modern computer can, only slower, and it can simulate other Turing machines: the universal Turing machine takes the description of any machine and its input and runs it, the idea of the stored-program computer.\n\nIt is used to define time and space complexity and to prove undecidability. Equivalent models include lambda calculus, register machines, and cellular automata such as Conway's Life and Rule 110; some surprising systems are Turing complete too, including spreadsheet formulas and some games. A real computer has finite memory, so it only approximates a Turing machine.",
+      "principles": "A model so simple that anything true of it is easy to prove, yet as powerful as any computer. Its role is to fix what computing means, and it lets you reason about all possible programs at once.",
+      "example": {
+        "label": "A machine that adds one to a binary number",
+        "code": "def run(rules, tape, state=\"start\", steps=1000):\n    tape, head = dict(enumerate(tape)), 0\n    for _ in range(steps):\n        if state == \"halt\":\n            break\n        symbol = tape.get(head, \"_\")\n        write, move, state = rules[(state, symbol)]\n        tape[head] = write\n        head += 1 if move == \"R\" else -1\n    return \"\".join(tape[i] for i in sorted(tape)).strip(\"_\")\n\nrules = {\n    (\"start\", \"0\"): (\"0\", \"R\", \"start\"), (\"start\", \"1\"): (\"1\", \"R\", \"start\"),\n    (\"start\", \"_\"): (\"_\", \"L\", \"carry\"),\n    (\"carry\", \"1\"): (\"0\", \"L\", \"carry\"), (\"carry\", \"0\"): (\"1\", \"L\", \"halt\"),\n    (\"carry\", \"_\"): (\"1\", \"L\", \"halt\"),\n}\nprint(run(rules, \"1011\"))    # 1100, since 11 + 1 = 12"
+      },
+      "requires": [
+        "computability"
+      ]
+    },
+    {
+      "id": "halting-problem",
+      "picture": "Can a program decide, for any program, whether it will ever stop? No.",
+      "mechanism": "Suppose a program H(P, x) could always tell whether program P halts on input x. Build a program D that takes a program P, runs H(P, P), and does the opposite: loops forever if H says it halts, halts if H says it loops. Now ask what D does when given itself. Whatever H answers is wrong, so H cannot exist.",
+      "detail": "Turing proved it in 1936. It is a diagonal argument, like Cantor's proof that the real numbers are uncountable, and closely related to Gödel's incompleteness theorem and to the liar paradox. Practical consequences follow through reductions and Rice's theorem: it is impossible to write a program that decides, for all programs, whether they contain a bug, whether they are malware, whether two programs compute the same function, or whether a program will ever print hello.\n\nReal tools cope by being approximate: static analyzers report warnings that may be false alarms, type systems reject some safe programs, and verifiers work on restricted languages or require human-supplied proofs. The theorem is about all programs at once; for many particular programs, halting is easy to decide. The related busy beaver numbers grow faster than any computable function.",
+      "principles": "A machine cannot fully predict machines like itself. The halting problem is the first hard proof of a limit to what computation can decide, and its shape, self-reference leading to contradiction, recurs across logic and mathematics.",
+      "example": {
+        "label": "The diagonal argument as code",
+        "code": "# Suppose halts(program, data) existed:\ndef halts(program, data):\n    ...     # imagine a perfect decider; the argument shows none can exist\n\ndef paradox(program):\n    if halts(program, program):\n        while True:          # loop forever if it would halt\n            pass\n    return \"done\"            # halt if it would loop\n\n# What does paradox(paradox) do? If halts says it stops, it loops; if it says it loops, it stops.\n# Either answer is wrong, so a correct halts() cannot exist.\nprint(\"no run needed: the contradiction is the proof\")"
+      },
+      "requires": [
+        "turing-machine",
+        "paradox"
+      ]
+    },
+    {
+      "id": "church-turing",
+      "picture": "Whatever can be computed by a step-by-step method can be computed by a Turing machine.",
+      "mechanism": "The thesis identifies an informal idea, effectively calculable by a mechanical procedure, with a formal one, computable by a Turing machine. It cannot be proved, because one side is not defined mathematically, but it can be tested: every serious model of computation proposed has turned out equivalent.",
+      "detail": "In 1936 Alonzo Church, with lambda calculus, and Alan Turing, with his machines, working independently, defined computability and showed their definitions coincide; Gödel, Kleene, Post, and others found the same class from recursive functions and production systems. Turing's argument for the thesis analyzed what a human calculator does and showed it reduces to his machine's steps.\n\nA stronger version, the extended thesis, says any reasonable machine can be simulated with only polynomial slowdown; quantum computing is widely believed to challenge that form, though not the basic thesis, since a quantum computer can factor faster than the best known classical algorithms. Hypercomputation, imagining machines that perform infinitely many steps in finite time, would break the thesis, but no physical realization is known. Philosophers still debate whether it applies to minds: Gödel and Penrose argued not, while most computer scientists lean yes or stay agnostic.",
+      "principles": "A definition that has survived every attempt to find a bigger notion of computable. It is part mathematics and part claim about the physical world, and much of the theory of computation quietly rests on it.",
+      "requires": [
+        "turing-machine",
+        "lambda-calculus"
+      ]
+    },
+    {
+      "id": "lambda-calculus",
+      "picture": "A whole theory of computation built from nothing but functions.",
+      "mechanism": "There are three kinds of expression: a variable (x), a function that takes an input (λx. body), and an application of one expression to another (f x). The one rule is substitution: applying (λx. body) to an argument replaces x in the body with the argument. Everything else, numbers, booleans, loops, is encoded with functions.",
+      "detail": "Alonzo Church introduced it in the 1930s while studying the foundations of mathematics, and it turned out to be equivalent to Turing machines. Numbers are encoded as Church numerals: n is the function that applies f n times. Booleans are functions that pick one of two arguments, so if needs no built-in. Recursion comes from the Y combinator, a function that lets an anonymous function call itself.\n\nThe calculus is the model behind functional programming: Lisp, from John McCarthy in 1958, drew on it, and Haskell, ML, and OCaml are typed descendants; JavaScript's arrow functions and Python's lambda carry the name. Typed variants connect programs to proofs, the Curry–Howard correspondence: a program's type is a theorem, and the program is its proof. The Church–Rosser theorem says that if a result exists, it is unique.",
+      "principles": "Functions alone are enough. Lambda calculus reduces computation to substitution and shows that data, control, and recursion can all be built from a single idea, a foundation for how many programmers think.",
+      "example": {
+        "label": "Numbers, booleans, and recursion from functions",
+        "code": "zero   = lambda f: lambda x: x\nsucc   = lambda n: lambda f: lambda x: f(n(f)(x))\nadd    = lambda a: lambda b: lambda f: lambda x: a(f)(b(f)(x))\nto_int = lambda n: n(lambda k: k + 1)(0)\n\none, two = succ(zero), succ(succ(zero))\nprint(to_int(add(two)(succ(two))))                      # 5\n\ntrue, false = (lambda a: lambda b: a), (lambda a: lambda b: b)\nprint(true(\"yes\")(\"no\"), false(\"yes\")(\"no\"))            # yes no\n\n# Recursion without naming the function: the Z combinator (Y for strict languages)\nZ = lambda f: (lambda x: f(lambda v: x(x)(v)))(lambda x: f(lambda v: x(x)(v)))\nfactorial = Z(lambda self: lambda n: 1 if n == 0 else n * self(n - 1))\nprint(factorial(5))                                      # 120"
+      },
+      "requires": [
+        "computability",
+        "functions"
+      ]
+    },
+    {
+      "id": "state-machines",
+      "picture": "A system that is always in one of a few states and jumps between them when things happen.",
+      "mechanism": "A finite-state machine has a set of states, a start state, and transitions: from state S, on input I, go to state T. Some states are marked accepting. It reads its input one symbol at a time and holds no memory beyond which state it is in.",
+      "detail": "Everyday examples: a turnstile (locked or unlocked, moved by coins and pushes), a traffic light, a vending machine, a media player (playing, paused, stopped), and TCP's connection states. Design tools include state diagrams and transition tables.\n\nDeterministic and nondeterministic machines recognize exactly the same set of languages, the regular languages, which are the ones regular expressions describe; every regular expression can be compiled to a state machine and back. Limits: a finite-state machine cannot count without bound or match nested brackets, which needs a pushdown automaton with a stack, and a machine with an unbounded tape is a Turing machine. This ladder is the Chomsky hierarchy. Practical uses: lexers in compilers, protocol implementations, game AI, user-interface flow, embedded controllers, and hardware design. Explicit state machines make impossible states unrepresentable and behavior testable.",
+      "principles": "Naming the states a system can be in, and the events that move it between them, tames complexity. A state machine is the smallest useful model of behavior, and its limits mark the first rung on the ladder of what machines can compute.",
+      "example": {
+        "label": "A turnstile",
+        "code": "transitions = {\n    (\"locked\", \"coin\"): \"unlocked\",\n    (\"locked\", \"push\"): \"locked\",\n    (\"unlocked\", \"coin\"): \"unlocked\",\n    (\"unlocked\", \"push\"): \"locked\",\n}\n\ndef run(events, state=\"locked\"):\n    for event in events:\n        state = transitions[(state, event)]\n    return state\n\nprint(run([\"push\", \"coin\", \"push\"]))       # locked\nprint(run([\"coin\", \"coin\"]))               # unlocked"
+      },
+      "requires": [
+        "computability"
+      ]
+    }
+  ]
+}
