@@ -122,7 +122,7 @@ Shipped for `dsa` (3 courses, 13 modules) and `calculus` (4 courses, 7 modules) 
 - `LibraryHome`: add a `chip-filter` alongside the existing "Written in depth" one — "Bookmarked" — reusing the same `flat`/`results` filtering path that already exists for search and `writtenOnly`.
 - This is per-viewer local state (this is a Tauri desktop app, not shared), so `localStorage` is the right call — no backend needed.
 
-### 3. "Liquid Glass" UI pass
+### 3. "Liquid Glass" UI pass — done 2026-09-24
 
 Distinct from (and further than) the flatter frosted-glass Apple redesign already shipped this session (`app.css`, `library.css`, `sheets.css` — near-black ink, `backdrop-filter: saturate(180%) blur(20px)` on sticky/floating surfaces, solid blue pills). Apple's *Liquid Glass* material (2025+) is more pronounced: heavier blur+saturation, a specular top-highlight rim simulating light catching a glass edge, and floating capsule/segmented controls where the *container* is glass and the *active* segment is a solid pill floating inside it.
 

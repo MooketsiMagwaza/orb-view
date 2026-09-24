@@ -44,10 +44,11 @@
   display: grid;
   grid-template-columns: 40px 1fr 36px;
   align-items: center;
+  border: var(--glass-edge);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(200%) blur(24px);
+  -webkit-backdrop-filter: saturate(200%) blur(24px);
   box-shadow: var(--shadow-float);
   overflow: hidden;
   animation: pathbar-in 0.4s var(--ease) both;
@@ -70,7 +71,7 @@
 /* ─── Sheets ─────────────────────────────────────────────────────────── */
 
 .sheet-root { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
-.sheet-scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.32); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: scrim-in 0.3s ease both; }
+.sheet-scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.32); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: scrim-in 0.3s ease both; }
 @keyframes scrim-in { from { opacity: 0; } }
 
 .sheet {
@@ -98,7 +99,11 @@
 .sheet__title { margin: 2px 0 0; font-size: 26px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; }
 .sheet__close {
   flex: none; width: 40px; height: 40px; display: grid; place-items: center;
-  border: 0; border-radius: 50%; background: var(--canvas-alt); color: var(--ink); cursor: pointer;
+  border: var(--glass-edge); border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6); color: var(--ink); cursor: pointer;
+  backdrop-filter: saturate(200%) blur(24px);
+  -webkit-backdrop-filter: saturate(200%) blur(24px);
+  box-shadow: var(--shadow-float);
   transition: background 0.2s ease;
 }
 @media (hover: hover) { .sheet__close:hover { background: rgba(0, 0, 0, 0.1); } }
