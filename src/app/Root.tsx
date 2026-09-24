@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ConceptPage, DepartmentPage } from "../library/ConceptPage";
+import { ConceptPage, CoursePage, DepartmentPage, ModulePage } from "../library/ConceptPage";
 import { LibraryHome } from "../library/LibraryHome";
 import { useRoute } from "../library/route";
 import { DebatePage } from "../debate/DebatePage";
@@ -26,6 +26,8 @@ export default function Root() {
     <div className="library-shell" ref={scroller}>
       {route.kind === "concept" ? <ConceptPage id={route.id} go={go} />
         : route.kind === "department" ? <DepartmentPage id={route.id} />
+        : route.kind === "course" ? <CoursePage id={route.id} />
+        : route.kind === "module" ? <ModulePage id={route.id} />
         : route.kind === "debate" ? <DebatePage />
         : route.kind === "study-japan" ? <StudyJapanPage />
         : <LibraryHome />}

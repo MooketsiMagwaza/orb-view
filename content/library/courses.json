@@ -1,0 +1,61 @@
+{
+  "$schema": "../courses.schema.json",
+  "description": "A curated tier between a department and its raw concept tree: Department → Course → Module → concept decks. Only departments listed here get this tier; the rest fall back to their entries directly.",
+  "courses": [
+    {
+      "id": "dsa-data-structures", "title": "Data Structures", "blurb": "How data is shaped in memory: lists, stacks, queues, hash tables, trees, and graphs.", "departmentId": "dsa",
+      "modules": [
+        { "id": "dsa-foundations", "title": "Foundations", "blurb": "What a data structure even is, before picking one.", "entries": ["abstract-data-types"] },
+        { "id": "dsa-linear-structures", "title": "Linear Structures", "blurb": "Arrays, linked lists, stacks, and queues.", "entries": ["arrays", "linked-lists", "stacks", "queues"] },
+        { "id": "dsa-hashing", "title": "Hashing", "blurb": "Constant-time lookup, and what happens when keys collide.", "entries": ["hash-tables"] },
+        { "id": "dsa-trees", "title": "Trees", "blurb": "Search trees, B-trees, tries, and heaps.", "entries": ["trees"] },
+        { "id": "dsa-graphs", "title": "Graphs", "blurb": "Nodes and edges, and the shapes they can take.", "entries": ["graphs"] }
+      ]
+    },
+    {
+      "id": "dsa-algorithms", "title": "Algorithms", "blurb": "The recipes that work on data: sorting, searching, and the limits of computation.", "departmentId": "dsa",
+      "modules": [
+        { "id": "algo-complexity", "title": "Complexity & Limits", "blurb": "Big O, and what computers provably cannot do.", "entries": ["big-o", "computability"] },
+        { "id": "algo-sorting-searching", "title": "Sorting & Searching", "blurb": "Putting things in order, and finding them again.", "entries": ["sorting", "searching"] },
+        { "id": "algo-recursion-dp", "title": "Recursion & Dynamic Programming", "blurb": "Solving a problem by way of smaller copies of itself.", "entries": ["recursion", "dynamic-programming"] },
+        { "id": "algo-greedy-graph", "title": "Greedy & Graph Algorithms", "blurb": "Taking the best step now, and searching a graph well.", "entries": ["greedy-algorithms", "graph-algorithms"] },
+        { "id": "algo-backtracking-random", "title": "Backtracking & Randomization", "blurb": "Trying, undoing, and letting chance do some of the work.", "entries": ["backtracking", "randomized-algorithms"] }
+      ]
+    },
+    {
+      "id": "dsa-number-theory-extras", "title": "Number Theory & Extras", "blurb": "Modular arithmetic, transforms, computational geometry, and streaming.", "departmentId": "dsa",
+      "modules": [
+        { "id": "nte-number-theory", "title": "Number Theory", "blurb": "Remainders, primes, and modular exponentiation.", "entries": ["modular-arithmetic"] },
+        { "id": "nte-transforms", "title": "Transforms", "blurb": "Turning a signal into its frequencies, quickly.", "entries": ["fft"] },
+        { "id": "nte-geometry-streams", "title": "Geometry & Streams", "blurb": "Shapes in the plane, and answering questions about data too big to store.", "entries": ["computational-geometry", "streaming-algorithms"] }
+      ]
+    },
+    {
+      "id": "calc-single-variable", "title": "Single-Variable Calculus", "blurb": "Functions, limits, derivatives, integrals, and series.", "departmentId": "calculus",
+      "modules": [
+        { "id": "calc-functions-limits", "title": "Functions & Limits", "blurb": "What a function is, and what it approaches.", "entries": ["functions", "limits"] },
+        { "id": "calc-derivatives", "title": "Derivatives", "blurb": "The rate something is changing, right now.", "entries": ["derivatives"] },
+        { "id": "calc-integrals", "title": "Integrals", "blurb": "Adding up infinitely many infinitely small pieces.", "entries": ["integrals"] },
+        { "id": "calc-series", "title": "Series", "blurb": "Sums with infinitely many terms, and when they settle on an answer.", "entries": ["series"] }
+      ]
+    },
+    {
+      "id": "calc-differential-equations", "title": "Differential Equations", "blurb": "Equations that describe how things change, from heat to quantum waves.", "departmentId": "calculus",
+      "modules": [
+        { "id": "calc-diffeq", "title": "Differential Equations", "blurb": "Ordinary and partial differential equations, and how to solve them.", "entries": ["differential-equations"] }
+      ]
+    },
+    {
+      "id": "calc-multivariable", "title": "Multivariable & Vector Calculus", "blurb": "Calculus in more than one dimension.", "departmentId": "calculus",
+      "modules": [
+        { "id": "calc-multivariable-module", "title": "Multivariable Calculus", "blurb": "Functions of several variables, gradients, and multiple integrals.", "entries": ["multivariable"] }
+      ]
+    },
+    {
+      "id": "calc-history", "title": "History", "blurb": "How calculus was made, and by whom.", "departmentId": "calculus",
+      "modules": [
+        { "id": "calc-history-module", "title": "How Calculus Was Made", "blurb": "Newton, Leibniz, and the argument over who got there first.", "entries": ["calculus-history"] }
+      ]
+    }
+  ]
+}

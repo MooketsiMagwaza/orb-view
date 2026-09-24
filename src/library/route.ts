@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 export type Route =
   | { kind: "library" }
   | { kind: "department"; id: string }
+  | { kind: "course"; id: string }
+  | { kind: "module"; id: string }
   | { kind: "concept"; id: string }
   | { kind: "map"; id: string }
   | { kind: "debate" }
@@ -13,7 +15,9 @@ export function parseRoute(hash: string): Route {
   const [, kind, id] = hash.replace(/^#/, "").split("/");
   if (kind === "debate") return { kind: "debate" };
   if (kind === "study-japan") return { kind: "study-japan" };
-  if (id && (kind === "department" || kind === "concept" || kind === "map")) return { kind, id: decodeURIComponent(id) };
+  if (id && (kind === "department" || kind === "course" || kind === "module" || kind === "concept" || kind === "map")) {
+    return { kind, id: decodeURIComponent(id) };
+  }
   return { kind: "library" };
 }
 

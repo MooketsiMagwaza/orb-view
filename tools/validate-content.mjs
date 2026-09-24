@@ -228,6 +228,25 @@ for (const file of libraryFiles) {
     }
   }
 }
+// Courses and modules: a curated tier between a department and its raw entries. Both need ids as
+// globally unique as a department's, and every module entry must point to a real concept.
+const courseIds = new Set();
+const moduleIds = new Set();
+for (const file of libraryFiles) {
+  for (const course of file.data.courses ?? []) {
+    if (departmentIds.has(course.id) || courseIds.has(course.id)) errors.push(`${file.name}: duplicate course id "${course.id}"`);
+    courseIds.add(course.id);
+    if (!departmentIds.has(course.departmentId)) errors.push(`${file.name}: course "${course.id}" references unknown department "${course.departmentId}"`);
+    for (const mod of course.modules ?? []) {
+      if (departmentIds.has(mod.id) || courseIds.has(mod.id) || moduleIds.has(mod.id)) errors.push(`${file.name}: duplicate module id "${mod.id}"`);
+      moduleIds.add(mod.id);
+      for (const entry of mod.entries ?? []) {
+        if (!byId.has(entry)) errors.push(`${file.name}: module "${mod.id}" lists unknown concept "${entry}"`);
+      }
+    }
+  }
+}
+
 // Every entrance should be reachable from some department, or it cannot be found from the library home.
 const reachableFromLibrary = new Set();
 const shelfStack = [...shelved];
@@ -247,7 +266,7 @@ console.log(`${all.length} concepts in ${clusters.length} files · ${all.reduce(
 console.log(`depth: ${maxDepth} levels · entrances (${entrances.length}): ${entrances.map((n) => `${n.id}=${n.orb}`).join(", ")}`);
 console.log(`orb forms: ${ORBS.map((form) => `${form} ${all.filter((n) => n.orb === form).length}`).join(" · ")}`);
 console.log(`sensitive: ${all.filter((n) => n.safety === "sensitive" || n.sensitive).map((n) => n.id).join(", ")}`);
-console.log(`categories: ${categoryFiles.length} · link files: ${linkFiles.length} · departments: ${departmentIds.size}`);
+console.log(`categories: ${categoryFiles.length} · link files: ${linkFiles.length} · departments: ${departmentIds.size} · courses: ${courseIds.size} · modules: ${moduleIds.size}`);
 console.log(`written in depth: ${depthById.size} of ${all.length} concepts (${((depthById.size / all.length) * 100).toFixed(1)}%)`);
 for (const note of notes) console.log(`fixed: ${note}`);
 

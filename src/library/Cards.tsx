@@ -1,6 +1,9 @@
 import type { ConceptNode } from "../concepts/types";
 import { OrbGlyph } from "../paths/OrbGlyph";
-import { depthById, departmentSize, departmentWritten, subtree, whereIs, LAYERS, type Department, type Faculty } from "./data";
+import {
+  courseSize, courseWritten, depthById, departmentSize, departmentWritten, moduleSize, moduleWritten, subtree, whereIs, LAYERS,
+  type Course, type Department, type Faculty, type Module,
+} from "./data";
 import type { Guide } from "./guides";
 import { hrefFor } from "./route";
 import { getNode } from "../graph/model";
@@ -50,6 +53,42 @@ export function DepartmentCard({ department, faculty }: { department: Department
       <OrbGlyph state={lead.orb} voice={faculty.voice} seed={department.id} size={52} />
       <h3 className="card__title">{department.title}</h3>
       <p className="card__blurb">{department.blurb}</p>
+      <span className="card__foot">
+        <span>{size} ideas</span>
+        <span className="card__written">{written ? `${written} in depth` : ""}</span>
+      </span>
+    </a>
+  );
+}
+
+/** A course as a deck: it opens onto the decks of its modules. */
+export function CourseCard({ course, faculty }: { course: Course; faculty: Faculty }) {
+  const lead = getNode(course.modules[0].entries[0]);
+  const size = courseSize(course);
+  const written = courseWritten(course);
+  return (
+    <a className="card card--deck card--department" href={hrefFor({ kind: "course", id: course.id })}>
+      <OrbGlyph state={lead.orb} voice={faculty.voice} seed={course.id} size={52} />
+      <h3 className="card__title">{course.title}</h3>
+      <p className="card__blurb">{course.blurb}</p>
+      <span className="card__foot">
+        <span>{size} ideas</span>
+        <span className="card__written">{written ? `${written} in depth` : ""}</span>
+      </span>
+    </a>
+  );
+}
+
+/** A module as a deck: it opens onto the concept cards of its entries. */
+export function ModuleCard({ module, faculty }: { module: Module; faculty: Faculty }) {
+  const lead = getNode(module.entries[0]);
+  const size = moduleSize(module);
+  const written = moduleWritten(module);
+  return (
+    <a className="card card--deck card--department" href={hrefFor({ kind: "module", id: module.id })}>
+      <OrbGlyph state={lead.orb} voice={faculty.voice} seed={module.id} size={52} />
+      <h3 className="card__title">{module.title}</h3>
+      <p className="card__blurb">{module.blurb}</p>
       <span className="card__foot">
         <span>{size} ideas</span>
         <span className="card__written">{written ? `${written} in depth` : ""}</span>

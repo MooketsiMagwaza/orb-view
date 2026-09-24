@@ -19,9 +19,12 @@ export type Depth = Record<LayerKey, string> & {
 
 export type Department = { id: string; title: string; blurb: string; entries: string[] };
 export type Faculty = { id: string; title: string; blurb: string; orb: OrbState; voice: ConceptVoice; departments: Department[] };
+/** A module's entries are anchor concept ids, not exhaustive — subtree() still supplies everything beneath one. */
+export type Module = { id: string; title: string; blurb: string; entries: string[] };
+export type Course = { id: string; title: string; blurb: string; departmentId: string; modules: Module[] };
 
 type DepthFile = { depth?: (Depth & { id: string })[] };
-type LibraryFile = { faculties?: Faculty[] };
+type LibraryFile = { faculties?: Faculty[]; courses?: Course[] };
 
 const depthFiles = import.meta.glob("../../content/depth/*.json", { eager: true, import: "default" }) as Record<string, DepthFile>;
 const libraryFiles = import.meta.glob("../../content/library/*.json", { eager: true, import: "default" }) as Record<string, LibraryFile>;
@@ -34,9 +37,29 @@ export const faculties: Faculty[] = Object.entries(libraryFiles)
   .sort(([a], [b]) => a.localeCompare(b))
   .flatMap(([, file]) => file.faculties ?? []);
 
+export const courses: Course[] = Object.entries(libraryFiles)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .flatMap(([, file]) => file.courses ?? []);
+
 const departmentsById = new Map(faculties.flatMap((f) => f.departments.map((d) => [d.id, { department: d, faculty: f }] as const)));
 
 export const getDepartment = (id: string) => departmentsById.get(id);
+
+const coursesById = new Map(courses.map((c) => [c.id, c] as const));
+export const getCourse = (id: string) => coursesById.get(id);
+
+const modulesById = new Map(courses.flatMap((c) => c.modules.map((m) => [m.id, { module: m, course: c }] as const)));
+export const getModule = (id: string) => modulesById.get(id);
+
+const coursesByDepartment = new Map<string, Course[]>();
+for (const course of courses) {
+  const list = coursesByDepartment.get(course.departmentId);
+  if (list) list.push(course); else coursesByDepartment.set(course.departmentId, [course]);
+}
+/** A department's courses, if it has been given a curated Course/Module tier. Empty means the department falls back to its raw entries. */
+export function coursesFor(departmentId: string): Course[] {
+  return coursesByDepartment.get(departmentId) ?? [];
+}
 
 /** Everything below an idea, in its own tree: the size of the deck it opens. */
 const subtreeCache = new Map<string, Set<string>>();
@@ -66,10 +89,10 @@ export function layersWritten(id: string): number {
   return depthById.has(id) ? LAYERS.length : 1;
 }
 
-/** Every concept a department opens onto: its entries and everything beneath them, counted once. */
-function departmentIds(department: Department): Set<string> {
+/** Every concept a list of anchor entries opens onto: the entries and everything beneath them, counted once. */
+function idsFor(entries: string[]): Set<string> {
   const all = new Set<string>();
-  for (const entry of department.entries) {
+  for (const entry of entries) {
     all.add(entry);
     for (const id of subtree(entry)) all.add(id);
   }
@@ -77,21 +100,54 @@ function departmentIds(department: Department): Set<string> {
 }
 
 export function departmentSize(department: Department): number {
-  return departmentIds(department).size;
+  return idsFor(department.entries).size;
 }
 
 /** How many of a department's concepts have all four layers written. */
 export function departmentWritten(department: Department): number {
   let written = 0;
-  for (const id of departmentIds(department)) if (depthById.has(id)) written++;
+  for (const id of idsFor(department.entries)) if (depthById.has(id)) written++;
+  return written;
+}
+
+export function moduleSize(mod: Module): number {
+  return idsFor(mod.entries).size;
+}
+
+export function moduleWritten(mod: Module): number {
+  let written = 0;
+  for (const id of idsFor(mod.entries)) if (depthById.has(id)) written++;
+  return written;
+}
+
+export function courseSize(course: Course): number {
+  return idsFor(course.modules.flatMap((m) => m.entries)).size;
+}
+
+export function courseWritten(course: Course): number {
+  let written = 0;
+  for (const id of idsFor(course.modules.flatMap((m) => m.entries))) if (depthById.has(id)) written++;
   return written;
 }
 
 /** The nearest department (by ancestry) that shelves this concept, with the trail from its entry down to it. */
-export function whereIs(id: string): { faculty: Faculty; department: Department; trail: string[] } | null {
-  const entryOf = new Map<string, { faculty: Faculty; department: Department }>();
-  for (const faculty of faculties) for (const department of faculty.departments) for (const entry of department.entries) {
-    if (!entryOf.has(entry)) entryOf.set(entry, { faculty, department });
+export function whereIs(
+  id: string,
+): { faculty: Faculty; department: Department; course: Course | null; module: Module | null; trail: string[] } | null {
+  const entryOf = new Map<string, { faculty: Faculty; department: Department; course: Course | null; module: Module | null }>();
+  for (const faculty of faculties) {
+    for (const department of faculty.departments) {
+      for (const course of coursesFor(department.id)) {
+        for (const mod of course.modules) {
+          for (const entry of mod.entries) {
+            if (!entryOf.has(entry)) entryOf.set(entry, { faculty, department, course, module: mod });
+          }
+        }
+      }
+      for (const entry of department.entries) {
+        if (!entryOf.has(entry)) entryOf.set(entry, { faculty, department, course: null, module: null });
+      }
+    }
   }
   // Breadth-first up the parents, so the closest shelf wins.
   const queue: { id: string; trail: string[] }[] = [{ id, trail: [id] }];

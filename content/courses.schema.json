@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Orb View courses",
+  "type": "object",
+  "required": ["courses"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "courses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "blurb", "departmentId", "modules"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "blurb": { "type": "string" },
+          "departmentId": { "type": "string", "description": "The department this course belongs under." },
+          "modules": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "blurb", "entries"],
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "blurb": { "type": "string" },
+                "entries": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Concept ids whose decks this module opens onto." }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

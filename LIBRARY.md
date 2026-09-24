@@ -88,9 +88,11 @@ Each Python example in those branches is executed by `npm run check:examples`, s
 
 Requested 2026-09-22, deliberately deferred — do this next, in this order, without re-asking scope questions unless something below is genuinely ambiguous once you're in the code.
 
-### 1. Courses and modules — a fourth tier between Department and the concept tree
+### 1. Courses and modules — a fourth tier between Department and the concept tree — done 2026-09-24
 
 Today the hierarchy is only Faculty → Department → (raw concept tree, "any concept with children is a deck"). Add two curated tiers in between so browsing reads like a real university: Faculty → Department → Course → Module → concept decks.
+
+Shipped for `dsa` (3 courses, 13 modules) and `calculus` (4 courses, 7 modules) — 7 courses / 20 modules total, all validated by `npm run check:content` and confirmed in the browser (department → course → module → concept, breadcrumbs, and a course-less department falling back to raw entries unchanged). The other ~29 departments are untouched, per the additive scope below.
 
 - New file `content/library/courses.json` (new top-level key `"courses"`, sibling to `faculties.json`'s `"faculties"` key — extend `LibraryFile` in `src/library/data.ts` to read both keys from the same glob). Shape:
   ```ts

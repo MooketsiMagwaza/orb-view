@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { getNode, graph } from "../graph/model";
 import { OrbGlyph } from "../paths/OrbGlyph";
 import { InfoSheet } from "../sheet/InfoSheet";
-import { ConceptCard, LayerDots } from "./Cards";
-import { LAYERS, childrenOf, depthById, getDepartment, whereIs, type LayerKey } from "./data";
+import { ConceptCard, CourseCard, LayerDots, ModuleCard } from "./Cards";
+import { LAYERS, childrenOf, coursesFor, depthById, getCourse, getDepartment, getModule, whereIs, type LayerKey } from "./data";
 import { hrefFor, type Route } from "./route";
 
 function Breadcrumbs({ id }: { id: string }) {
@@ -17,6 +17,18 @@ function Breadcrumbs({ id }: { id: string }) {
           <a href={hrefFor({ kind: "library" })}>{place.faculty.title}</a>
           <span aria-hidden="true">›</span>
           <a href={hrefFor({ kind: "department", id: place.department.id })}>{place.department.title}</a>
+          {place.course && (
+            <>
+              <span aria-hidden="true">›</span>
+              <a href={hrefFor({ kind: "course", id: place.course.id })}>{place.course.title}</a>
+            </>
+          )}
+          {place.module && (
+            <>
+              <span aria-hidden="true">›</span>
+              <a href={hrefFor({ kind: "module", id: place.module.id })}>{place.module.title}</a>
+            </>
+          )}
           {place.trail.map((step, index) => {
             const last = index === place.trail.length - 1;
             return (
@@ -214,6 +226,7 @@ export function DepartmentPage({ id }: { id: string }) {
     return <article className="page"><h1 className="page__title">Not in the library</h1><p><a href={hrefFor({ kind: "library" })}>Back to the library</a></p></article>;
   }
   const { department, faculty } = found;
+  const courses = coursesFor(department.id);
   return (
     <article className="page">
       <nav className="crumbs" aria-label="Where this lives">
@@ -241,7 +254,77 @@ export function DepartmentPage({ id }: { id: string }) {
           This deck is the journey as a chain. The detailed reference, MEXT's seven categories, prerequisites, and Botswana-specific notes, lives in the dedicated guide →
         </a>
       )}
-      <div className="cards">{department.entries.map((entry) => <ConceptCard key={entry} node={getNode(entry)} />)}</div>
+      {courses.length > 0 ? (
+        <div className="cards">{courses.map((course) => <CourseCard key={course.id} course={course} faculty={faculty} />)}</div>
+      ) : (
+        <div className="cards">{department.entries.map((entry) => <ConceptCard key={entry} node={getNode(entry)} />)}</div>
+      )}
+    </article>
+  );
+}
+
+/** A course: a shelf of the modules it's broken into. */
+export function CoursePage({ id }: { id: string }) {
+  const course = getCourse(id);
+  if (!course) {
+    return <article className="page"><h1 className="page__title">Not in the library</h1><p><a href={hrefFor({ kind: "library" })}>Back to the library</a></p></article>;
+  }
+  const found = getDepartment(course.departmentId);
+  if (!found) {
+    return <article className="page"><h1 className="page__title">Not in the library</h1><p><a href={hrefFor({ kind: "library" })}>Back to the library</a></p></article>;
+  }
+  const { department, faculty } = found;
+  return (
+    <article className="page">
+      <nav className="crumbs" aria-label="Where this lives">
+        <a href={hrefFor({ kind: "library" })}>Library</a><span aria-hidden="true">›</span>
+        <a href={hrefFor({ kind: "library" })}>{faculty.title}</a><span aria-hidden="true">›</span>
+        <a href={hrefFor({ kind: "department", id: department.id })}>{department.title}</a><span aria-hidden="true">›</span>
+        <strong aria-current="page">{course.title}</strong>
+      </nav>
+      <header className="page__head">
+        <OrbGlyph state={getNode(course.modules[0].entries[0]).orb} voice={faculty.voice} seed={course.id} size={72} />
+        <div className="page__heading">
+          <p className="eyebrow">{department.title}</p>
+          <h1 className="page__title">{course.title}</h1>
+        </div>
+      </header>
+      <p className="page__lede">{course.blurb}</p>
+      <div className="cards">{course.modules.map((mod) => <ModuleCard key={mod.id} module={mod} faculty={faculty} />)}</div>
+    </article>
+  );
+}
+
+/** A module: a small shelf of the concept decks it opens onto. */
+export function ModulePage({ id }: { id: string }) {
+  const found = getModule(id);
+  if (!found) {
+    return <article className="page"><h1 className="page__title">Not in the library</h1><p><a href={hrefFor({ kind: "library" })}>Back to the library</a></p></article>;
+  }
+  const { module: mod, course } = found;
+  const departmentEntry = getDepartment(course.departmentId);
+  if (!departmentEntry) {
+    return <article className="page"><h1 className="page__title">Not in the library</h1><p><a href={hrefFor({ kind: "library" })}>Back to the library</a></p></article>;
+  }
+  const { department, faculty } = departmentEntry;
+  return (
+    <article className="page">
+      <nav className="crumbs" aria-label="Where this lives">
+        <a href={hrefFor({ kind: "library" })}>Library</a><span aria-hidden="true">›</span>
+        <a href={hrefFor({ kind: "library" })}>{faculty.title}</a><span aria-hidden="true">›</span>
+        <a href={hrefFor({ kind: "department", id: department.id })}>{department.title}</a><span aria-hidden="true">›</span>
+        <a href={hrefFor({ kind: "course", id: course.id })}>{course.title}</a><span aria-hidden="true">›</span>
+        <strong aria-current="page">{mod.title}</strong>
+      </nav>
+      <header className="page__head">
+        <OrbGlyph state={getNode(mod.entries[0]).orb} voice={faculty.voice} seed={mod.id} size={72} />
+        <div className="page__heading">
+          <p className="eyebrow">{course.title}</p>
+          <h1 className="page__title">{mod.title}</h1>
+        </div>
+      </header>
+      <p className="page__lede">{mod.blurb}</p>
+      <div className="cards">{mod.entries.map((entry) => <ConceptCard key={entry} node={getNode(entry)} />)}</div>
     </article>
   );
 }
