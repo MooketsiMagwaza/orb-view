@@ -23,11 +23,10 @@ export type Category = {
 const files = import.meta.glob("../../content/categories/*.json", { eager: true, import: "default" }) as Record<string, Category>;
 
 /** Groups appear in this order; anything unlisted follows alphabetically. */
-export const GROUP_ORDER = ["Me", "Tech", "People", "Science", "Culture", "Abstract"];
+export const GROUP_ORDER = ["Tech", "People", "Science", "Culture", "Abstract"];
 
 /** Each group borrows a voice so its orbs share a blue. */
 export const GROUP_VOICE: Record<string, ConceptVoice> = {
-  Me: "restless",
   Tech: "precise",
   People: "human",
   Science: "vast",

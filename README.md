@@ -9,7 +9,7 @@ Orb View is a visual learning app for exploring how ideas connect. Browse a libr
 - Bookmark ideas you want to come back to, and filter the library down to just those.
 - Explore the concept graph by expanding nodes, panning, and zooming.
 - Focus on an idea to read a short explanation and open its sources.
-- Follow curated learning paths, including a debate guide and a Japan study guide.
+- Follow curated learning paths, including a debate guide.
 - Use keyboard navigation, synthesized interaction sounds, and reduced-motion support.
 
 ## Get started

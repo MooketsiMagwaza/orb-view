@@ -3,14 +3,6 @@
   "description": "The top of the library, organized like a university: faculties contain departments, and each department opens onto the concept decks beneath it. Below this level the structure comes from the concept tree itself: any concept with children is a deck.",
   "faculties": [
     {
-      "id": "me", "title": "Me", "blurb": "Beliefs, fascinations, and lessons, in my own words.", "orb": "working", "voice": "restless",
-      "departments": [
-        { "id": "entropy", "title": "Entropy", "blurb": "The idea I keep coming back to, and everything that hangs off it.", "entries": ["entropy"] },
-        { "id": "taoism-care", "title": "Taoism, Care & Letting Go", "blurb": "Helping without forcing, boundaries, and living with regret.", "entries": ["taoism", "care", "boundaries", "regret"] },
-        { "id": "study-in-japan", "title": "Studying in Japan", "blurb": "The whole journey as a chain, start to finish: choosing a path, the MEXT application, the visa, and settling in.", "entries": ["study-in-japan"] }
-      ]
-    },
-    {
       "id": "engineering", "title": "Engineering & Technology", "blurb": "How people build things that work, from stone to software.", "orb": "connecting", "voice": "precise",
       "departments": [
         { "id": "computer-science", "title": "Computer Science", "blurb": "Software, data, and the machines that follow instructions.", "entries": ["computing", "software", "data"] },
