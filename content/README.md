@@ -6,7 +6,7 @@ The network is data. Nothing about concepts, links, or paths lives in code, so i
 content/
 ├── concepts/        one file per cluster of ideas: cosmos.json, security.json, music.json, …
 ├── links/           themed lists of extra cross-links: tech.json, science.json, …
-├── categories/      one file per learning path: me-entropy-taoism.json, tech-networking.json, …
+├── categories/      one file per learning path: tech-networking.json, science-cosmos.json, …
 ├── depth/           the four layers (picture, mechanism, detail, principles) for concepts written in full
 ├── library/         the faculties and departments at the top of the library
 └── *.schema.json    editor schemas for each of the above
@@ -68,7 +68,7 @@ A category is a way in: an entry concept and a short ordered trail of ideas to l
 }
 ```
 
-`group` is one of `Me`, `Tech`, `People`, `Science`, `Culture`, `Abstract` (a new group name simply appears after them). The path must start at `entry` and only list real concept ids.
+`group` is one of `Tech`, `People`, `Science`, `Culture`, `Abstract` (a new group name simply appears after them). The path must start at `entry` and only list real concept ids.
 
 ## Depth files
 

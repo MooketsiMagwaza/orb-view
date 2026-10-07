@@ -3,7 +3,6 @@ import { ConceptPage, CoursePage, DepartmentPage, ModulePage } from "../library/
 import { LibraryHome } from "../library/LibraryHome";
 import { useRoute } from "../library/route";
 import { DebatePage } from "../debate/DebatePage";
-import { StudyJapanPage } from "../study-japan/StudyJapanPage";
 import MapView from "./App";
 
 /**
@@ -29,7 +28,6 @@ export default function Root() {
         : route.kind === "course" ? <CoursePage id={route.id} />
         : route.kind === "module" ? <ModulePage id={route.id} />
         : route.kind === "debate" ? <DebatePage />
-        : route.kind === "study-japan" ? <StudyJapanPage />
         : <LibraryHome />}
     </div>
   );

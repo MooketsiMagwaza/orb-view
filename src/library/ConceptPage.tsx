@@ -251,17 +251,11 @@ export function DepartmentPage({ id }: { id: string }) {
           <h1 className="page__title">{department.title}</h1>
         </div>
         {department.id === "reasoning" && <div className="page__actions"><a className="pill" href={hrefFor({ kind: "debate" })}>How to Argue Well</a></div>}
-        {department.id === "study-in-japan" && <div className="page__actions"><a className="pill" href={hrefFor({ kind: "study-japan" })}>Read the Full Guide</a></div>}
       </header>
       <p className="page__lede">{department.blurb}</p>
       {department.id === "reasoning" && (
         <a className="page-link" href={hrefFor({ kind: "debate" })}>
           A dedicated guide: build a sound case, debate in good faith, a field guide to every fallacy family below, and a quiz for spotting them live →
-        </a>
-      )}
-      {department.id === "study-in-japan" && (
-        <a className="page-link" href={hrefFor({ kind: "study-japan" })}>
-          This deck is the journey as a chain. The detailed reference, MEXT's seven categories, prerequisites, and Botswana-specific notes, lives in the dedicated guide →
         </a>
       )}
       {courses.length > 0 ? (
